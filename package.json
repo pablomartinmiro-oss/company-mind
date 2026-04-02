@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "npx tsx scripts/seed-demo.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/react": "^3.0.144",
     "@anthropic-ai/sdk": "^0.82.0",
     "@mastra/core": "^1.21.0",
     "@supabase/ssr": "^0.10.0",
