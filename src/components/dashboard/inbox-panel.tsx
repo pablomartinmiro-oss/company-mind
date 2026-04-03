@@ -83,7 +83,7 @@ export function InboxPanel() {
   }
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden flex flex-col bg-white">
+    <div className="border border-zinc-200/60 rounded-xl overflow-hidden flex flex-col bg-white" style={{ height: 356 }}>
       {/* Header */}
       <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60">
         <div className="flex items-center gap-2">

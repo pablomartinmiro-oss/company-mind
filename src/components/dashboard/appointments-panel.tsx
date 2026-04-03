@@ -38,7 +38,7 @@ export function AppointmentsPanel() {
   const isToday = new Date().toDateString() === date.toDateString();
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white flex flex-col">
+    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white flex flex-col" style={{ height: 356 }}>
       {/* Header */}
       <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60 shrink-0">
         <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-400">Appointments</span>
