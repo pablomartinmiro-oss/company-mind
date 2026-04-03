@@ -74,6 +74,7 @@ interface Props {
   pipelineNames: string[];
   teamMembers: { name: string; initials: string; role: string }[];
   contactDetails: { label: string; value: string }[];
+  contactRole?: string | null;
 }
 
 const TABS = ['Overview', 'Activity', 'Research'] as const;
@@ -154,25 +155,28 @@ export function ContactDetailClient(props: Props) {
           <div>
             {/* Contacts */}
             <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-2">Contacts</h3>
-            {props.contactDetails.length > 0 ? (
-              <div className="border border-zinc-200/60 rounded-lg p-3 mb-3">
-                <p className="text-[13px] font-medium">{props.contactName}</p>
+            <div className="border border-zinc-200/60 rounded-lg p-3 mb-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium">{props.contactName}</span>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 cursor-pointer">
+                  {props.contactRole ?? 'Owner / Decision Maker'} ▾
+                </span>
+              </div>
+              {props.contactDetails.length > 0 && (
                 <div className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
-                  {props.contactDetails.map((d) => (
-                    <div key={d.label}>{d.value}</div>
-                  ))}
+                  {props.contactDetails.map((d) => d.value).join(' · ')}
                 </div>
-              </div>
-            ) : (
-              <div className="border border-zinc-200/60 rounded-lg p-3 mb-3">
-                <p className="text-[13px] font-medium">{props.contactName}</p>
-              </div>
-            )}
+              )}
+            </div>
+            <span className="text-[11px] text-blue-600 cursor-pointer mt-1.5 block">+ Add contact</span>
 
             <div className="border-t border-zinc-100 my-3" />
 
             {/* Team */}
-            <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-2">Team</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400">Team</h3>
+              <span className="text-[11px] text-blue-600 cursor-pointer">+</span>
+            </div>
             {props.teamMembers.map((m) => (
               <div key={m.name} className="flex items-center gap-2 py-1.5 border-b border-zinc-100 last:border-0">
                 <div className="h-[26px] w-[26px] rounded-full bg-zinc-900 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
