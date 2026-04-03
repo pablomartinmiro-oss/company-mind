@@ -126,9 +126,9 @@ export function InboxPanel() {
             </>
           )}
           {allConvos.length === 0 && !loading && (
-            <div className="flex flex-col items-center justify-center h-full gap-2">
-              <span className="text-[13px] font-medium text-zinc-400">Inbox connected</span>
-              <span className="text-[11px] text-zinc-300">No unread messages right now</span>
+            <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
+              <p className="text-[13px] font-medium text-zinc-400">Inbox connected</p>
+              <p className="text-[11px] text-zinc-300">No unread messages right now</p>
             </div>
           )}
         </div>
