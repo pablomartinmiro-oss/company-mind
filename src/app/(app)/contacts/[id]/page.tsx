@@ -116,6 +116,14 @@ export default async function ContactDetailPage({ params }: PageProps) {
 
   const teamMembers = TEAM_MEMBERS.map((m) => ({ name: m.name, initials: m.initials, role: 'Rep' }));
 
+  // Fetch appointments for this contact via internal API
+  let appointments: { id: string; contactName: string; type: string; startTime: string; status: string }[] = [];
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ? '' : 'http://localhost:3000';
+    const aptRes = await fetch(`${baseUrl}/api/appointments?contactId=${contactId}`, { cache: 'no-store' });
+    if (aptRes.ok) appointments = await aptRes.json();
+  } catch { /* ignore */ }
+
   return (
     <ContactDetailClient
       contactId={contactId}
@@ -133,6 +141,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
       pipelineNames={pipelineNames}
       teamMembers={teamMembers}
       contactDetails={contactDetails}
+      appointments={appointments}
     />
   );
 }

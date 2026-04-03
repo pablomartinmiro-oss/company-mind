@@ -75,6 +75,7 @@ interface Props {
   teamMembers: { name: string; initials: string; role: string }[];
   contactDetails: { label: string; value: string }[];
   contactRole?: string | null;
+  appointments?: { id: string; contactName: string; type: string; startTime: string; status: string }[];
 }
 
 const TABS = ['Overview', 'Activity', 'Research'] as const;
@@ -93,13 +94,16 @@ export function ContactDetailClient(props: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mt-2">
         <div>
-          {/* Badge row */}
+          {/* Badge row — show all pipeline enrollments */}
           <div className="flex items-center gap-1.5 flex-wrap mb-2">
-            {props.currentStage && (
-              <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[props.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}>
-                {props.currentStage}
+            {props.enrollments.map((e) => (
+              <span
+                key={e.pipelineId}
+                className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
+              >
+                {e.currentStage} — {e.pipelineName}
               </span>
-            )}
+            ))}
             <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500">
               {props.daysInStage}d in stage
             </span>
@@ -239,6 +243,33 @@ export function ContactDetailClient(props: Props) {
                 </div>
               ))}
               {props.tasks.length === 0 && <p className="text-[12px] text-zinc-300 py-4">No tasks.</p>}
+            </div>
+
+            {/* Upcoming Appointments */}
+            <div className="mt-5">
+              <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-2">Upcoming Appointments</h3>
+              {(props.appointments ?? []).length > 0 ? (
+                (props.appointments ?? []).map((appt) => {
+                  const time = new Date(appt.startTime);
+                  const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                  const isConfirmed = appt.status === 'confirmed';
+                  return (
+                    <div key={appt.id} className="flex items-start gap-2 py-2 border-b border-zinc-100 last:border-0">
+                      <span className="text-[10px] font-mono text-zinc-400 w-[44px] shrink-0 pt-0.5">{timeStr}</span>
+                      <div className={`w-[2px] self-stretch rounded-sm ${isConfirmed ? 'bg-zinc-900' : 'bg-zinc-200'}`} />
+                      <div>
+                        <p className="text-[12px] font-medium">{appt.contactName}</p>
+                        <p className="text-[10px] text-zinc-400 mt-0.5">{appt.type}</p>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${isConfirmed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600'}`}>
+                          {isConfirmed ? 'Confirmed' : 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-[12px] text-zinc-400 py-4">No upcoming appointments</p>
+              )}
             </div>
           </div>
         </div>
