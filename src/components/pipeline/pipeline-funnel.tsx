@@ -74,41 +74,41 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
             {/* Stage circles */}
             {isExpanded && (
               <>
-                <div className="flex items-center px-4 pb-4 pt-2">
+                <div className="flex items-center w-full px-6 pb-5 pt-3">
                   {pipeline.stages.map((stage, sIdx) => {
                     const count = contactsInStage(stage);
                     const isOpen = openLog?.pipelineId === pipeline.id && openLog?.stage === stage;
                     const isSelected = selectedStage === stage;
 
                     return (
-                      <div key={stage} className="flex items-center">
+                      <div key={stage} className="contents">
                         {sIdx > 0 && (
-                          <div className="flex-1 border-t-[1.5px] border-dashed border-zinc-200 min-w-4 mx-1" />
+                          <div className="flex-1 border-t-[1.5px] border-dashed border-zinc-200 mb-[20px] min-w-[20px]" />
                         )}
                         <button
                           onClick={() => toggleStageLog(pipeline.id, stage)}
-                          className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
+                          className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer"
                         >
                           <div className="relative">
                             <div
-                              className={`h-[30px] w-[30px] rounded-full border-[1.5px] flex items-center justify-center ${
+                              className={`h-[44px] w-[44px] rounded-full border-[1.5px] flex items-center justify-center ${
                                 isOpen || isSelected
-                                  ? 'border-[2px] border-zinc-900 bg-zinc-900 text-white text-[11px] font-bold font-mono'
+                                  ? 'border-[2px] border-zinc-900 bg-zinc-900 text-white text-[14px] font-bold'
                                   : count > 0
-                                  ? 'border-zinc-200 bg-zinc-100 text-zinc-400 text-[11px] font-medium font-mono'
-                                  : 'border-zinc-200 bg-white text-zinc-400 text-[11px] font-medium font-mono'
+                                  ? 'border-zinc-200 bg-zinc-50 text-zinc-400 text-[14px]'
+                                  : 'border-zinc-200 bg-white text-zinc-400 text-[13px] font-mono'
                               }`}
                             >
-                              {count > 0 ? count : sIdx + 1}
+                              {count > 0 && !(isOpen || isSelected) ? '✓' : sIdx + 1}
                             </div>
                             {count > 0 && (
-                              <span className="absolute -top-1 -right-1 h-[18px] w-[18px] rounded-full bg-zinc-900 text-white text-[9px] font-medium flex items-center justify-center">
+                              <span className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] rounded-full bg-zinc-900 text-white text-[10px] font-semibold flex items-center justify-center">
                                 {count}
                               </span>
                             )}
                           </div>
                           <span
-                            className={`text-[9px] text-center max-w-[58px] leading-tight ${
+                            className={`text-[10px] text-center max-w-[64px] leading-tight mt-1 ${
                               isOpen || isSelected ? 'font-medium text-zinc-900' : 'text-zinc-400'
                             }`}
                           >

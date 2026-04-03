@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
-import { scoreGrade, scoreBg, scoreColor } from '@/lib/format';
 import { ChevronRight } from 'lucide-react';
 
 interface PipelineContact {
@@ -61,58 +60,45 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
         )}
       </div>
 
-      {/* Contact rows */}
+      {/* Company rows */}
       {filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <p className="text-[13px] text-zinc-300">No contacts found.</p>
+          <p className="text-[13px] text-zinc-300">No companies found.</p>
         </div>
       ) : (
-        filtered.map((contact) => {
-          const grade = contact.score != null ? scoreGrade(contact.score) : null;
+        filtered.map((contact) => (
+          <Link
+            key={`${contact.contact_id}-${contact.stage}`}
+            href={`/contacts/${contact.contact_id}`}
+            className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/50 cursor-pointer"
+          >
+            {/* Days badge */}
+            <span className={`text-[10px] font-medium font-mono px-1.5 py-0.5 rounded text-center w-[44px] flex-shrink-0 ${daysBadgeClass(contact.days_in_stage)}`}>
+              {contact.days_in_stage}d
+            </span>
 
-          return (
-            <Link
-              key={contact.contact_id}
-              href={`/contacts/${contact.contact_id}`}
-              className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/50 cursor-pointer"
-            >
-              {/* Days badge */}
-              <span className={`text-[10px] font-medium font-mono px-1.5 py-0.5 rounded text-center w-[44px] flex-shrink-0 ${daysBadgeClass(contact.days_in_stage)}`}>
-                {contact.days_in_stage}d
-              </span>
-
-              {/* Contact info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-zinc-900">{contact.contact_name}</p>
-                {contact.company_name && (
-                  <p className="text-[11px] text-zinc-400 mt-0.5">{contact.company_name}</p>
-                )}
-              </div>
-
-              {/* Stage pill */}
-              <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STAGE_PILL_CLASSES[contact.stage] ?? 'bg-zinc-100 text-zinc-500'}`}>
-                {contact.stage}
-              </span>
-
-              {/* Score */}
-              {grade && contact.score != null ? (
-                <span className={`text-[10px] font-medium font-mono px-2 py-0.5 rounded-full flex-shrink-0 ${scoreBg(contact.score)}`}>
-                  {contact.score} {grade.letter}
-                </span>
-              ) : (
-                <span className="text-[10px] text-zinc-300 font-mono px-2 py-0.5 flex-shrink-0">—</span>
+            {/* Company info — company name primary, contact name secondary */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium text-zinc-900">{contact.company_name || contact.contact_name}</p>
+              {contact.company_name && (
+                <p className="text-[11px] text-zinc-400 mt-0.5">{contact.contact_name}</p>
               )}
+            </div>
 
-              {/* Deal value */}
-              <span className="text-[11px] font-mono text-zinc-400 min-w-[70px] text-right flex-shrink-0">
-                {contact.deal_value ?? '—'}
-              </span>
+            {/* Stage pill */}
+            <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STAGE_PILL_CLASSES[contact.stage] ?? 'bg-zinc-100 text-zinc-500'}`}>
+              {contact.stage}
+            </span>
 
-              {/* Chevron */}
-              <ChevronRight className="text-[14px] text-zinc-300 flex-shrink-0 h-3.5 w-3.5" />
-            </Link>
-          );
-        })
+            {/* Deal value */}
+            <span className="text-[11px] font-mono text-zinc-400 min-w-[70px] text-right flex-shrink-0">
+              {contact.deal_value ?? '—'}
+            </span>
+
+            {/* Chevron */}
+            <ChevronRight className="text-[14px] text-zinc-300 flex-shrink-0 h-3.5 w-3.5" />
+          </Link>
+        ))
       )}
     </>
   );

@@ -45,7 +45,7 @@ export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
     <div className="p-5 animate-fade-in">
       <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">Pipeline</h1>
       <p className="mt-1 text-[13px] text-zinc-400">
-        {contacts.length} contacts · {totalValue} total value
+        {contacts.length} companies · {totalValue} total value
       </p>
 
       <div className="mt-5">
