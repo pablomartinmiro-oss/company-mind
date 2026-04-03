@@ -1,25 +1,110 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
-import { scoreGrade, formatDuration, timeAgo } from '@/lib/format';
+import { scoreGrade, scoreBg, scoreColor, formatDuration, timeAgo } from '@/lib/format';
+import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
+import { CallFilters } from '@/components/calls/call-filters';
 
 export const dynamic = 'force-dynamic';
 
 const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
 
-function formatCallType(type: string): string {
-  return type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+type Tab = 'all' | 'needs_review' | 'skipped' | 'archived';
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'all', label: 'All calls' },
+  { key: 'needs_review', label: 'Needs review' },
+  { key: 'skipped', label: 'Skipped' },
+  { key: 'archived', label: 'Archived' },
+];
+
+interface CallRow {
+  id: string;
+  contact_name: string;
+  contact_ghl_id: string;
+  call_type: string | null;
+  outcome: string | null;
+  score: { overall: number; criteria?: unknown[] } | null;
+  duration_seconds: number | null;
+  called_at: string;
+  call_summary: string | null;
+  processing_status: string | null;
+  archived: boolean | null;
 }
 
-export default async function CallsPage() {
-  const { data: calls, error } = await supabaseAdmin
+interface SearchParams {
+  tab?: string;
+  time?: string;
+  type?: string;
+  outcome?: string;
+}
+
+export default async function CallsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  const tab = (params.tab ?? 'all') as Tab;
+  const timeFilter = params.time ?? '7';
+  const typeFilter = params.type ?? '';
+  const outcomeFilter = params.outcome ?? '';
+
+  let query = supabaseAdmin
     .from('calls')
-    .select('*')
+    .select('id, contact_name, contact_ghl_id, call_type, outcome, score, duration_seconds, called_at, call_summary, processing_status, archived')
     .eq('tenant_id', TENANT_ID)
     .order('called_at', { ascending: false });
 
+  if (tab === 'needs_review') {
+    query = query.eq('processing_status', 'error');
+  } else if (tab === 'skipped') {
+    query = query.lt('duration_seconds', 45);
+  } else if (tab === 'archived') {
+    query = query.eq('archived', true);
+  }
+
+  if (timeFilter === '7') {
+    query = query.gte('called_at', new Date(Date.now() - 7 * 86400000).toISOString());
+  } else if (timeFilter === '30') {
+    query = query.gte('called_at', new Date(Date.now() - 30 * 86400000).toISOString());
+  }
+
+  if (typeFilter) query = query.eq('call_type', typeFilter);
+  if (outcomeFilter) query = query.eq('outcome', outcomeFilter);
+
+  const { data: calls, error } = await query;
+
+  const [allCount, reviewCount, skippedCount, archivedCount] = await Promise.all([
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).eq('processing_status', 'error'),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).lt('duration_seconds', 45),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).eq('archived', true),
+  ]);
+
+  const counts: Record<Tab, number> = {
+    all: allCount.count ?? 0,
+    needs_review: reviewCount.count ?? 0,
+    skipped: skippedCount.count ?? 0,
+    archived: archivedCount.count ?? 0,
+  };
+
+  const contactIds = [...new Set((calls ?? []).map((c: CallRow) => c.contact_ghl_id).filter(Boolean))];
+  const { data: dataPoints } = contactIds.length > 0
+    ? await supabaseAdmin
+        .from('contact_data_points')
+        .select('contact_ghl_id, field_name, field_value')
+        .eq('tenant_id', TENANT_ID)
+        .in('contact_ghl_id', contactIds)
+        .in('field_name', ['company_name', 'address'])
+    : { data: [] };
+
+  const dpMap: Record<string, { company?: string; address?: string }> = {};
+  for (const dp of dataPoints ?? []) {
+    if (!dpMap[dp.contact_ghl_id]) dpMap[dp.contact_ghl_id] = {};
+    if (dp.field_name === 'company_name') dpMap[dp.contact_ghl_id].company = dp.field_value;
+    if (dp.field_name === 'address') dpMap[dp.contact_ghl_id].address = dp.field_value;
+  }
+
   if (error) {
     return (
-      <div className="p-10">
+      <div className="p-5">
         <h1 className="text-[28px] font-semibold">Calls</h1>
         <p className="mt-4 text-[13px] text-red-500">Failed to load calls.</p>
       </div>
@@ -27,76 +112,105 @@ export default async function CallsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1000px] px-8 py-10 animate-fade-in">
+    <div className="p-5 animate-fade-in">
       <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">Calls</h1>
       <p className="mt-1 text-[13px] text-zinc-400">All recorded calls and scores.</p>
 
-      {!calls || calls.length === 0 ? (
-        <div className="mt-16 text-center">
-          <p className="text-[13px] text-zinc-300">No calls yet.</p>
-        </div>
-      ) : (
-        <div className="mt-10">
-          {/* Header row */}
-          <div className="flex items-center px-3 pb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400">
-            <span className="w-10 shrink-0" />
-            <span className="ml-4 flex-1">Contact</span>
-            <span className="w-24 text-right">Type</span>
-            <span className="w-20 text-right">Duration</span>
-            <span className="w-24 text-right">When</span>
+      <div className="flex items-center gap-1 mt-5">
+        {TABS.map((t) => {
+          const isActive = tab === t.key;
+          return (
+            <Link
+              key={t.key}
+              href={`/calls?tab=${t.key}`}
+              className={`rounded-md px-3 py-1.5 text-[13px] font-medium flex items-center gap-1.5 transition-all duration-150 ${
+                isActive ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
+              }`}
+            >
+              {t.label}
+              <span className={`text-[10px] px-1.5 rounded-full ${
+                isActive ? 'bg-white/15 text-white/80' : 'bg-zinc-100 text-zinc-500'
+              }`}>
+                {counts[t.key] > 100 ? '100+' : counts[t.key]}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {tab === 'needs_review' && (
+        <p className="text-[11px] text-zinc-400 italic mt-3">Calls where transcription or scoring failed.</p>
+      )}
+
+      <Suspense>
+        <CallFilters />
+      </Suspense>
+
+      <div className="mt-5 border border-zinc-200/60 rounded-xl overflow-hidden">
+        {!calls || calls.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-[13px] text-zinc-300">No calls found.</p>
           </div>
+        ) : (
+          (calls as CallRow[]).map((call) => {
+            const overall = call.score?.overall;
+            const grade = overall != null ? scoreGrade(overall) : null;
+            const isError = call.processing_status === 'error';
+            const company = dpMap[call.contact_ghl_id]?.company;
+            const address = dpMap[call.contact_ghl_id]?.address;
 
-          {/* Rows */}
-          <div className="border-t border-zinc-100">
-            {calls.map((call: Record<string, unknown>) => {
-              const overall = (call.score as Record<string, unknown>)?.overall as number | undefined;
-              const grade = overall != null ? scoreGrade(overall) : null;
-
-              return (
-                <Link
-                  key={call.id as string}
-                  href={`/calls/${call.id}`}
-                  className="group flex items-center py-3.5 px-3 -mx-3 rounded-lg transition-colors hover:bg-zinc-50/60"
-                >
-                  {/* Score box */}
-                  {grade ? (
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${grade.bg}`}>
-                      <span className={`text-[14px] font-bold font-mono ${grade.color}`}>{overall}</span>
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-zinc-50">
-                      <span className="text-[11px] text-zinc-300">--</span>
-                    </div>
-                  )}
-
-                  {/* Name + summary */}
-                  <div className="ml-4 flex-1 min-w-0">
-                    <span className="text-[14px] font-medium text-zinc-900">{(call.contact_name as string) ?? 'Unknown'}</span>
-                    {typeof call.call_summary === 'string' && call.call_summary && (
-                      <p className="mt-0.5 text-[12px] text-zinc-400 truncate">{call.call_summary}</p>
+            return (
+              <Link
+                key={call.id}
+                href={`/calls/${call.id}`}
+                className={`flex items-start gap-4 px-4 py-4 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/50 cursor-pointer transition-colors ${
+                  isError ? 'border-l-2 border-l-red-400' : ''
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-medium text-zinc-900">{call.contact_name ?? 'Unknown'}</p>
+                  {company && <p className="text-[11px] text-zinc-400 mt-0.5">{company}</p>}
+                  {address && <p className="text-[11px] text-zinc-400">{address}</p>}
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {call.call_type && (
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[call.call_type] ?? 'bg-zinc-100 text-zinc-500'}`}>
+                        {CALL_TYPE_LABELS[call.call_type] ?? call.call_type}
+                      </span>
+                    )}
+                    {call.outcome && (
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${OUTCOME_PILL[call.outcome] ?? 'bg-zinc-100 text-zinc-400'}`}>
+                        {OUTCOME_LABELS[call.outcome] ?? call.outcome}
+                      </span>
+                    )}
+                    {isError && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-200">Processing error</span>
                     )}
                   </div>
-
-                  {/* Type */}
-                  <span className="w-24 text-right text-[12px] text-zinc-400">
-                    {formatCallType((call.call_type as string) ?? '')}
-                  </span>
-
-                  {/* Duration */}
-                  <span className="w-20 text-right text-[12px] font-mono text-zinc-400">
-                    {call.duration_seconds != null ? formatDuration(call.duration_seconds as number) : '--'}
-                  </span>
-
-                  {/* When */}
-                  <span className="w-24 text-right text-[12px] text-zinc-400">
-                    {call.called_at ? timeAgo(call.called_at as string) : '--'}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                  {call.call_summary && (
+                    <p className="text-[11px] text-zinc-400 mt-1.5 line-clamp-2 leading-relaxed">{call.call_summary}</p>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <div className="text-[11px] text-zinc-400 text-right leading-relaxed">
+                    {call.duration_seconds != null && <div>{formatDuration(call.duration_seconds)}</div>}
+                    <div>{timeAgo(call.called_at)}</div>
+                  </div>
+                  {isError ? (
+                    <div className="h-[42px] w-[42px] rounded-full border-[1.5px] border-red-300 bg-red-50 flex flex-col items-center justify-center flex-shrink-0">
+                      <span className="text-[16px] text-red-500">!</span>
+                    </div>
+                  ) : grade && overall != null ? (
+                    <div className={`h-[42px] w-[42px] rounded-full border-[1.5px] flex flex-col items-center justify-center flex-shrink-0 ${scoreBg(overall)}`}>
+                      <span className={`text-[12px] font-medium font-mono ${scoreColor(overall)}`}>{overall}</span>
+                      <span className={`text-[9px] ${scoreColor(overall)}`}>{grade.letter}</span>
+                    </div>
+                  ) : null}
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }
