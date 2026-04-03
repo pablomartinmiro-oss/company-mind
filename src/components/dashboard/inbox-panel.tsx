@@ -169,19 +169,23 @@ export function InboxPanel() {
               <div className="border-t border-zinc-200/60 px-3 py-2.5 bg-white shrink-0">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[9px] font-medium tracking-widest uppercase text-zinc-400">Reply via</span>
-                  {CHANNEL_TABS.map((ch) => (
-                    <button
-                      key={ch}
-                      onClick={() => setReplyChannel(ch)}
-                      className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
-                        replyChannel === ch
-                          ? 'bg-zinc-900 text-white border-zinc-900'
-                          : 'text-zinc-500 border-zinc-200 hover:bg-zinc-50'
-                      }`}
-                    >
-                      {ch}
-                    </button>
-                  ))}
+                  {CHANNEL_TABS.map((ch) => {
+                    const isActive = replyChannel === ch;
+                    const activeClass = ch === 'WhatsApp'
+                      ? 'bg-teal-50 text-teal-700 border-teal-200'
+                      : 'bg-zinc-900 text-white border-zinc-900';
+                    return (
+                      <button
+                        key={ch}
+                        onClick={() => setReplyChannel(ch)}
+                        className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
+                          isActive ? activeClass : 'text-zinc-500 border-zinc-200 hover:bg-zinc-50'
+                        }`}
+                      >
+                        {ch}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="flex items-center gap-2">
                   <textarea
