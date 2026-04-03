@@ -168,9 +168,15 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
                 }`}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-zinc-900">{call.contact_name ?? 'Unknown'}</p>
-                  {company && <p className="text-[11px] text-zinc-400 mt-0.5">{company}</p>}
-                  {address && <p className="text-[11px] text-zinc-400">{address}</p>}
+                  <p className="text-[14px] font-medium text-zinc-900">{call.contact_name ?? 'Unknown'}</p>
+                  {company && <p className="text-[13px] text-zinc-400 mt-0.5">{company}</p>}
+                  <div className="flex items-center gap-2 mt-1 text-[13px] text-zinc-400">
+                    <span>Pablo Martin</span>
+                    <span className="text-zinc-200">·</span>
+                    {call.duration_seconds != null && <span className="font-mono">{formatDuration(call.duration_seconds)}</span>}
+                    <span className="text-zinc-200">·</span>
+                    <span>{timeAgo(call.called_at)}</span>
+                  </div>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {call.call_type && (
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[call.call_type] ?? 'bg-zinc-100 text-zinc-500'}`}>
@@ -187,22 +193,18 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
                     )}
                   </div>
                   {call.call_summary && (
-                    <p className="text-[11px] text-zinc-400 mt-1.5 line-clamp-2 leading-relaxed">{call.call_summary}</p>
+                    <p className="text-[13px] text-zinc-600 mt-1.5 line-clamp-2 leading-relaxed">{call.call_summary}</p>
                   )}
                 </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <div className="text-[11px] text-zinc-400 text-right leading-relaxed">
-                    {call.duration_seconds != null && <div>{formatDuration(call.duration_seconds)}</div>}
-                    <div>{timeAgo(call.called_at)}</div>
-                  </div>
+                <div className="flex-shrink-0">
                   {isError ? (
-                    <div className="h-[42px] w-[42px] rounded-full border-[1.5px] border-red-300 bg-red-50 flex flex-col items-center justify-center flex-shrink-0">
-                      <span className="text-[16px] text-red-500">!</span>
+                    <div className="h-[52px] w-[52px] rounded-xl border-[1.5px] border-red-300 bg-red-50 flex flex-col items-center justify-center">
+                      <span className="text-[20px] text-red-500">!</span>
                     </div>
                   ) : grade && overall != null ? (
-                    <div className={`h-[42px] w-[42px] rounded-full border-[1.5px] flex flex-col items-center justify-center flex-shrink-0 ${scoreBg(overall)}`}>
-                      <span className={`text-[12px] font-medium font-mono ${scoreColor(overall)}`}>{overall}</span>
-                      <span className={`text-[9px] ${scoreColor(overall)}`}>{grade.letter}</span>
+                    <div className={`h-[52px] w-[52px] rounded-xl flex flex-col items-center justify-center ${scoreBg(overall)}`}>
+                      <span className={`text-[22px] font-bold leading-none ${scoreColor(overall)}`}>{grade.letter}</span>
+                      <span className={`text-[11px] font-medium mt-0.5 ${scoreColor(overall)}`}>{overall}%</span>
                     </div>
                   ) : null}
                 </div>
