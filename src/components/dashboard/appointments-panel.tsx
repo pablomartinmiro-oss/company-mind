@@ -62,8 +62,9 @@ export function AppointmentsPanel() {
             <p className="text-[11px] text-zinc-300">Loading...</p>
           </div>
         ) : appointments.length === 0 ? (
-          <div className="py-8 text-center">
-            <p className="text-[11px] text-zinc-300">No appointments</p>
+          <div className="flex flex-col items-center justify-center h-full gap-2 py-8">
+            <span className="text-[13px] font-medium text-zinc-400">No appointments today</span>
+            <span className="text-[11px] text-zinc-300">Calendar connected via GHL</span>
           </div>
         ) : (
           appointments.map((appt) => {
