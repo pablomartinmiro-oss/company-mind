@@ -91,7 +91,14 @@ export function PipelineTracker({ enrollments }: Props) {
             {/* Stage log panel */}
             {openLog?.pipelineId === enrollment.pipelineId && (
               <div className="bg-zinc-50 border-t border-zinc-100 px-4 py-3">
-                <p className="text-[13px] font-medium text-zinc-900 mb-2">{openLog.stage}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[13px] font-medium text-zinc-900">{openLog.stage}</span>
+                  <div className="flex items-center gap-1.5">
+                    <button className="bg-zinc-900 text-white text-[11px] px-2.5 py-1 rounded-full">+ Log</button>
+                    <button className="border border-zinc-200 text-[11px] px-2.5 py-1 rounded-full text-zinc-500">Edit</button>
+                    <button className="border border-zinc-200 text-[11px] px-2.5 py-1 rounded-full text-zinc-500">Delete</button>
+                  </div>
+                </div>
                 {logForStage(openLog.stage).length === 0 ? (
                   <p className="text-[11px] text-zinc-400">No log entries.</p>
                 ) : (
