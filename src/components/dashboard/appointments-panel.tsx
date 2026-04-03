@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Appointment {
   id: string;
-  title: string;
+  title?: string;
   contactName: string;
   type: string;
   startTime: string;
@@ -38,9 +38,9 @@ export function AppointmentsPanel() {
   const isToday = new Date().toDateString() === date.toDateString();
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white">
+    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white flex flex-col">
       {/* Header */}
-      <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60">
+      <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60 shrink-0">
         <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-400">Appointments</span>
         <div className="flex items-center gap-1.5">
           <button onClick={prevDay} className="p-0.5 hover:bg-zinc-100 rounded">
@@ -55,10 +55,10 @@ export function AppointmentsPanel() {
         </div>
       </div>
 
-      {/* Appointment rows */}
-      <div className="min-h-[200px]">
+      {/* Body — fixed height to match inbox */}
+      <div className="flex-1 overflow-y-auto" style={{ height: 320 }}>
         {loading ? (
-          <div className="py-8 text-center">
+          <div className="flex items-center justify-center h-full">
             <p className="text-[11px] text-zinc-300">Loading...</p>
           </div>
         ) : appointments.length === 0 ? (
@@ -82,9 +82,7 @@ export function AppointmentsPanel() {
                   <p className="text-[12px] font-medium">{appt.contactName || appt.title}</p>
                   <p className="text-[10px] text-zinc-400 mt-0.5">{appt.type || appt.title}</p>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
-                    isConfirmed
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'bg-amber-50 text-amber-600'
+                    isConfirmed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600'
                   }`}>
                     {isConfirmed ? 'Confirmed' : 'Pending'}
                   </span>

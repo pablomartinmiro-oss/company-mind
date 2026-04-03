@@ -88,7 +88,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 items-start">
         <div className="col-span-2">
           <InboxPanel />
         </div>
