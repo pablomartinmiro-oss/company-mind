@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
+import { scoreBg, scoreGrade } from '@/lib/format';
 import { ChevronRight } from 'lucide-react';
 
 interface PipelineContact {
@@ -89,6 +90,15 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
             <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STAGE_PILL_CLASSES[contact.stage] ?? 'bg-zinc-100 text-zinc-500'}`}>
               {contact.stage}
             </span>
+
+            {/* Score pill */}
+            {contact.score != null ? (
+              <span className={`text-[10px] font-medium font-mono px-2 py-0.5 rounded-full flex-shrink-0 ${scoreBg(contact.score)}`}>
+                {contact.score} {scoreGrade(contact.score).letter}
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-300 flex-shrink-0">—</span>
+            )}
 
             {/* Deal value */}
             <span className="text-[11px] font-mono text-zinc-400 min-w-[70px] text-right flex-shrink-0">

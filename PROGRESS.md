@@ -52,6 +52,11 @@
 ### Phase 7 — Shared Config
 - `src/lib/pipeline-config.ts` — all shared constants
 
+### UI Bug Fixes
+- `src/components/dashboard/task-list.tsx` — pills now show pipeline stage (New Lead, Qualification, Closing…) instead of task type; filter dropdown updated to stages
+- `src/components/pipeline/contact-list.tsx` — added score pills (e.g. "91 A", "82 B") using scoreBg/scoreGrade from format.ts; shows "—" when no score
+- `src/app/(app)/calls/page.tsx` — renders address line below company name (data already fetched, just not displayed)
+
 ### Seed Data Fix
 - `scripts/fix-seed-data.ts` — fixes call_type, outcome, stage_entered_at, task pipeline_stage
 - call_type: closing (Sarah Chen), qualification (David Kim, Marcus Thompson), follow_up (Lisa Patel), cold_call (Jake Rivera)

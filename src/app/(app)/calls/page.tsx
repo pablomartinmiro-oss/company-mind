@@ -170,6 +170,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-medium text-zinc-900">{call.contact_name ?? 'Unknown'}</p>
                   {company && <p className="text-[13px] text-zinc-400 mt-0.5">{company}</p>}
+                  {address && <p className="text-[11px] text-zinc-400">{address}</p>}
                   <div className="flex items-center gap-2 mt-1 text-[13px] text-zinc-400">
                     <span>Pablo Martin</span>
                     <span className="text-zinc-200">·</span>
