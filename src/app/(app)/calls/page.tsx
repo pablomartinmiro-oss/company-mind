@@ -4,10 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { scoreGrade, scoreBg, scoreColor, formatDuration, timeAgo } from '@/lib/format';
 import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
 import { CallFilters } from '@/components/calls/call-filters';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 export const dynamic = 'force-dynamic';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
 
 type Tab = 'all' | 'needs_review' | 'skipped' | 'archived';
 
@@ -40,6 +39,7 @@ interface SearchParams {
 }
 
 export default async function CallsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const { tenantId } = await getTenantForUser();
   const params = await searchParams;
   const tab = (params.tab ?? 'all') as Tab;
   const timeFilter = params.time ?? '7';
@@ -49,7 +49,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   let query = supabaseAdmin
     .from('calls')
     .select('id, contact_name, contact_ghl_id, call_type, outcome, score, duration_seconds, called_at, call_summary, processing_status, archived')
-    .eq('tenant_id', TENANT_ID)
+    .eq('tenant_id', tenantId)
     .order('called_at', { ascending: false });
 
   if (tab === 'needs_review') {
@@ -72,10 +72,10 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   const { data: calls, error } = await query;
 
   const [allCount, reviewCount, skippedCount, archivedCount] = await Promise.all([
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID),
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).eq('processing_status', 'error'),
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).lt('duration_seconds', 45),
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).eq('archived', true),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('processing_status', 'error'),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).lt('duration_seconds', 45),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('archived', true),
   ]);
 
   const counts: Record<Tab, number> = {
@@ -90,7 +90,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
     ? await supabaseAdmin
         .from('contact_data_points')
         .select('contact_ghl_id, field_name, field_value')
-        .eq('tenant_id', TENANT_ID)
+        .eq('tenant_id', tenantId)
         .in('contact_ghl_id', contactIds)
         .in('field_name', ['company_name', 'address'])
     : { data: [] };

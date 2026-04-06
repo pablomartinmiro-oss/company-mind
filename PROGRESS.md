@@ -71,7 +71,36 @@
 - stage_entered_at staggered: 0, 1, 2, 4, 7 days ago across demo contacts
 - npm script: `npm run fix-seed`
 
+### Chat E2E Verification
+- `src/mastra/agents/company-mind.ts` — model updated from `claude-sonnet-4-20250514` to `claude-sonnet-4-6`
+- `src/mastra/tools/call-analysis.ts` — direct Anthropic SDK model string updated to `claude-sonnet-4-6`
+- `src/app/api/chat/route.ts` — added `requestContext.set('tenantId', tenantId)` so tools can resolve tenant
+- `src/mastra/tools/get-tenant-id.ts` — **NEW** helper: reads tenantId from `requestContext` (preferred) or `agent.resourceId` (legacy fallback), throws if missing
+- All 8 tool files (19 occurrences) updated: `executionContext.agent?.resourceId` → `getTenantId(executionContext)`, removed non-null assertions
+  - ghl-contacts.ts (4), db-calls.ts (3), ghl-pipelines.ts (4), ghl-calendar.ts (2), ghl-conversations.ts (2), ghl-notes.ts (1), ghl-tasks.ts (2), call-analysis.ts (1)
+- `tsc --noEmit` passes clean (0 errors)
+
+**Bug fixed**: All 19 tool functions would crash at runtime because `executionContext.agent?.resourceId` is only populated when agent has memory config (which we don't use). Now tools read tenantId from requestContext, which the chat route always sets.
+
+### Supabase Auth + Tenant Isolation
+- `@supabase/ssr` installed for cookie-based auth
+- `src/lib/supabase-browser.ts` — browser Supabase client (anon key, cookie storage)
+- `src/lib/supabase-server.ts` — server-side auth-aware client using cookies
+- `src/middleware.ts` — protects all routes except `/login` and `/api/webhooks/*`
+- `src/app/login/page.tsx` — email/password login page
+- `src/lib/get-tenant.ts` — resolves auth user → users.auth_user_id → tenant_id
+- `scripts/add-auth-user-id.sql` — migration adding auth_user_id to users table
+- **All hardcoded tenant IDs removed** from `src/` (verified by grep)
+- All server components + API routes use `getTenantForUser()` for tenant isolation
+- `/api/chat/route.ts` — security fix: tenant resolved from auth cookies, not client body
+- `src/components/layout/app-shell.tsx` — sign out dropdown on avatar
+- `src/app/actions.ts` — approve/reject actions now auth-aware
+- `tsc --noEmit` passes clean (0 errors)
+- **Exception**: `/api/webhooks/*` routes NOT changed (use their own auth via GHL signatures)
+
 ## Next Session
-1. Test chat end-to-end with live Anthropic key
-2. Delete old /pipelines route
-3. Add auth to replace hardcoded tenant ID
+1. Create Supabase auth accounts for pablo.martin.miro@gmail.com and corey@getgunner.ai
+2. Link auth accounts to existing users: `UPDATE users SET auth_user_id = '<auth-uid>' WHERE email = '...'`
+3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel env vars
+4. Live test login → dashboard → chat end-to-end
+5. Delete old /pipelines route

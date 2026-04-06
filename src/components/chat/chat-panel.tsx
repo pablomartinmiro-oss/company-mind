@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import type { UIMessage } from 'ai';
 
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
-
 interface ChatPanelProps {
   currentPage: string;
   isOpen: boolean;
@@ -47,7 +45,6 @@ export function ChatPanel({
       new DefaultChatTransport({
         api: '/api/chat',
         body: () => ({
-          tenantId: TENANT_ID,
           context: {
             userName: 'Pablo',
             userRole: 'owner',

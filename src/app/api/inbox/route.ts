@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGHLClientForTenant } from '@/lib/tenant-context';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
-
-const CHANNEL_MAP: Record<string, string> = { sms: 'SMS', email: 'Email', whatsapp: 'WhatsApp' };
+import { getTenantForUser } from '@/lib/get-tenant';
 
 const DEMO_CONVERSATIONS = {
   unread: [
@@ -80,7 +77,8 @@ const DEMO_CONVERSATIONS = {
 
 export async function GET() {
   try {
-    const ghl = await getGHLClientForTenant(TENANT_ID);
+    const { tenantId } = await getTenantForUser();
+    const ghl = await getGHLClientForTenant(tenantId);
     const data = await ghl.getConversations(30);
     const conversations = data?.conversations ?? [];
 
@@ -118,7 +116,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ unread, needsReply });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Not authenticated') {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
     console.log('Using demo inbox data');
     return NextResponse.json(DEMO_CONVERSATIONS);
   }

@@ -5,18 +5,18 @@ import { scoreGrade } from '@/lib/format';
 import { InboxPanel } from '@/components/dashboard/inbox-panel';
 import { AppointmentsPanel } from '@/components/dashboard/appointments-panel';
 import { TaskList } from '@/components/dashboard/task-list';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 export default async function DashboardPage() {
+  const { tenantId } = await getTenantForUser();
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
   const [callsCountRes, avgScoreRes, pipelineRes, taskRes, dueTodayRes] = await Promise.all([
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).gte('called_at', sevenDaysAgo),
-    supabaseAdmin.from('calls').select('score').eq('tenant_id', TENANT_ID).eq('status', 'complete'),
-    supabaseAdmin.from('pipeline_contacts').select('deal_value').eq('tenant_id', TENANT_ID),
-    supabaseAdmin.from('tasks').select('*').eq('tenant_id', TENANT_ID).eq('completed', false).order('due_date', { ascending: true, nullsFirst: false }),
-    supabaseAdmin.from('tasks').select('id', { count: 'exact', head: true }).eq('tenant_id', TENANT_ID).eq('completed', false).eq('due_date', new Date().toISOString().split('T')[0]),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('called_at', sevenDaysAgo),
+    supabaseAdmin.from('calls').select('score').eq('tenant_id', tenantId).eq('status', 'complete'),
+    supabaseAdmin.from('pipeline_contacts').select('deal_value').eq('tenant_id', tenantId),
+    supabaseAdmin.from('tasks').select('*').eq('tenant_id', tenantId).eq('completed', false).order('due_date', { ascending: true, nullsFirst: false }),
+    supabaseAdmin.from('tasks').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('completed', false).eq('due_date', new Date().toISOString().split('T')[0]),
   ]);
 
   const totalCalls = callsCountRes.count ?? 0;
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
 
   const taskContactIds = [...new Set((taskRes.data ?? []).map((t: { contact_id: string | null }) => t.contact_id).filter(Boolean))];
   const { data: taskCalls } = taskContactIds.length > 0
-    ? await supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', TENANT_ID).in('contact_ghl_id', taskContactIds)
+    ? await supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', tenantId).in('contact_ghl_id', taskContactIds)
     : { data: [] };
 
   const nameMap: Record<string, string> = {};

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { scoreGrade } from '@/lib/format';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 const callTypePill: Record<string, string> = {
   discovery: 'bg-blue-50 text-blue-600',
@@ -9,8 +10,6 @@ const callTypePill: Record<string, string> = {
 };
 
 export const dynamic = 'force-dynamic';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
 
 const STAGES = [
   'Lead',
@@ -42,11 +41,13 @@ interface PipelineContact {
 }
 
 export default async function PipelinesPage() {
+  const { tenantId } = await getTenantForUser();
+
   // Fetch all calls for this tenant
   const { data: calls } = await supabaseAdmin
     .from('calls')
     .select('contact_name, contact_ghl_id, score, call_type')
-    .eq('tenant_id', TENANT_ID);
+    .eq('tenant_id', tenantId);
 
   // Fetch company_name and deal_value data points for all contacts
   const contactIds = Object.keys(CONTACT_STAGE_MAP);
@@ -54,7 +55,7 @@ export default async function PipelinesPage() {
   const { data: dataPoints } = await supabaseAdmin
     .from('contact_data_points')
     .select('contact_ghl_id, field_name, field_value')
-    .eq('tenant_id', TENANT_ID)
+    .eq('tenant_id', tenantId)
     .in('contact_ghl_id', contactIds)
     .in('field_name', ['company_name', 'deal_value']);
 

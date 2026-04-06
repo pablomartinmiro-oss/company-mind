@@ -4,6 +4,7 @@
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { getTenantId } from './get-tenant-id';
 
 export const searchContacts = createTool({
   id: 'search_contacts',
@@ -26,9 +27,9 @@ export const searchContacts = createTool({
   execute: async (input, executionContext) => {
     // resourceId contains the tenant ID, passed when agent is invoked
     // In production, you'd load the GHL client for this tenant
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
 
     const result = await ghl.searchContacts(input.query, input.limit);
 
@@ -56,9 +57,9 @@ export const getContact = createTool({
     contact: z.record(z.unknown()),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
 
     const result = await ghl.getContact(input.contactId);
     return { contact: result.contact };
@@ -84,9 +85,9 @@ export const createContact = createTool({
     message: z.string(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
 
     const result = await ghl.createContact({
       firstName: input.firstName,
@@ -124,9 +125,9 @@ export const updateContact = createTool({
     message: z.string(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
 
     const { contactId, ...updates } = input;
     const result = await ghl.updateContact(contactId, updates);

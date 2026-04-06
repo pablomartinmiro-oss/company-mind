@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { ChatPanel } from '@/components/chat/chat-panel';
-import { Brain, Settings } from 'lucide-react';
+import { Brain, Settings, LogOut } from 'lucide-react';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 
 const navItems = [
   { href: '/dashboard', label: 'Daily HQ' },
@@ -22,8 +23,28 @@ const pageNames: Record<string, string> = {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const currentPage = pageNames[pathname] ?? pageNames[Object.keys(pageNames).find(k => pathname.startsWith(k)) ?? ''] ?? 'Dashboard';
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [menuOpen]);
+
+  const handleSignOut = async () => {
+    await supabaseBrowser.auth.signOut();
+    router.push('/login');
+  };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
@@ -63,8 +84,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/settings">
             <Settings className="h-4 w-4 text-zinc-400 hover:text-zinc-600 transition-colors" />
           </Link>
-          <div className="h-7 w-7 rounded-full bg-zinc-900 text-white text-[11px] font-semibold flex items-center justify-center">
-            PM
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="h-7 w-7 rounded-full bg-zinc-900 text-white text-[11px] font-semibold flex items-center justify-center hover:bg-zinc-700 transition-colors"
+            >
+              PM
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-36 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>

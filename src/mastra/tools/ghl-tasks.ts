@@ -2,6 +2,7 @@
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { getTenantId } from './get-tenant-id';
 
 export const getContactTasks = createTool({
   id: 'get_contact_tasks',
@@ -11,9 +12,9 @@ export const getContactTasks = createTool({
   }),
   outputSchema: z.object({ tasks: z.array(z.record(z.unknown())) }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.getContactTasks(input.contactId);
     return { tasks: result.tasks || [] };
   },
@@ -31,9 +32,9 @@ export const createTask = createTool({
   }),
   outputSchema: z.object({ task: z.record(z.unknown()), message: z.string() }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.createTask(input.contactId, {
       title: input.title,
       body: input.description,

@@ -1,23 +1,23 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { PipelinePageClient } from '@/components/pipeline/pipeline-page-client';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 export const dynamic = 'force-dynamic';
 
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
-
 export default async function PipelinePage() {
+  const { tenantId } = await getTenantForUser();
   // Fetch pipelines
   const { data: pipelinesRaw } = await supabaseAdmin
     .from('pipelines')
     .select('id, name, stages')
-    .eq('tenant_id', TENANT_ID)
+    .eq('tenant_id', tenantId)
     .order('created_at', { ascending: true });
 
   // Fetch pipeline contacts
   const { data: pipelineContacts } = await supabaseAdmin
     .from('pipeline_contacts')
     .select('id, contact_id, pipeline_id, stage, deal_value, stage_entered_at')
-    .eq('tenant_id', TENANT_ID);
+    .eq('tenant_id', tenantId);
 
   // Fetch stage log
   const pipelineIds = (pipelinesRaw ?? []).map((p: { id: string }) => p.id);
@@ -25,7 +25,7 @@ export default async function PipelinePage() {
     ? await supabaseAdmin
         .from('stage_log')
         .select('*')
-        .eq('tenant_id', TENANT_ID)
+        .eq('tenant_id', tenantId)
         .in('pipeline_id', pipelineIds)
         .order('entered_at', { ascending: false })
     : { data: [] };
@@ -34,7 +34,7 @@ export default async function PipelinePage() {
   const { data: calls } = await supabaseAdmin
     .from('calls')
     .select('contact_ghl_id, contact_name, score')
-    .eq('tenant_id', TENANT_ID);
+    .eq('tenant_id', tenantId);
 
   // Fetch company names
   const contactIds = [...new Set((pipelineContacts ?? []).map((pc: { contact_id: string }) => pc.contact_id))];
@@ -42,7 +42,7 @@ export default async function PipelinePage() {
     ? await supabaseAdmin
         .from('contact_data_points')
         .select('contact_ghl_id, field_name, field_value')
-        .eq('tenant_id', TENANT_ID)
+        .eq('tenant_id', tenantId)
         .in('contact_ghl_id', contactIds)
         .eq('field_name', 'company_name')
     : { data: [] };

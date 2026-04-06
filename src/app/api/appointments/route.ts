@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getGHLClientForTenant } from '@/lib/tenant-context';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 function todayAt(hour: number, minute: number) {
   const d = new Date();
@@ -29,11 +28,12 @@ export async function GET(req: NextRequest) {
   const contactId = req.nextUrl.searchParams.get('contactId');
 
   try {
+    const { tenantId } = await getTenantForUser();
     const dateParam = req.nextUrl.searchParams.get('date') ?? new Date().toISOString().split('T')[0];
     const startTime = new Date(`${dateParam}T00:00:00`).toISOString();
     const endTime = new Date(`${dateParam}T23:59:59`).toISOString();
 
-    const ghl = await getGHLClientForTenant(TENANT_ID);
+    const ghl = await getGHLClientForTenant(tenantId);
     const calData = await ghl.listCalendars();
     const calendars = calData?.calendars ?? [];
 
@@ -60,7 +60,10 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(events);
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Not authenticated') {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
     console.log('Using demo appointment data');
     const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
     return NextResponse.json(filtered);
