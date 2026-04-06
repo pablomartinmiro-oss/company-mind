@@ -52,6 +52,13 @@
 ### Phase 7 — Shared Config
 - `src/lib/pipeline-config.ts` — all shared constants
 
+### Seed Data Fix
+- `scripts/fix-seed-data.ts` — fixes call_type, outcome, stage_entered_at, task pipeline_stage
+- call_type: closing (Sarah Chen), qualification (David Kim, Marcus Thompson), follow_up (Lisa Patel), cold_call (Jake Rivera)
+- outcome: closed_won (Sarah Chen), follow_up_scheduled (David Kim, Marcus, Lisa), null (Jake)
+- stage_entered_at staggered: 0, 1, 2, 4, 7 days ago across demo contacts
+- npm script: `npm run fix-seed`
+
 ## Next Session
 1. Test chat end-to-end with live Anthropic key
 2. Delete old /pipelines route

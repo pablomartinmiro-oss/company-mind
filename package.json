@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "npx tsx scripts/seed-demo.ts"
+    "seed": "npx tsx scripts/seed-demo.ts",
+    "fix-seed": "npx tsx scripts/fix-seed-data.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
