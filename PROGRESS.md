@@ -98,9 +98,17 @@
 - `tsc --noEmit` passes clean (0 errors)
 - **Exception**: `/api/webhooks/*` routes NOT changed (use their own auth via GHL signatures)
 
+### Auth User Creation
+- `scripts/create-auth-users.ts` — creates Supabase Auth accounts + app user rows, links via `auth_id`
+- `src/lib/get-tenant.ts` — fixed column name: `auth_user_id` → `auth_id` (matches actual DB schema)
+- Auth users created:
+  - pablo.martin.miro@gmail.com → `40a714b9-15ac-45d6-b749-1d818dd6a5f5`
+  - corey@getgunner.ai → `af0bd40b-681c-4c79-9300-e97d0687f27e`
+- Both linked in `users.auth_id` and verified
+- Script is idempotent (skips existing auth users, skips existing app user rows)
+- npm script: `npm run create-auth-users`
+
 ## Next Session
-1. Create Supabase auth accounts for pablo.martin.miro@gmail.com and corey@getgunner.ai
-2. Link auth accounts to existing users: `UPDATE users SET auth_user_id = '<auth-uid>' WHERE email = '...'`
-3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel env vars
-4. Live test login → dashboard → chat end-to-end
-5. Delete old /pipelines route
+1. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel env vars
+2. Live test login → dashboard → chat end-to-end
+3. Delete old /pipelines route

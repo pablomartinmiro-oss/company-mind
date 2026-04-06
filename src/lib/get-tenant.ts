@@ -9,7 +9,7 @@ export async function getTenantForUser() {
   const { data: appUser } = await supabaseAdmin
     .from('users')
     .select('tenant_id')
-    .eq('auth_user_id', user.id)
+    .eq('auth_id', user.id)
     .single()
 
   if (!appUser) throw new Error('User not linked to tenant')
