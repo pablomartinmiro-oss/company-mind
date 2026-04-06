@@ -28,6 +28,12 @@ const CHANNEL_ICONS: Record<string, { bg: string; text: string; letter: string }
   WhatsApp: { bg: 'bg-teal-50',    text: 'text-teal-700',    letter: 'W' },
 };
 
+const CHANNEL_BUBBLE: Record<string, { inbound: string; outbound: string }> = {
+  SMS:      { inbound: 'bg-emerald-50 border border-emerald-200/80 text-zinc-800 rounded-tr-xl rounded-b-xl', outbound: 'bg-emerald-700 text-white rounded-tl-xl rounded-b-xl' },
+  Email:    { inbound: 'bg-blue-50 border border-blue-200/80 text-zinc-800 rounded-tr-xl rounded-b-xl',    outbound: 'bg-blue-700 text-white rounded-tl-xl rounded-b-xl' },
+  WhatsApp: { inbound: 'bg-teal-50 border border-teal-200/80 text-zinc-800 rounded-tr-xl rounded-b-xl',    outbound: 'bg-teal-700 text-white rounded-tl-xl rounded-b-xl' },
+};
+
 const CHANNEL_TABS = ['SMS', 'Email', 'WhatsApp'] as const;
 
 export function InboxPanel() {
@@ -87,7 +93,7 @@ export function InboxPanel() {
   }
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden flex flex-col bg-white" style={{ height: 356 }}>
+    <div className="border border-zinc-200/60 rounded-xl overflow-hidden flex flex-col bg-white" style={{ height: 516 }}>
       {/* Header */}
       <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60">
         <div className="flex items-center gap-2">
@@ -104,7 +110,7 @@ export function InboxPanel() {
       </div>
 
       {/* Body */}
-      <div className="flex" style={{ height: 320 }}>
+      <div className="flex" style={{ height: 480 }}>
         {/* Left: conversation list */}
         <div className="w-[240px] border-r border-zinc-200/60 overflow-y-auto">
           {conversations.unread.length > 0 && (
@@ -171,12 +177,12 @@ export function InboxPanel() {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2 bg-zinc-50/40">
-                {selected.messages.map((msg) => (
+                {selected.messages.map((msg) => {
+                  const bubble = CHANNEL_BUBBLE[msg.type] ?? CHANNEL_BUBBLE.SMS;
+                  return (
                   <div key={msg.id} className={msg.direction === 'inbound' ? 'self-start' : 'self-end'}>
                     <div className={`max-w-[78%] px-3 py-2 text-[12px] ${
-                      msg.direction === 'inbound'
-                        ? 'bg-white border border-zinc-200/80 text-zinc-800 rounded-tr-xl rounded-b-xl'
-                        : 'bg-zinc-900 text-white rounded-tl-xl rounded-b-xl'
+                      msg.direction === 'inbound' ? bubble.inbound : bubble.outbound
                     }`}>
                       {msg.body}
                     </div>
@@ -184,7 +190,8 @@ export function InboxPanel() {
                       {new Date(msg.dateAdded).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                     </span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Reply area */}

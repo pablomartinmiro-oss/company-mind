@@ -63,6 +63,20 @@ export const OUTCOME_PILL: Record<string, string> = {
   voicemail:           'bg-zinc-100 text-zinc-400',
 };
 
+export const TASK_TYPE_LABELS: Record<string, string> = {
+  admin:      'Admin',
+  follow_up:  'Follow Up',
+  new_lead:   'New Lead',
+  scheduling: 'Scheduling',
+};
+
+export const TASK_TYPE_PILL: Record<string, string> = {
+  admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
+  follow_up:  'bg-amber-50 text-amber-700 border border-amber-200',
+  new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
+};
+
 export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
   qualification_call: 'Qualification Call',
   closing_call:       'Closing Call',

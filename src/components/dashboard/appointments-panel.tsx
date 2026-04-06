@@ -61,7 +61,7 @@ export function AppointmentsPanel() {
   const isToday = new Date().toDateString() === date.toDateString();
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white flex flex-col" style={{ height: 356 }}>
+    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white flex flex-col" style={{ height: 516 }}>
       {/* Header */}
       <div className="h-9 flex items-center justify-between px-3.5 border-b border-zinc-200/60 shrink-0">
         <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-400">Appointments</span>
@@ -79,7 +79,7 @@ export function AppointmentsPanel() {
       </div>
 
       {/* Body — fixed height to match inbox */}
-      <div className="flex-1 overflow-y-auto" style={{ height: 320 }}>
+      <div className="flex-1 overflow-y-auto" style={{ height: 480 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="h-4 w-4 border-2 border-zinc-200 border-t-zinc-400 rounded-full animate-spin" />

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, ChevronDown, Check } from 'lucide-react';
-import { STAGE_PILL_CLASSES, TEAM_MEMBERS } from '@/lib/pipeline-config';
+import { ChevronRight, ChevronDown, Check, ExternalLink, Pencil } from 'lucide-react';
+import { STAGE_PILL_CLASSES, TEAM_MEMBERS, TASK_TYPE_LABELS, TASK_TYPE_PILL, PIPELINES } from '@/lib/pipeline-config';
 
 interface Task {
   id: string;
@@ -22,21 +22,12 @@ interface Props {
   initialTasks: Task[];
 }
 
-const STAGE_FILTER_OPTIONS = [
-  { label: 'All stages', value: '' },
-  { label: 'New Lead', value: 'New Lead' },
-  { label: 'Qualification', value: 'Qualification' },
-  { label: 'Closing', value: 'Closing' },
-  { label: 'Closed', value: 'Closed' },
-  { label: 'New Client', value: 'New Client' },
-  { label: 'Building', value: 'Building' },
-  { label: 'Built', value: 'Built' },
-  { label: 'Operating', value: 'Operating' },
-  { label: 'Tier 1', value: 'Tier 1' },
-  { label: 'Tier 2', value: 'Tier 2' },
-  { label: 'Tier 3', value: 'Tier 3' },
-  { label: 'Nurture', value: 'Nurture' },
-  { label: 'Dead', value: 'Dead' },
+const TASK_TYPE_FILTER_OPTIONS = [
+  { label: 'All types', value: '' },
+  { label: 'Follow Up', value: 'follow_up' },
+  { label: 'New Lead', value: 'new_lead' },
+  { label: 'Scheduling', value: 'scheduling' },
+  { label: 'Admin', value: 'admin' },
 ];
 
 function dueLabel(dueDate: string | null): { text: string; className: string } | null {
@@ -58,17 +49,37 @@ function getInitials(name: string) {
 
 export function TaskList({ initialTasks }: Props) {
   const [tasks] = useState(initialTasks);
-  const [stageFilter, setStageFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const filtered = tasks.filter((t) => {
-    if (t.completed || completedIds.has(t.id)) return false;
-    if (stageFilter && t.pipeline_stage !== stageFilter) return false;
-    if (teamFilter && t.assigned_to !== teamFilter) return false;
-    return true;
-  });
+  const filtered = tasks
+    .filter((t) => {
+      if (t.completed || completedIds.has(t.id)) return false;
+      if (typeFilter && (t.task_type ?? 'follow_up') !== typeFilter) return false;
+      if (teamFilter && t.assigned_to !== teamFilter) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayMs = today.getTime();
+      function priority(t: Task): number {
+        if (!t.due_date) return 3; // no due date — last
+        const due = new Date(t.due_date + 'T00:00:00').getTime();
+        if (due < todayMs) return 0; // overdue
+        if (due === todayMs) return 1; // due today
+        return 2; // future
+      }
+      const pa = priority(a);
+      const pb = priority(b);
+      if (pa !== pb) return pa - pb;
+      // Within same bucket, sort by due date ascending (earliest first)
+      const da = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+      const db = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+      return da - db;
+    });
 
   async function completeTask(id: string) {
     setCompletedIds((prev) => new Set(prev).add(id));
@@ -92,8 +103,8 @@ export function TaskList({ initialTasks }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-200/60">
         <div className="flex items-center gap-2">
-          <select className={selectClass} value={stageFilter} onChange={(e) => setStageFilter(e.target.value)}>
-            {STAGE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <select className={selectClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+            {TASK_TYPE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           <select className={selectClass} value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
             <option value="">All team</option>
@@ -112,8 +123,9 @@ export function TaskList({ initialTasks }: Props) {
         filtered.map((task) => {
           const isCompleted = completedIds.has(task.id);
           const due = dueLabel(task.due_date);
-          const stageName = task.pipeline_stage || 'Unknown';
-          const stageClass = STAGE_PILL_CLASSES[stageName] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
+          const taskType = task.task_type ?? 'follow_up';
+          const typeClass = TASK_TYPE_PILL[taskType] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
+          const typeLabel = TASK_TYPE_LABELS[taskType] ?? taskType;
           const isExpanded = expandedId === task.id;
 
           return (
@@ -136,8 +148,8 @@ export function TaskList({ initialTasks }: Props) {
                 </button>
 
                 {/* Task type pill */}
-                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${stageClass}`}>
-                  {stageName}
+                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${typeClass}`}>
+                  {typeLabel}
                 </span>
 
                 {/* Task body */}
@@ -169,64 +181,60 @@ export function TaskList({ initialTasks }: Props) {
 
               {/* Expanded detail panel */}
               {isExpanded && (
-                <div className="px-4 pb-4 border-b border-zinc-100 bg-zinc-50/40 transition-all duration-200">
-                  <div className="grid grid-cols-3 gap-3 mb-3 pt-3">
-                    <div>
-                      <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-0.5">Contact</p>
-                      {task.contact_id ? (
-                        <Link href={`/contacts/${task.contact_id}`} className="text-[13px] text-blue-600 hover:underline">
-                          {task.contact_name || task.contact_id}
-                        </Link>
-                      ) : (
-                        <p className="text-[13px] text-zinc-700">{task.contact_name || '—'}</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-0.5">Pipeline</p>
-                      {task.pipeline_stage ? (
-                        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full inline-block ${STAGE_PILL_CLASSES[task.pipeline_stage] ?? 'bg-zinc-100 text-zinc-500'}`}>
-                          {task.pipeline_stage}
-                        </span>
-                      ) : (
-                        <p className="text-[13px] text-zinc-700">—</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-0.5">Assigned To</p>
-                      {task.assigned_to ? (
-                        <div className="flex items-center gap-1.5">
-                          <div className="h-5 w-5 rounded-full bg-zinc-900 text-white text-[8px] font-semibold flex items-center justify-center">
-                            {getInitials(task.assigned_to)}
-                          </div>
-                          <span className="text-[13px] text-zinc-700">{task.assigned_to}</span>
-                        </div>
-                      ) : (
-                        <p className="text-[13px] text-zinc-700">—</p>
-                      )}
-                    </div>
-                  </div>
+                <div className="px-4 pb-4 border-b border-zinc-100 bg-zinc-50/40 transition-all duration-200 pt-3">
+                  {/* Title */}
+                  <p className="text-[14px] font-semibold text-zinc-900 mb-1">{task.title}</p>
 
+                  {/* Description */}
                   {task.description && (
-                    <p className="text-[13px] text-zinc-600 leading-relaxed mb-3">{task.description}</p>
+                    <p className="text-[13px] text-zinc-500 leading-relaxed mb-3">{task.description}</p>
                   )}
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => completeTask(task.id)}
-                      className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                    >
-                      <Check className="h-3 w-3" /> Mark complete
-                    </button>
-                    {task.contact_id && (
-                      <Link
-                        href={`/contacts/${task.contact_id}`}
-                        className="border border-zinc-200 text-[12px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50"
-                      >
-                        Go to contact →
-                      </Link>
+                  {/* Meta row: due date + task type pill */}
+                  <div className="flex items-center gap-3 mb-3">
+                    {due && (
+                      <span className={due.className}>{due.text}</span>
                     )}
-                    <button className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1 cursor-pointer">
-                      Reschedule
+                    <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typeClass}`}>
+                      {typeLabel}
+                    </span>
+                  </div>
+
+                  {/* Pipeline stage pills — all stages for this contact */}
+                  {task.pipeline_stage && (
+                    <div className="mb-3">
+                      <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-1.5">Pipeline Stages</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {PIPELINES.flatMap((p) => p.stages.map((s) => (
+                          <span
+                            key={s}
+                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                              s === task.pipeline_stage
+                                ? STAGE_PILL_CLASSES[s] ?? 'bg-zinc-100 text-zinc-500'
+                                : 'bg-zinc-50 text-zinc-300 border border-zinc-100'
+                            }`}
+                          >
+                            {s}
+                          </span>
+                        )))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions: Go to company + Edit task */}
+                  <div className="flex gap-2">
+                    {task.contact_id && (
+                      <a
+                        href={`/contacts/${task.contact_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-zinc-700"
+                      >
+                        <ExternalLink className="h-3 w-3" /> Go to company
+                      </a>
+                    )}
+                    <button className="border border-zinc-200 text-[12px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50 flex items-center gap-1.5">
+                      <Pencil className="h-3 w-3" /> Edit task
                     </button>
                   </div>
                 </div>

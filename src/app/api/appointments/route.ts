@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
 
     if (calendars.length === 0) {
       const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
+      filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
       return NextResponse.json(filtered);
     }
 
@@ -54,15 +55,18 @@ export async function GET(req: NextRequest) {
 
     if (events.length === 0) {
       const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
+      filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
       return NextResponse.json(filtered);
     }
 
+    events.sort((a: { startTime: string }, b: { startTime: string }) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
     return NextResponse.json(events);
   } catch (err) {
     if (err instanceof Error && err.message === 'Not authenticated') {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
     const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
+    filtered.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
     return NextResponse.json(filtered);
   }
 }
