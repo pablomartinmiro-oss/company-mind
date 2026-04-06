@@ -2,6 +2,7 @@
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { getTenantId } from './get-tenant-id';
 
 export const createNote = createTool({
   id: 'create_note',
@@ -12,9 +13,9 @@ export const createNote = createTool({
   }),
   outputSchema: z.object({ note: z.record(z.unknown()), message: z.string() }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.createNote(input.contactId, input.body);
     return { note: result.note || result, message: 'Note added to contact.' };
   },

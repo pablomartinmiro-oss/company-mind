@@ -2,15 +2,16 @@ import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { mastra } from '@/mastra';
 import { RequestContext } from '@mastra/core/request-context';
 import { supabaseAdmin } from '@/lib/supabase';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 export async function POST(req: Request) {
-  const { messages, tenantId = TENANT_ID, context = {} } = await req.json();
+  const { tenantId, email } = await getTenantForUser();
+  const { messages, context = {} } = await req.json();
 
   const agent = mastra.getAgent('companyMind');
 
   const requestContext = new RequestContext();
+  requestContext.set('tenantId', tenantId);
   requestContext.set('userName', context.userName ?? 'User');
   requestContext.set('userRole', context.userRole ?? 'member');
   requestContext.set('tenantName', context.tenantName ?? 'Company');

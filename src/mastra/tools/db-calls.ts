@@ -5,6 +5,7 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { supabaseAdmin } from '../../lib/supabase';
+import { getTenantId } from './get-tenant-id';
 
 export const searchCalls = createTool({
   id: 'search_calls',
@@ -34,11 +35,11 @@ export const searchCalls = createTool({
     total: z.number(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     let query = supabaseAdmin
       .from('calls')
       .select('id, contact_name, contact_ghl_id, source, status, call_type, direction, duration_seconds, score, called_at', { count: 'exact' })
-      .eq('tenant_id', resourceId!)
+      .eq('tenant_id', resourceId)
       .order('called_at', { ascending: false })
       .limit(input.limit || 20);
 
@@ -93,12 +94,12 @@ export const getCallDetail = createTool({
     actions: z.array(z.record(z.unknown())),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { data: call } = await supabaseAdmin
       .from('calls')
       .select('*')
       .eq('id', input.callId)
-      .eq('tenant_id', resourceId!)
+      .eq('tenant_id', resourceId)
       .single();
 
     if (!call) throw new Error('Call not found');
@@ -133,11 +134,11 @@ export const getContactCallHistory = createTool({
     totalCalls: z.number(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { data, count } = await supabaseAdmin
       .from('calls')
       .select('id, called_at, call_type, duration_seconds, score, coaching', { count: 'exact' })
-      .eq('tenant_id', resourceId!)
+      .eq('tenant_id', resourceId)
       .eq('contact_ghl_id', input.contactGhlId)
       .eq('status', 'complete')
       .order('called_at', { ascending: false })

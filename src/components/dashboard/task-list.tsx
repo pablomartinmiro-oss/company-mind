@@ -22,17 +22,21 @@ interface Props {
   initialTasks: Task[];
 }
 
-const TASK_TYPE_PILL: Record<string, { label: string; cls: string }> = {
-  follow_up: { label: 'Follow Up', cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
-  admin:     { label: 'Admin',     cls: 'bg-violet-50 text-violet-700 border border-violet-200' },
-  new_lead:  { label: 'New Lead',  cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
-};
-
-const TYPE_FILTER_OPTIONS = [
-  { label: 'All types', value: '' },
-  { label: 'Follow Up', value: 'follow_up' },
-  { label: 'Admin', value: 'admin' },
-  { label: 'New Lead', value: 'new_lead' },
+const STAGE_FILTER_OPTIONS = [
+  { label: 'All stages', value: '' },
+  { label: 'New Lead', value: 'New Lead' },
+  { label: 'Qualification', value: 'Qualification' },
+  { label: 'Closing', value: 'Closing' },
+  { label: 'Closed', value: 'Closed' },
+  { label: 'New Client', value: 'New Client' },
+  { label: 'Building', value: 'Building' },
+  { label: 'Built', value: 'Built' },
+  { label: 'Operating', value: 'Operating' },
+  { label: 'Tier 1', value: 'Tier 1' },
+  { label: 'Tier 2', value: 'Tier 2' },
+  { label: 'Tier 3', value: 'Tier 3' },
+  { label: 'Nurture', value: 'Nurture' },
+  { label: 'Dead', value: 'Dead' },
 ];
 
 function dueLabel(dueDate: string | null): { text: string; className: string } | null {
@@ -54,15 +58,14 @@ function getInitials(name: string) {
 
 export function TaskList({ initialTasks }: Props) {
   const [tasks] = useState(initialTasks);
-  const [typeFilter, setTypeFilter] = useState('');
+  const [stageFilter, setStageFilter] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filtered = tasks.filter((t) => {
     if (t.completed || completedIds.has(t.id)) return false;
-    const taskType = t.task_type ?? 'follow_up';
-    if (typeFilter && taskType !== typeFilter) return false;
+    if (stageFilter && t.pipeline_stage !== stageFilter) return false;
     if (teamFilter && t.assigned_to !== teamFilter) return false;
     return true;
   });
@@ -89,8 +92,8 @@ export function TaskList({ initialTasks }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-200/60">
         <div className="flex items-center gap-2">
-          <select className={selectClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            {TYPE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <select className={selectClass} value={stageFilter} onChange={(e) => setStageFilter(e.target.value)}>
+            {STAGE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           <select className={selectClass} value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
             <option value="">All team</option>
@@ -109,8 +112,8 @@ export function TaskList({ initialTasks }: Props) {
         filtered.map((task) => {
           const isCompleted = completedIds.has(task.id);
           const due = dueLabel(task.due_date);
-          const taskType = task.task_type ?? 'follow_up';
-          const pill = TASK_TYPE_PILL[taskType] ?? TASK_TYPE_PILL.follow_up;
+          const stageName = task.pipeline_stage || 'Unknown';
+          const stageClass = STAGE_PILL_CLASSES[stageName] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
           const isExpanded = expandedId === task.id;
 
           return (
@@ -133,8 +136,8 @@ export function TaskList({ initialTasks }: Props) {
                 </button>
 
                 {/* Task type pill */}
-                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${pill.cls}`}>
-                  {pill.label}
+                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${stageClass}`}>
+                  {stageName}
                 </span>
 
                 {/* Task body */}

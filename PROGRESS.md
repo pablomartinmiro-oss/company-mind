@@ -1,13 +1,55 @@
 # PROGRESS.md — Company Mind Build Tracker
 
 ## Current Status
-- **Phase**: Full UI rebuild complete — all phases from CLAUDE_CODE_MASTER_PROMPT.md built
-- **App state**: tsc clean (0 errors)
-- **GHL**: connected via Private Integration Token
-- **Supabase**: 14 tables (8 original + 6 new: pipelines, pipeline_contacts, stage_log, tasks, contact_research, activity_feed)
-- **Frontend**: top nav, redesigned calls/dashboard/pipeline pages, new contact detail page
+- **Phase**: Production-ready, auth live, all 6 build phases complete
+- **App state**: tsc clean, all routes auth-protected, login flow live
+- **Live URL**: https://company-mind.vercel.app
+- **First tenant**: Company Mind (Pablo + Corey)
 
-## What's Done
+## Completed Phases
+
+### 1. Seed Data Fix
+- `scripts/fix-seed-data.ts` — corrected call_type/outcome for all demo contacts
+- stage_entered_at staggered: 0, 1, 2, 4, 7 days ago across demo contacts
+- npm script: `npm run fix-seed`
+
+### 2. UI Bug Fixes
+- Task stage pills show pipeline stage names instead of task type
+- Pipeline contact list shows score pills (e.g. "91 A", "82 B")
+- Call rows render address line below company name
+
+### 3. GHL Graceful States
+- Inbox: empty state (Mail icon), error state (AlertCircle + retry), demo data fallback
+- Appointments: empty state (Calendar icon), error state, 5s timeout fallback
+- `src/lib/env-check.ts` — dev-only server-side check for 6 required env vars
+
+### 4. Chat E2E
+- Model strings updated to `claude-sonnet-4-6`
+- `src/mastra/tools/get-tenant-id.ts` — reads tenantId from requestContext (preferred) or agent.resourceId (fallback)
+- All 19 tool functions across 8 files updated to use `getTenantId(executionContext)`
+- `/api/chat/route.ts` sets `requestContext.set('tenantId', tenantId)` so tools can resolve tenant
+
+### 5. Auth + Tenant Isolation
+- `@supabase/ssr` installed for cookie-based auth
+- `src/lib/supabase-browser.ts` — browser Supabase client (anon key)
+- `src/lib/supabase-server.ts` — server-side auth-aware client using cookies
+- `src/middleware.ts` — protects all routes except `/login` and `/api/webhooks/*`
+- `src/app/login/page.tsx` — email/password login page
+- `src/lib/get-tenant.ts` — resolves auth user → `users.auth_id` → `tenant_id`
+- All hardcoded tenant IDs removed from `src/` (28 files updated)
+- `/api/chat/route.ts` — tenant resolved from auth cookies, not client body
+- `src/components/layout/app-shell.tsx` — sign out dropdown on avatar
+- Auth users created: pablo.martin.miro@gmail.com, corey@getgunner.ai (via `scripts/create-auth-users.ts`)
+- `ANTHROPIC_API_KEY` and `ASSEMBLYAI_API_KEY` pushed to Vercel (production, preview, development)
+
+### 6. Pre-Launch Cleanup
+- Deleted old `/pipelines` route (replaced by `/pipeline`)
+- Added `loading.tsx` skeleton files: dashboard, calls, pipeline, contacts/[id]
+- Added `error.tsx` error boundaries: dashboard, calls, pipeline, contacts/[id]
+- Removed all production `console.log` statements (kept only in `env-check.ts`)
+- Verified nav routes: `/dashboard`, `/calls`, `/pipeline` (no stale links)
+
+## What's Done (Prior Sessions)
 
 ### Phase 0 — SQL Migrations
 - 4 new columns on calls table (archived, call_type, outcome, processing_status)
@@ -53,6 +95,9 @@
 - `src/lib/pipeline-config.ts` — all shared constants
 
 ## Next Session
-1. Test chat end-to-end with live Anthropic key
-2. Delete old /pipelines route
-3. Add auth to replace hardcoded tenant ID
+1. Test full login flow on production with real credentials
+2. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
+3. Onboard first real client — needs onboarding flow design
+4. Build settings page (team management, GHL connection status, password reset)
+5. Build rubric editor UI (currently disabled)
+6. Add second tenant to verify multi-tenancy isolation

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabaseAdmin } from '../../lib/supabase';
 import { getTenant, getGHLClientForTenant } from '../../lib/tenant-context';
+import { getTenantId } from './get-tenant-id';
 
 const anthropic = new Anthropic();
 
@@ -20,7 +21,7 @@ export const analyzeCall = createTool({
     message: z.string(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     // ── Load call + tenant ──
     const { data: call } = await supabaseAdmin
       .from('calls')
@@ -141,7 +142,7 @@ CRITICAL: Return ONLY valid JSON. No preamble, no code fences, no explanation ou
 
     for (let attempt = 0; attempt < 2; attempt++) {
       const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }],
       });

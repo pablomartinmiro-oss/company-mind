@@ -2,6 +2,7 @@
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { getTenantId } from './get-tenant-id';
 
 export const listPipelines = createTool({
   id: 'list_pipelines',
@@ -15,9 +16,9 @@ export const listPipelines = createTool({
     })),
   }),
   execute: async (_input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.listPipelines();
     return {
       pipelines: (result.pipelines || []).map((p: Record<string, unknown>) => ({
@@ -42,9 +43,9 @@ export const searchOpportunities = createTool({
     total: z.number(),
   }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.searchOpportunities(input.pipelineId, input.stageId);
     return {
       opportunities: result.opportunities || [],
@@ -63,9 +64,9 @@ export const moveOpportunity = createTool({
   }),
   outputSchema: z.object({ opportunity: z.record(z.unknown()), message: z.string() }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.updateOpportunity(input.opportunityId, {
       stageId: input.stageId,
       ...(input.pipelineId && { pipelineId: input.pipelineId }),
@@ -86,9 +87,9 @@ export const createOpportunity = createTool({
   }),
   outputSchema: z.object({ opportunity: z.record(z.unknown()), message: z.string() }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.createOpportunity({
       pipelineId: input.pipelineId,
       pipelineStageId: input.stageId,

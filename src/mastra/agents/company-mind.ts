@@ -70,7 +70,7 @@ ${currentContactId ? `- Currently viewing contact: ${currentContactName} (ID: ${
 Today is ${todayDate}.`;
   },
 
-  model: anthropic('claude-sonnet-4-20250514'),
+  model: anthropic('claude-sonnet-4-6'),
 
   tools: {
     searchContacts,

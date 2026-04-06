@@ -2,6 +2,7 @@
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { getTenantId } from './get-tenant-id';
 
 export const listCalendars = createTool({
   id: 'list_calendars',
@@ -9,9 +10,9 @@ export const listCalendars = createTool({
   inputSchema: z.object({}),
   outputSchema: z.object({ calendars: z.array(z.record(z.unknown())) }),
   execute: async (_input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.listCalendars();
     return { calendars: result.calendars || [] };
   },
@@ -27,9 +28,9 @@ export const listCalendarEvents = createTool({
   }),
   outputSchema: z.object({ events: z.array(z.record(z.unknown())) }),
   execute: async (input, executionContext) => {
-    const resourceId = executionContext.agent?.resourceId;
+    const resourceId = getTenantId(executionContext);
     const { getGHLClientForTenant } = await import('../../lib/tenant-context');
-    const ghl = await getGHLClientForTenant(resourceId!);
+    const ghl = await getGHLClientForTenant(resourceId);
     const result = await ghl.listCalendarEvents(input.calendarId, input.startTime, input.endTime);
     return { events: result.events || [] };
   },

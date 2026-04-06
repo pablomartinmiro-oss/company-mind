@@ -7,20 +7,20 @@ import { formatDuration, scoreGrade, scoreColor, scoreBg } from '@/lib/format';
 import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
 import { ArrowLeft, User, Clock, MapPin, Star } from 'lucide-react';
 import { CallDetailTabs } from './call-detail-tabs';
-
-const TENANT_ID = 'eb14e21e-1f61-44a2-a908-48b5b43303d9';
+import { getTenantForUser } from '@/lib/get-tenant';
 
 export default async function CallDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { tenantId } = await getTenantForUser();
   const { id } = await params;
 
   const { data: call, error } = await supabaseAdmin
-    .from('calls').select('*').eq('id', id).eq('tenant_id', TENANT_ID).single();
+    .from('calls').select('*').eq('id', id).eq('tenant_id', tenantId).single();
   if (error || !call) notFound();
 
   const [actionsRes, dataPointsRes, contactDpRes] = await Promise.all([
-    supabaseAdmin.from('call_actions').select('*').eq('call_id', id).eq('tenant_id', TENANT_ID).order('created_at', { ascending: true }),
-    supabaseAdmin.from('contact_data_points').select('*').eq('source_call_id', id).eq('tenant_id', TENANT_ID),
-    supabaseAdmin.from('contact_data_points').select('field_name, field_value').eq('tenant_id', TENANT_ID).eq('contact_ghl_id', call.contact_ghl_id).in('field_name', ['company_name', 'address']),
+    supabaseAdmin.from('call_actions').select('*').eq('call_id', id).eq('tenant_id', tenantId).order('created_at', { ascending: true }),
+    supabaseAdmin.from('contact_data_points').select('*').eq('source_call_id', id).eq('tenant_id', tenantId),
+    supabaseAdmin.from('contact_data_points').select('field_name, field_value').eq('tenant_id', tenantId).eq('contact_ghl_id', call.contact_ghl_id).in('field_name', ['company_name', 'address']),
   ]);
 
   const actions = actionsRes.data ?? [];

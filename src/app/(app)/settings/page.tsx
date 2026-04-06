@@ -5,9 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getTenantForUser } from '@/lib/get-tenant';
 
 const scoringCriteria = [
   { name: "Rapport Building", weight: 15, color: "bg-violet-500" },
@@ -17,7 +17,8 @@ const scoringCriteria = [
   { name: "Next Steps", weight: 20, color: "bg-rose-500" },
 ];
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const { tenantId } = await getTenantForUser();
   return (
     <div className="mx-auto max-w-3xl px-8 py-8 animate-fade-in">
       {/* Header */}
@@ -56,7 +57,7 @@ export default function SettingsPage() {
                 Tenant ID
               </label>
               <p className="font-mono text-xs text-muted-foreground/70 select-all">
-                eb14e21e-1f61-44a2-a908-48b5b43303d9
+                {tenantId}
               </p>
             </div>
           </CardContent>
