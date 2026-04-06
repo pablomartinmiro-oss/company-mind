@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, Send, Link as LinkIcon } from 'lucide-react';
+import { Mail, RefreshCw, Send, Link as LinkIcon, AlertCircle } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -37,11 +37,14 @@ export function InboxPanel() {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   async function fetchInbox() {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch('/api/inbox');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setConversations(data);
       if (!selected && (data.unread.length > 0 || data.needsReply.length > 0)) {
@@ -49,6 +52,7 @@ export function InboxPanel() {
       }
     } catch {
       setConversations({ unread: [], needsReply: [] });
+      setError(true);
     }
     setLoading(false);
   }
@@ -127,8 +131,25 @@ export function InboxPanel() {
           )}
           {allConvos.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
-              <p className="text-[13px] font-medium text-zinc-400">Inbox connected</p>
-              <p className="text-[11px] text-zinc-300">No unread messages right now</p>
+              {error ? (
+                <>
+                  <AlertCircle className="h-6 w-6 text-zinc-300" />
+                  <p className="text-[13px] text-zinc-400">Inbox unavailable</p>
+                  <p className="text-[11px] text-zinc-300">Check GHL connection</p>
+                  <button
+                    onClick={fetchInbox}
+                    className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+                  >
+                    Retry
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Mail className="h-6 w-6 text-zinc-300" />
+                  <p className="text-[13px] text-zinc-400">No conversations yet</p>
+                  <p className="text-[11px] text-zinc-300">Conversations from SMS, email, and WhatsApp will appear here</p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -207,11 +228,11 @@ export function InboxPanel() {
                 </div>
               </div>
             </>
-          ) : (
+          ) : allConvos.length > 0 ? (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-[12px] text-zinc-300">Select a conversation</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

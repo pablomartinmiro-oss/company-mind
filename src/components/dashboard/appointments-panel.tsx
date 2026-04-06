@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 
 interface Appointment {
   id: string;
@@ -16,20 +16,43 @@ export function AppointmentsPanel() {
   const [date, setDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   async function fetchAppointments(d: Date) {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
+    setError(false);
+
+    // Timeout fallback: stop loading after 5 seconds
+    const timeout = setTimeout(() => {
+      controller.abort();
+      setLoading(false);
+      setError(true);
+    }, 5000);
+
     try {
-      const res = await fetch(`/api/appointments?date=${d.toISOString().split('T')[0]}`);
+      const res = await fetch(`/api/appointments?date=${d.toISOString().split('T')[0]}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setAppointments(Array.isArray(data) ? data : []);
-    } catch {
-      setAppointments([]);
+    } catch (err) {
+      clearTimeout(timeout);
+      if ((err as Error).name !== 'AbortError') {
+        setAppointments([]);
+        setError(true);
+      }
     }
     setLoading(false);
   }
 
-  useEffect(() => { fetchAppointments(date); }, [date]);
+  useEffect(() => { fetchAppointments(date); }, [date]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function prevDay() { setDate(new Date(date.getTime() - 86400000)); }
   function nextDay() { setDate(new Date(date.getTime() + 86400000)); }
@@ -59,12 +82,24 @@ export function AppointmentsPanel() {
       <div className="flex-1 overflow-y-auto" style={{ height: 320 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-[11px] text-zinc-300">Loading...</p>
+            <div className="h-4 w-4 border-2 border-zinc-200 border-t-zinc-400 rounded-full animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
+            <AlertCircle className="h-6 w-6 text-zinc-300" />
+            <p className="text-[13px] text-zinc-400">Calendar unavailable</p>
+            <p className="text-[11px] text-zinc-300">Check GHL connection</p>
+            <button
+              onClick={() => fetchAppointments(date)}
+              className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+            >
+              Retry
+            </button>
           </div>
         ) : appointments.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
-            <p className="text-[13px] font-medium text-zinc-400">No appointments today</p>
-            <p className="text-[11px] text-zinc-300">Calendar connected via GHL</p>
+            <Calendar className="h-6 w-6 text-zinc-300" />
+            <p className="text-[13px] text-zinc-400">No appointments {isToday ? 'today' : dateLabel}</p>
           </div>
         ) : (
           appointments.map((appt) => {

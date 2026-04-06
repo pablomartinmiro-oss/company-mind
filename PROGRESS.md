@@ -52,6 +52,13 @@
 ### Phase 7 — Shared Config
 - `src/lib/pipeline-config.ts` — all shared constants
 
+### Empty/Error States + Env Check
+- `src/components/dashboard/inbox-panel.tsx` — Mail icon + "No conversations yet" empty state; AlertCircle + retry button on API error; no more "Select a conversation" when list is empty
+- `src/components/dashboard/appointments-panel.tsx` — Calendar icon + "No appointments today" empty state; AlertCircle + retry on error; 5s timeout fallback instead of infinite "Loading..."
+- `src/lib/env-check.ts` — dev-only server-side check logging presence of 6 required env vars
+- `src/components/layout/app-shell.tsx` — extracted client layout from `(app)/layout.tsx`
+- `src/app/(app)/layout.tsx` — now a server component that calls checkEnvVars() then renders AppShell
+
 ### UI Bug Fixes
 - `src/components/dashboard/task-list.tsx` — pills now show pipeline stage (New Lead, Qualification, Closing…) instead of task type; filter dropdown updated to stages
 - `src/components/pipeline/contact-list.tsx` — added score pills (e.g. "91 A", "82 B") using scoreBg/scoreGrade from format.ts; shows "—" when no score
