@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
     const calendars = calData?.calendars ?? [];
 
     if (calendars.length === 0) {
-      console.log('Using demo appointment data');
       const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
       return NextResponse.json(filtered);
     }
@@ -54,7 +53,6 @@ export async function GET(req: NextRequest) {
     }));
 
     if (events.length === 0) {
-      console.log('Using demo appointment data');
       const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
       return NextResponse.json(filtered);
     }
@@ -64,7 +62,6 @@ export async function GET(req: NextRequest) {
     if (err instanceof Error && err.message === 'Not authenticated') {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    console.log('Using demo appointment data');
     const filtered = contactId ? DEMO_APPOINTMENTS.filter((a) => a.contactId === contactId) : DEMO_APPOINTMENTS;
     return NextResponse.json(filtered);
   }

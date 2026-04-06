@@ -83,7 +83,6 @@ export async function GET() {
     const conversations = data?.conversations ?? [];
 
     if (conversations.length === 0) {
-      console.log('Using demo inbox data');
       return NextResponse.json(DEMO_CONVERSATIONS);
     }
 
@@ -120,7 +119,6 @@ export async function GET() {
     if (err instanceof Error && err.message === 'Not authenticated') {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    console.log('Using demo inbox data');
     return NextResponse.json(DEMO_CONVERSATIONS);
   }
 }

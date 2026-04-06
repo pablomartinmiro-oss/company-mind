@@ -108,7 +108,19 @@
 - Script is idempotent (skips existing auth users, skips existing app user rows)
 - npm script: `npm run create-auth-users`
 
+### Vercel Env Vars
+- `ANTHROPIC_API_KEY` and `ASSEMBLYAI_API_KEY` pushed to Vercel (production, preview, development)
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` already present
+
+### Pre-Launch Cleanup
+- Deleted old `/pipelines` route (`src/app/(app)/pipelines/`) — replaced by `/pipeline`
+- Added `loading.tsx` skeletons: dashboard, calls, pipeline, contacts/[id]
+- Added `error.tsx` error boundaries: dashboard, calls, pipeline, contacts/[id]
+- Removed all production `console.log` statements (kept only in `env-check.ts`)
+- Verified nav routes: `/dashboard`, `/calls`, `/pipeline` (no stale `/pipelines` links)
+- `tsc --noEmit` passes clean (0 errors)
+
 ## Next Session
-1. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel env vars
-2. Live test login → dashboard → chat end-to-end
-3. Delete old /pipelines route
+1. Live test login → dashboard → chat end-to-end
+2. Test call grading pipeline with real GHL calls
+3. Add GHL_ACCESS_TOKEN to Vercel env vars if not already present
