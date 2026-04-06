@@ -41,6 +41,11 @@ Test: could a new Claude Code session pick up using only PROGRESS.md + CLAUDE.md
 ### Rule 7 — Never Expose Secrets Client-Side
 SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, GHL_ACCESS_TOKEN — server-side only. Use NEXT_PUBLIC_ prefix only for truly public values.
 
+### Rule 8 — Auth Required Everywhere
+Every server component and API route MUST call getTenantForUser() to get the tenant ID.
+Exceptions: /login route, /api/webhooks/* routes, static assets.
+Never hardcode a tenant ID. Never trust a tenant ID from a request body or query param.
+
 ## Tech Stack (Locked)
 
 | Layer | Tech | Entry Point |
@@ -72,11 +77,20 @@ src/app/api/jobs/process-calls/route.ts — background worker, retry, locking, d
 src/app/actions.ts         — server actions for approve/reject mutations
 src/components/chat/chat-panel.tsx — collapsible chat panel with useChat
 scripts/seed-demo.ts       — demo data seeder (npm run seed)
+src/lib/supabase-browser.ts  — client-side Supabase (auth-aware, anon key)
+src/lib/supabase-server.ts   — server-side Supabase (auth-aware, cookie-based)
+src/lib/get-tenant.ts        — resolves auth user → tenant_id via auth_id column
+src/lib/env-check.ts         — env var verification (dev only)
+src/middleware.ts             — auth middleware, protects all routes except /login and /api/webhooks
+src/app/login/page.tsx        — login page
 ```
 
 ## DB Tables
 
-tenants, users, calls, call_actions, contact_data_points, feedback_log, chat_messages, call_jobs
+tenants, users, calls, call_actions, contact_data_points, feedback_log, chat_messages, call_jobs,
+pipelines, pipeline_contacts, stage_log, tasks, contact_research, activity_feed
+
+Note: users table has `auth_id` column (not `auth_user_id`) linking to Supabase Auth users.
 
 ### Key Column Notes
 - calls.score: JSONB `{ overall: number, criteria: [...] }`
@@ -87,9 +101,10 @@ tenants, users, calls, call_actions, contact_data_points, feedback_log, chat_mes
 
 ## Current Tenant (MVP)
 
-ID: `eb14e21e-1f61-44a2-a908-48b5b43303d9`
 Name: Company Mind
 Industry: SaaS
+Tenant ID is resolved dynamically via `getTenantForUser()` based on the authenticated user.
+No hardcoded tenant IDs anywhere in the codebase.
 
 ## Agent Usage
 
