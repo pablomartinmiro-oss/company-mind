@@ -276,32 +276,24 @@ export function InboxPanel() {
   );
 }
 
-const TENANT_DISPLAY = 'Company Mind';
-const TENANT_EMAIL = 'pablo.martin.miro@gmail.com';
-const TENANT_PHONE = '+1 (555) 100-0001';
+// Contact metadata available but not displayed in bubbles — thread header shows name + channel
 
 /* ─── SMS Thread ─── */
-function SMSThread({ messages, contactName, contactPhone }: { messages: Message[]; contactName: string; contactPhone?: string }) {
-  const cPhone = contactPhone ?? '—';
+function SMSThread({ messages }: { messages: Message[]; contactName: string; contactPhone?: string }) {
   return (
     <>
       {messages.map((msg) => (
-        <div key={msg.id} className={`flex flex-col ${msg.direction === 'inbound' ? 'items-start' : 'items-end'}`}>
-          <span className="text-[10px] text-zinc-500 mb-0.5">
-            {msg.direction === 'inbound'
-              ? `From: ${contactName} (${msg.meta?.from ?? cPhone}) → To: ${TENANT_DISPLAY} (${TENANT_PHONE})`
-              : `From: ${TENANT_DISPLAY} (${TENANT_PHONE}) → To: ${contactName} (${msg.meta?.to ?? cPhone})`}
-          </span>
-          <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
+        <div key={msg.id} className={msg.direction === 'inbound' ? 'self-start max-w-[78%]' : 'self-end max-w-[78%]'}>
+          <div className={`px-3.5 py-2.5 text-[13px] leading-relaxed ${
             msg.direction === 'inbound'
-              ? 'self-start bg-white/60 border border-emerald-200 rounded-2xl text-zinc-800'
-              : 'self-end bg-emerald-500 text-white rounded-2xl'
+              ? 'bg-white/70 backdrop-blur border border-white/60 text-zinc-800 rounded-2xl rounded-tl-md shadow-[0_2px_8px_rgba(28,25,22,0.04)]'
+              : 'bg-emerald-500/90 text-white rounded-2xl rounded-tr-md shadow-[0_2px_8px_rgba(16,185,129,0.2)]'
           }`}>
             {msg.body}
           </div>
-          <span className="text-[10px] text-zinc-500 mt-0.5">
+          <div className={`text-[10px] text-zinc-400 mt-1 font-mono ${msg.direction === 'inbound' ? 'ml-1' : 'mr-1 text-right'}`}>
             {formatExactTime(msg.dateAdded)}
-          </span>
+          </div>
         </div>
       ))}
     </>
@@ -309,22 +301,26 @@ function SMSThread({ messages, contactName, contactPhone }: { messages: Message[
 }
 
 /* ─── Email Thread ─── */
-function EmailThread({ messages, contactName, contactEmail }: { messages: Message[]; contactName: string; contactEmail?: string }) {
-  const cEmail = contactEmail ?? '—';
-  const contactFull = `${contactName} <${cEmail}>`;
-  const tenantFull = `${TENANT_DISPLAY} <${TENANT_EMAIL}>`;
+function EmailThread({ messages }: { messages: Message[]; contactName: string; contactEmail?: string }) {
   return (
     <>
       {messages.map((msg) => (
-        <div key={msg.id} className="bg-white/60 border border-blue-100 rounded-lg p-3 mb-2">
-          <div className="text-[10px] text-zinc-500 leading-relaxed space-y-0.5">
-            <p>From: {msg.direction === 'inbound' ? (msg.meta?.from ?? contactFull) : (msg.meta?.from ?? tenantFull)}</p>
-            <p>To: {msg.direction === 'outbound' ? (msg.meta?.to ?? contactFull) : (msg.meta?.to ?? tenantFull)}</p>
-            {msg.meta?.subject && <p>Subject: {msg.meta.subject}</p>}
-            <p>{formatExactDateTime(msg.dateAdded)}</p>
+        <div key={msg.id} className={msg.direction === 'inbound' ? 'self-start max-w-[85%]' : 'self-end max-w-[85%]'}>
+          <div className={`px-3.5 py-2.5 text-[13px] leading-relaxed rounded-2xl ${
+            msg.direction === 'inbound'
+              ? 'bg-white/70 backdrop-blur border border-white/60 text-zinc-800 rounded-tl-md shadow-[0_2px_8px_rgba(28,25,22,0.04)]'
+              : 'bg-blue-500/90 text-white rounded-tr-md shadow-[0_2px_8px_rgba(59,130,246,0.2)]'
+          }`}>
+            {msg.meta?.subject && (
+              <p className={`text-[10px] font-medium mb-1 ${msg.direction === 'inbound' ? 'text-zinc-500' : 'text-blue-100'}`}>
+                {msg.meta.subject}
+              </p>
+            )}
+            <div className="whitespace-pre-wrap">{msg.body}</div>
           </div>
-          <div className="border-t border-white/30 my-2" />
-          <div className="text-[12px] text-zinc-800 whitespace-pre-wrap">{msg.body}</div>
+          <div className={`text-[10px] text-zinc-400 mt-1 font-mono ${msg.direction === 'inbound' ? 'ml-1' : 'mr-1 text-right'}`}>
+            {formatExactDateTime(msg.dateAdded)}
+          </div>
         </div>
       ))}
     </>
@@ -332,29 +328,23 @@ function EmailThread({ messages, contactName, contactEmail }: { messages: Messag
 }
 
 /* ─── WhatsApp Thread ─── */
-function WhatsAppThread({ messages, contactName, contactPhone }: { messages: Message[]; contactName: string; contactPhone?: string }) {
-  const cPhone = contactPhone ?? '—';
+function WhatsAppThread({ messages }: { messages: Message[]; contactName: string; contactPhone?: string }) {
   return (
     <>
       {messages.map((msg) => (
-        <div key={msg.id} className={`flex flex-col ${msg.direction === 'inbound' ? 'items-start' : 'items-end'}`}>
-          <span className="text-[10px] text-zinc-500 mb-0.5">
-            {msg.direction === 'inbound'
-              ? `From: ${contactName} (${msg.meta?.from ?? cPhone}) → To: ${TENANT_DISPLAY} (${TENANT_PHONE})`
-              : `From: ${TENANT_DISPLAY} (${TENANT_PHONE}) → To: ${contactName} (${msg.meta?.to ?? cPhone})`}
-          </span>
-          <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
+        <div key={msg.id} className={msg.direction === 'inbound' ? 'self-start max-w-[78%]' : 'self-end max-w-[78%]'}>
+          <div className={`px-3.5 py-2.5 text-[13px] leading-relaxed ${
             msg.direction === 'inbound'
-              ? 'self-start bg-white/60 border border-teal-200 rounded-lg text-zinc-800'
-              : 'self-end bg-teal-500 text-white rounded-lg'
+              ? 'bg-white/70 backdrop-blur border border-white/60 text-zinc-800 rounded-2xl rounded-tl-md shadow-[0_2px_8px_rgba(28,25,22,0.04)]'
+              : 'bg-teal-500/90 text-white rounded-2xl rounded-tr-md shadow-[0_2px_8px_rgba(20,184,166,0.2)]'
           }`}>
             {msg.body}
           </div>
-          <div className="flex items-center gap-1 mt-0.5">
+          <div className={`flex items-center gap-1 mt-1 ${msg.direction === 'inbound' ? 'ml-1' : 'mr-1 justify-end'}`}>
             {msg.direction === 'outbound' && (
-              <span className="text-teal-700 text-[10px]">✓✓</span>
+              <span className="text-teal-500 text-[10px]">✓✓</span>
             )}
-            <span className="text-[10px] text-zinc-500">
+            <span className="text-[10px] text-zinc-400 font-mono">
               {formatExactTime(msg.dateAdded)}
             </span>
           </div>
