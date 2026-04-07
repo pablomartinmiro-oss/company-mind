@@ -48,7 +48,7 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
         value={noteText}
         onChange={(e) => setNoteText(e.target.value)}
         placeholder="Add a note... use @ to tag a team member"
-        className="border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-zinc-100 bg-[#0a0a0b] w-full resize-none min-h-[64px] mb-2 focus:outline-none focus:border-zinc-500"
+        className="border border-[rgba(28,25,22,0.1)] rounded-lg px-3 py-2 text-[13px] text-[#1c1916] bg-white w-full resize-none min-h-[64px] mb-2 focus:outline-none focus:border-zinc-400"
         onKeyDown={(e) => { if (e.key === 'Enter' && e.shiftKey) return; if (e.key === 'Enter') { e.preventDefault(); postNote(); } }}
       />
       <div className="flex items-center justify-between mb-4">
@@ -56,7 +56,7 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
         <button
           onClick={postNote}
           disabled={posting || !noteText.trim()}
-          className="px-3 py-1.5 bg-white text-zinc-900 text-[12px] font-medium rounded-lg disabled:opacity-40"
+          className="px-3 py-1.5 bg-[#ff6a3d] text-white text-[12px] font-medium rounded-lg disabled:opacity-40"
         >
           Post
         </button>
@@ -69,14 +69,14 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
           : '?';
 
         return (
-          <div key={entry.id} className="flex gap-2.5 py-3 border-b border-white/[0.04] last:border-0">
+          <div key={entry.id} className="flex gap-2.5 py-3 border-b border-[rgba(28,25,22,0.04)] last:border-0">
             {/* Avatar */}
             <div className={`h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-semibold ${
               entry.type === 'note'
-                ? 'bg-white text-zinc-900'
+                ? 'bg-[#1c1916] text-white'
                 : entry.type === 'call_logged'
-                ? 'bg-blue-500/10 text-blue-300 text-[11px]'
-                : 'bg-white/[0.06] text-zinc-400 text-[12px]'
+                ? 'bg-blue-50 text-blue-700 text-[11px]'
+                : 'bg-zinc-100 text-zinc-500 text-[12px]'
             }`}>
               {entry.type === 'stage_moved' ? '⇄' : entry.type === 'call_logged' ? String((entry.content as Record<string, unknown>)?.score ?? '?') : initials}
             </div>
@@ -84,7 +84,7 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
             <div className="flex-1 min-w-0">
               {/* Meta */}
               <div className="flex items-center gap-1.5">
-                {entry.author && <span className="text-[11px] font-medium text-zinc-100">{entry.author}</span>}
+                {entry.author && <span className="text-[11px] font-medium text-[#1c1916]">{entry.author}</span>}
                 <span className="text-[11px] text-zinc-500">
                   {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   {' '}
@@ -94,19 +94,19 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
 
               {/* Content */}
               {entry.type === 'note' && (
-                <p className="text-[12px] text-zinc-300 leading-relaxed mt-0.5">
+                <p className="text-[12px] text-zinc-700 leading-relaxed mt-0.5">
                   {String((entry.content as Record<string, unknown>)?.text ?? '')}
                 </p>
               )}
               {entry.type === 'call_logged' && (
                 <Link
                   href={`/calls/${(entry.content as Record<string, unknown>)?.callId}`}
-                  className="border border-white/[0.04] rounded-lg px-3 py-2 cursor-pointer hover:bg-white/[0.03] mt-1 block"
+                  className="border border-[rgba(28,25,22,0.04)] rounded-lg px-3 py-2 cursor-pointer hover:bg-[#faf8f5] mt-1 block"
                 >
                   <div className="flex items-center gap-2">
                     {Boolean((entry.content as Record<string, unknown>)?.callType) && (
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                        CALL_TYPE_PILL[String((entry.content as Record<string, unknown>).callType)] ?? 'bg-white/[0.06] text-zinc-400'
+                        CALL_TYPE_PILL[String((entry.content as Record<string, unknown>).callType)] ?? 'bg-zinc-100 text-zinc-500'
                       }`}>
                         {CALL_TYPE_LABELS[String((entry.content as Record<string, unknown>).callType)] ?? String((entry.content as Record<string, unknown>).callType)}
                       </span>
@@ -118,7 +118,7 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
                 </Link>
               )}
               {entry.type === 'stage_moved' && (
-                <div className="inline-flex items-center gap-1.5 text-[12px] text-zinc-300 bg-white/[0.03] rounded-lg px-3 py-1.5 mt-1">
+                <div className="inline-flex items-center gap-1.5 text-[12px] text-zinc-700 bg-[#faf8f5] rounded-lg px-3 py-1.5 mt-1">
                   {String((entry.content as Record<string, unknown>)?.from ?? '')} → {String((entry.content as Record<string, unknown>)?.to ?? '')}
                   <span className="text-[10px] text-zinc-500 ml-1">
                     {String((entry.content as Record<string, unknown>)?.pipeline ?? '')}
@@ -132,7 +132,7 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
 
       {entries.length === 0 && (
         <div className="py-8 text-center">
-          <p className="text-[13px] text-zinc-600">No activity yet.</p>
+          <p className="text-[13px] text-zinc-400">No activity yet.</p>
         </div>
       )}
     </div>

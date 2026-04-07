@@ -257,12 +257,36 @@ Full Payoneer-inspired dark theme applied across the entire app. Brand kit scaff
 - Logo SVGs copied to `public/brand/` for static serving
 - `brand/EXPORT.md` documents how to port the kit to other projects
 
+### Payoneer Redesign (2026-04-07)
+
+Complete visual overhaul from dark-everywhere to Payoneer 3-layer sandwich design.
+
+**The signature:** Warm dark page bg (#1c1916) → floating white app container (rounded-[28px]) → dark stat cards on white + white data panels. Thin dark icon sidebar replaces top bar.
+
+**What changed:**
+- Layout: Body bg #1c1916 with p-6 padding, white app container with warm shadow, 64px dark icon sidebar (replaces top bar)
+- Sidebar: Dark bg, coral brand mark, coral active item wash + left bar, icon-only nav
+- Dashboard: Dark stat cards (#1f1a16) with coral values and icons — the Payoneer signature. Inbox, appointments, tasks as white panels.
+- All content pages: White panels with warm cream muted sections (#faf8f5), warm borders rgba(28,25,22,0.06)
+- Buttons: Coral pill CTAs (#ff6a3d rounded-full), dark secondary, ghost
+- Chat drawer: White bg, warm borders, coral send button
+- Login: White card on dark bg, coral submit button
+- Brand showcase (/brand): Updated for Payoneer edition with 3-layer demo
+- Docs: DESIGN_DECISIONS, DECISIONS, GOLDEN all updated for Payoneer spec
+- Brand tokens: Colors, shadows, radii updated for warm palette
+- Logo SVGs: Coral mark replaces gradient mark
+- Pipeline config: Light-theme pill classes (work on white content area)
+
+**Coral budget:** 6 of 7 used (brand mark, sidebar active, Ask AI CTA, dark card icons, stat values, showcase demos). Score circles 90+ pending.
+
+**Locked files NOT touched:** ghl.ts, supabase.ts, mastra/**, calls/[id]/*, chat-panel.tsx, format.ts
+
 ## Next Session
-1. Verify dark theme + brand showcase on live site
-2. Call detail page (/calls/[id]) needs separate dark treatment (currently locked)
-3. Score circles 90+ gradient (gradient use #2) — needs implementation
+1. Verify Payoneer redesign on live site
+2. Call detail page (/calls/[id]) needs Payoneer treatment (locked)
+3. Score circles 90+ coral ring (coral use #5)
 4. Batch 5: Gmail inbox connector, Google Meet call import
-5. Button audit + AI assistant function check across the entire app
-6. Build settings page (team management, GHL connection status, password reset)
-7. Build rubric editor UI (currently disabled)
+5. Button audit + AI assistant function check
+6. Build settings page
+7. Build rubric editor UI
 8. Add second tenant to verify multi-tenancy isolation

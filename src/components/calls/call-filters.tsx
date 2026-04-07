@@ -27,7 +27,7 @@ const OUTCOME_OPTIONS = [
   { label: 'Voicemail', value: 'voicemail' },
 ];
 
-const selectClass = 'text-[12px] px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#0a0a0b] text-zinc-400 focus:outline-none focus:border-zinc-500';
+const selectClass = 'text-[12px] px-2.5 py-1.5 rounded-lg border border-[rgba(28,25,22,0.1)] bg-white text-zinc-500 focus:outline-none focus:border-zinc-400';
 
 export function CallFilters() {
   const router = useRouter();

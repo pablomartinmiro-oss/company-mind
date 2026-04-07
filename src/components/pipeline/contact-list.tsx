@@ -48,7 +48,7 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
           placeholder="Search name, company..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[12px] px-3 py-1.5 border border-white/[0.08] rounded-lg bg-white/[0.03] text-zinc-100 focus:outline-none focus:border-zinc-400 placeholder:text-zinc-500"
+          className="flex-1 text-[12px] px-3 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400 placeholder:text-zinc-500"
         />
         {selectedStage && (
           <button
@@ -80,7 +80,7 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
 
             {/* Company info — company name primary, contact name secondary */}
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-zinc-100">{contact.company_name || contact.contact_name}</p>
+              <p className="text-[13px] font-medium text-[#1c1916]">{contact.company_name || contact.contact_name}</p>
               {contact.company_name && (
                 <p className="text-[11px] text-zinc-400 mt-0.5">{contact.contact_name}</p>
               )}

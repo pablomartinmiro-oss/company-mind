@@ -1,117 +1,42 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { useState, useCallback } from 'react';
+import { Sidebar } from '@/components/layout/sidebar';
 import { ChatDrawer } from '@/components/chat/chat-drawer';
-import { Brain, Settings, LogOut, Sparkles } from 'lucide-react';
-import { supabaseBrowser } from '@/lib/supabase-browser';
-
-const navItems = [
-  { href: '/dashboard', label: 'Daily HQ' },
-  { href: '/calls', label: 'Calls' },
-  { href: '/companies', label: 'Companies' },
-];
+import { Sparkles } from 'lucide-react';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const closeChat = useCallback(() => setChatOpen(false), []);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [menuOpen]);
-
-  const handleSignOut = async () => {
-    await supabaseBrowser.auth.signOut();
-    router.push('/login');
-  };
-
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#0a0a0b]">
-      {/* Top bar */}
-      <header className="h-[52px] shrink-0 border-b border-white/[0.06] bg-[#111113] flex items-center px-5 gap-6 z-10">
-        {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-gradient-accent">
-            <Brain className="h-3.5 w-3.5 text-white" />
-          </div>
-          <span className="text-[13px] font-semibold text-zinc-100">Company Mind</span>
-        </Link>
+    <div
+      className="bg-white rounded-[28px] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.4)] min-h-[calc(100vh-48px)] flex overflow-hidden"
+    >
+      {/* Sidebar — thin dark icon nav (Payoneer signature) */}
+      <Sidebar />
 
-        {/* Nav tabs */}
-        <nav className="flex items-center gap-0.5">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'rounded-md px-3 py-1.5 text-[13px] font-medium transition-all duration-150',
-                  isActive
-                    ? 'bg-white text-zinc-900'
-                    : 'text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100'
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right side */}
-        <div className="ml-auto flex items-center gap-2.5">
-          {/* Ask AI button */}
-          <button
-            onClick={() => setChatOpen(true)}
-            className="flex h-7 items-center gap-1.5 rounded-md bg-gradient-accent px-2.5 text-[12px] font-medium text-white transition-colors"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Ask AI
-          </button>
-
-          <Link href="/settings">
-            <Settings className="h-4 w-4 text-zinc-500 hover:text-zinc-300 transition-colors" />
-          </Link>
-          <div ref={menuRef} className="relative">
+      {/* Main content area */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Content header bar */}
+        <div className="h-14 shrink-0 flex items-center justify-between px-8 border-b border-[rgba(28,25,22,0.06)]">
+          <div />
+          <div className="flex items-center gap-3">
+            {/* Ask AI button (coral use #3 — primary CTA) */}
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="h-7 w-7 rounded-full bg-white text-zinc-900 text-[11px] font-semibold flex items-center justify-center hover:bg-zinc-200 transition-colors"
+              onClick={() => setChatOpen(true)}
+              className="flex h-8 items-center gap-1.5 rounded-full bg-[#ff6a3d] px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#f5552a]"
             >
-              PM
+              <Sparkles className="h-3.5 w-3.5" />
+              Ask AI
             </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-36 rounded-lg border border-white/[0.08] bg-[#17171a] py-1 shadow-lg">
-                <button
-                  onClick={handleSignOut}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-zinc-400 hover:bg-white/[0.03] hover:text-zinc-100 transition-colors"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  Sign out
-                </button>
-              </div>
-            )}
           </div>
         </div>
-      </header>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-[#0a0a0b]">
-        {children}
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-8 py-6">
+          {children}
+        </div>
       </main>
 
       {/* Chat drawer */}

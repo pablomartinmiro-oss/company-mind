@@ -72,18 +72,18 @@ export function AppointmentsPanel() {
   const isToday = new Date().toDateString() === date.toDateString();
 
   return (
-    <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-[#111113] flex flex-col" style={{ height: 516 }}>
+    <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] shadow-sm overflow-hidden flex flex-col" style={{ height: 516 }}>
       {/* Header */}
-      <div className="h-9 flex items-center justify-between px-3.5 border-b border-white/[0.06] shrink-0">
+      <div className="h-9 flex items-center justify-between px-3.5 border-b border-[rgba(28,25,22,0.06)] shrink-0">
         <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Appointments</span>
         <div className="flex items-center gap-1.5">
-          <button onClick={prevDay} className="p-0.5 hover:bg-white/[0.06] rounded">
+          <button onClick={prevDay} className="p-0.5 hover:bg-zinc-100 rounded">
             <ChevronLeft className="h-3 w-3 text-zinc-500" />
           </button>
-          <span className="text-[11px] font-medium text-zinc-300 min-w-[50px] text-center">
+          <span className="text-[11px] font-medium text-zinc-700 min-w-[50px] text-center">
             {isToday ? 'Today' : dateLabel}
           </span>
-          <button onClick={nextDay} className="p-0.5 hover:bg-white/[0.06] rounded">
+          <button onClick={nextDay} className="p-0.5 hover:bg-zinc-100 rounded">
             <ChevronRight className="h-3 w-3 text-zinc-500" />
           </button>
         </div>
@@ -93,24 +93,24 @@ export function AppointmentsPanel() {
       <div className="flex-1 overflow-y-auto" style={{ height: 480 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="h-4 w-4 border-2 border-white/[0.08] border-t-zinc-400 rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
-            <AlertCircle className="h-6 w-6 text-zinc-600" />
-            <p className="text-[13px] text-zinc-400">Calendar unavailable</p>
-            <p className="text-[11px] text-zinc-600">Check GHL connection</p>
+            <AlertCircle className="h-6 w-6 text-zinc-300" />
+            <p className="text-[13px] text-zinc-500">Calendar unavailable</p>
+            <p className="text-[11px] text-zinc-400">Check GHL connection</p>
             <button
               onClick={() => fetchAppointments(date)}
-              className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-white/[0.08] text-zinc-400 hover:bg-white/[0.03]"
+              className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-[rgba(28,25,22,0.1)] text-zinc-600 hover:bg-[#faf8f5]"
             >
               Retry
             </button>
           </div>
         ) : appointments.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
-            <Calendar className="h-6 w-6 text-zinc-600" />
-            <p className="text-[13px] text-zinc-400">No appointments {isToday ? 'today' : dateLabel}</p>
+            <Calendar className="h-6 w-6 text-zinc-300" />
+            <p className="text-[13px] text-zinc-500">No appointments {isToday ? 'today' : dateLabel}</p>
           </div>
         ) : (
           appointments.map((appt) => {
@@ -123,19 +123,19 @@ export function AppointmentsPanel() {
               <div key={appt.id}>
                 <div
                   onClick={() => toggleExpand(appt.id)}
-                  className="flex items-start gap-2 px-3 py-2 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] cursor-pointer transition-colors"
+                  className="flex items-start gap-2 px-3 py-2 border-b border-[rgba(28,25,22,0.04)] last:border-0 hover:bg-[#faf8f5] cursor-pointer transition-colors"
                 >
                   <span className="text-[10px] font-mono text-zinc-500 w-[80px] shrink-0 pt-0.5 leading-tight">
                     {timeStr}
                   </span>
-                  <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-white' : 'bg-white/[0.08]'}`} />
+                  <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-[#1c1916]' : 'bg-zinc-200'}`} />
                   <div>
-                    <p className="text-[12px] font-medium text-zinc-200">{appt.contactName || appt.title}</p>
+                    <p className="text-[12px] font-medium text-zinc-800">{appt.contactName || appt.title}</p>
                     <p className="text-[10px] text-zinc-500 mt-0.5">{appt.type || appt.title}</p>
                     <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
-                      isConfirmed ? 'bg-emerald-500/10 text-emerald-300'
-                        : appt.status === 'cancelled' ? 'bg-red-500/10 text-red-400'
-                        : 'bg-amber-500/10 text-amber-300'
+                      isConfirmed ? 'bg-emerald-50 text-emerald-700'
+                        : appt.status === 'cancelled' ? 'bg-red-50 text-red-600'
+                        : 'bg-amber-50 text-amber-700'
                     }`}>
                       {appt.status === 'confirmed' ? 'Confirmed' : appt.status === 'cancelled' ? 'Cancelled' : 'Pending'}
                     </span>
@@ -144,9 +144,9 @@ export function AppointmentsPanel() {
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="bg-white/[0.03] border-t border-white/[0.04] px-3 py-3 space-y-2">
-                    <p className="text-[13px] font-medium text-zinc-100">{appt.title || appt.contactName}</p>
-                    <p className="text-[11px] font-mono text-zinc-400">
+                  <div className="bg-[#faf8f5] border-t border-[rgba(28,25,22,0.04)] px-3 py-3 space-y-2">
+                    <p className="text-[13px] font-medium text-[#1c1916]">{appt.title || appt.contactName}</p>
+                    <p className="text-[11px] font-mono text-zinc-500">
                       {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                       {' '}
                       {timeStr}
@@ -155,7 +155,7 @@ export function AppointmentsPanel() {
                     {appt.attendees && appt.attendees.length > 0 && (
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-0.5">Attendees</p>
-                        <p className="text-[11px] text-zinc-300">
+                        <p className="text-[11px] text-zinc-700">
                           {appt.attendees.map((a) => a.name || a.email || 'Unknown').join(', ')}
                         </p>
                       </div>
@@ -165,7 +165,7 @@ export function AppointmentsPanel() {
                         href={appt.meetingLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
                       >
                         <ExternalLink className="h-3 w-3" /> Join meeting
                       </a>
@@ -173,14 +173,14 @@ export function AppointmentsPanel() {
                       <p className="text-[11px] text-zinc-500">No meeting link</p>
                     )}
                     {appt.description && (
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">{appt.description}</p>
+                      <p className="text-[11px] text-zinc-500 leading-relaxed">{appt.description}</p>
                     )}
                     {appt.calendarUrl && (
                       <a
                         href={appt.calendarUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
                       >
                         <Calendar className="h-3 w-3" /> Open in calendar
                       </a>

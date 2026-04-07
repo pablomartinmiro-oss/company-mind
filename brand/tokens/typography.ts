@@ -10,8 +10,8 @@ export const typography = {
     body: '13px',
     h3: '14px',
     h2: '16px',
-    h1: '18px',
-    display: '24px',
+    h1: '22px',
+    display: '36px',
   },
   fontWeight: {
     regular: 400,
@@ -19,7 +19,7 @@ export const typography = {
     semibold: 600,
   },
   letterSpacing: {
-    tight: '-0.01em',
+    tight: '-0.02em',
     normal: '0',
     wide: '0.08em',
     widest: '0.15em',

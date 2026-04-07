@@ -20,9 +20,9 @@ interface Props {
 }
 
 function daysBadgeClass(days: number): string {
-  if (days <= 1) return 'bg-emerald-500/10 text-emerald-300';
-  if (days <= 3) return 'bg-amber-500/10 text-amber-300';
-  return 'bg-red-500/10 text-red-400';
+  if (days <= 1) return 'bg-emerald-50 text-emerald-600';
+  if (days <= 3) return 'bg-amber-50 text-amber-600';
+  return 'bg-red-50 text-red-600';
 }
 
 export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
@@ -39,18 +39,18 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
   return (
     <>
       {/* Search + filter bar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04]">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(28,25,22,0.04)]">
         <input
           type="text"
           placeholder="Search name, company..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[12px] px-3 py-1.5 border border-white/[0.08] rounded-lg bg-[#0a0a0b] text-zinc-100 focus:outline-none focus:border-zinc-500"
+          className="flex-1 text-[12px] px-3 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400"
         />
         {selectedStage && (
           <button
             onClick={onClearStage}
-            className="text-[11px] font-medium px-3 py-1 rounded-full bg-white/[0.06] text-zinc-300 flex items-center gap-1.5 cursor-pointer"
+            className="text-[11px] font-medium px-3 py-1 rounded-full bg-zinc-100 text-zinc-700 flex items-center gap-1.5 cursor-pointer"
           >
             {selectedStage}
             <span className="text-zinc-500">✕</span>
@@ -61,7 +61,7 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
       {/* Company rows */}
       {filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <p className="text-[13px] text-zinc-600">No companies found.</p>
+          <p className="text-[13px] text-zinc-400">No companies found.</p>
         </div>
       ) : (
         filtered.map((contact) => (
@@ -70,7 +70,7 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
             href={`/contacts/${contact.contact_id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] cursor-pointer"
+            className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(28,25,22,0.04)] last:border-0 hover:bg-[#faf8f5]/60 cursor-pointer"
           >
             {/* Days badge */}
             <span className={`text-[10px] font-medium font-mono px-1.5 py-0.5 rounded text-center w-[44px] flex-shrink-0 ${daysBadgeClass(contact.days_in_stage)}`}>
@@ -79,7 +79,7 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
 
             {/* Company info — company name primary, contact name secondary */}
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-zinc-100">{contact.company_name || contact.contact_name}</p>
+              <p className="text-[13px] font-medium text-[#1c1916]">{contact.company_name || contact.contact_name}</p>
               {contact.company_name && (
                 <p className="text-[11px] text-zinc-500 mt-0.5">{contact.contact_name}</p>
               )}
@@ -90,7 +90,7 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
               {contact.enrollments.map((e) => (
                 <span
                   key={`${e.pipeline_name}-${e.stage}`}
-                  className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STAGE_PILL_CLASSES[e.stage] ?? 'bg-white/[0.06] text-zinc-400'}`}
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STAGE_PILL_CLASSES[e.stage] ?? 'bg-zinc-100 text-zinc-500'}`}
                   title={e.pipeline_name}
                 >
                   <span className="text-[8px] opacity-60">{e.pipeline_name} · </span>{e.stage}
@@ -104,7 +104,7 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
             </span>
 
             {/* Chevron */}
-            <ChevronRight className="text-[14px] text-zinc-600 flex-shrink-0 h-3.5 w-3.5" />
+            <ChevronRight className="text-[14px] text-zinc-300 flex-shrink-0 h-3.5 w-3.5" />
           </a>
         ))
       )}
