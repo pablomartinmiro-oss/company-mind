@@ -108,11 +108,19 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
         <div className="w-[260px] shrink-0 border-r border-zinc-100 p-6 overflow-y-auto">
           {/* Overall Grade */}
           <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 text-center mb-3">Overall Grade</p>
-          <div className={`w-20 h-20 rounded-xl mx-auto flex flex-col items-center justify-center ${scoreBg(overall)}`}>
-            <span className={`text-[36px] font-bold leading-none ${scoreColor(overall)}`}>{grade.letter}</span>
-            <span className={`text-[16px] font-medium mt-1 ${scoreColor(overall)}`}>{overall}%</span>
-          </div>
-          <p className={`text-[12px] text-center mt-2 cursor-pointer ${scoreColor(overall)}`}>Flag a scoring issue</p>
+          {score === null ? (
+            <div className="w-20 h-20 rounded-2xl bg-zinc-100/60 backdrop-blur border border-zinc-200/40 mx-auto flex flex-col items-center justify-center">
+              <div className="text-[10px] text-zinc-500 text-center px-1">Not scored</div>
+            </div>
+          ) : (
+            <>
+              <div className={`w-20 h-20 rounded-xl mx-auto flex flex-col items-center justify-center ${scoreBg(overall)}`}>
+                <span className={`text-[36px] font-bold leading-none ${scoreColor(overall)}`}>{grade.letter}</span>
+                <span className={`text-[16px] font-medium mt-1 ${scoreColor(overall)}`}>{overall}%</span>
+              </div>
+              <p className={`text-[12px] text-center mt-2 cursor-pointer ${scoreColor(overall)}`}>Flag a scoring issue</p>
+            </>
+          )}
 
         </div>
 
