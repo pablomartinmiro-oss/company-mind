@@ -6,7 +6,19 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Phase R1 — Research Catalog Foundation
+## Latest: Phase R2 — AI Inference Engines
+- Deep enrichment engine: web search + Claude inference populates 159-field catalog
+  - Respects locked/manual fields, runs predictive scores, enriches each contact
+  - Tracked via enrichment_jobs table
+- Call analysis engine: extracts company/contact field updates, next steps, data
+  points, scoring, and coaching from call transcripts
+  - Updates research with source='call', creates next_steps and data_points
+- JSON schema builders for all Claude prompts (company, contact, predictive, call)
+- API routes: POST /api/companies/[id]/enrich, POST /api/calls/[id]/analyze
+- Re-enrich button wired on company detail page
+- DB: coaching_data + transcript columns on calls table
+
+## Phase R1 — Research Catalog Foundation
 - 159-field catalog locked as source of truth (92 company + 67 contact)
 - 9 company sections: Identity, Business Profile, Tech & Tools, Marketing, Pain & Opportunity, Buying Process, Engagement History, Account Health, Predictive
 - 7 contact sections: Identity, Role & Authority, Communication Profile, Relationship, Personal Context, Triggers & Signals, Predictive
