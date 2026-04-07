@@ -46,6 +46,15 @@ Every server component and API route MUST call getTenantForUser() to get the ten
 Exceptions: /login route, /api/webhooks/* routes, static assets.
 Never hardcode a tenant ID. Never trust a tenant ID from a request body or query param.
 
+## Git Workflow
+
+- ALWAYS work directly on main. Never create feature branches.
+- Before starting any task: git checkout main && git pull origin main
+- After finishing any task: git add -A && git commit -m "..." && git push origin main
+- The dual-push remote pushes to both pablomartinmiro-oss/company-mind and c7lavinder/company-mind automatically.
+- Vercel auto-deploys from main on c7lavinder/company-mind within ~30 seconds.
+- DO NOT create branches like claude/<name>, feature/<name>, fix/<name>, or any other branch under any circumstance unless I explicitly say "create a branch for this".
+
 ## Tech Stack (Locked)
 
 | Layer | Tech | Entry Point |
