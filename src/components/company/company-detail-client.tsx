@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ReEnrichButton } from './re-enrich-button';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
 import { StagePopover } from './stage-popover';
 import { scoreGrade, scoreBg, scoreColor } from '@/lib/format';
@@ -218,9 +219,7 @@ export function CompanyDetailClient(props: Props) {
 
             {/* Action buttons */}
             <div className="flex items-center gap-2 mt-4">
-              <button className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 transition-colors inline-flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3" /> Re-enrich
-              </button>
+              <ReEnrichButton companyId={props.companyId} />
               <button className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 transition-colors inline-flex items-center gap-1.5">
                 <ExternalLink className="w-3 h-3" /> Open in GHL
               </button>
