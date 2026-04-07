@@ -13,12 +13,15 @@ import {
   formatTranscriptWithSpeakers,
 } from '@/lib/transcription/assemblyai';
 import { analyzeCall } from '@/lib/ai/call-analysis';
+import { log } from '@/lib/log';
 
 const MAX_ATTEMPTS = 3;
 const PROCESSING_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const BATCH_SIZE = 5;
 
 export async function GET(req: NextRequest) {
+  const tickStart = Date.now();
+
   // Auth check — only Vercel cron should call this
   const authHeader = req.headers.get('authorization');
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -43,13 +46,20 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: true })
       .limit(BATCH_SIZE);
 
+    log.info('cron_tick_start', {
+      pending: pendingCalls?.length ?? 0,
+    });
+
     for (const call of pendingCalls || []) {
       try {
         if (!call.ghl_recording_url) {
+          log.warn('call_processing_error', { callId: call.id, state: 'pending', error: 'no_recording_url' });
           await markFailed(call.id, 'No recording URL provided by GHL');
           results.failed++;
           continue;
         }
+
+        log.info('call_processing_start', { callId: call.id, state: 'pending', attempt: (call.processing_attempts || 0) + 1 });
 
         // Advance to transcribing and increment attempt counter
         await supabaseAdmin
@@ -72,6 +82,7 @@ export async function GET(req: NextRequest) {
         results.pending_picked_up++;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
+        log.error('call_processing_error', { callId: call.id, state: 'pending', error: msg });
         results.errors.push(`pending ${call.id}: ${msg}`);
         await markFailed(call.id, `Submit failed: ${msg}`);
         results.failed++;
@@ -93,6 +104,7 @@ export async function GET(req: NextRequest) {
         if (call.processing_started_at) {
           const startedAt = new Date(call.processing_started_at).getTime();
           if (Date.now() - startedAt > PROCESSING_TIMEOUT_MS) {
+            log.warn('call_processing_error', { callId: call.id, state: 'transcribing', error: 'timeout' });
             await markFailed(call.id, 'Transcription timeout (10 min)');
             results.failed++;
             continue;
@@ -106,6 +118,13 @@ export async function GET(req: NextRequest) {
             ? formatTranscriptWithSpeakers(result.speakers)
             : result.text;
 
+          log.info('transcription_complete', {
+            callId: call.id,
+            duration_seconds: call.duration_seconds,
+            word_count: result.text.split(/\s+/).length,
+            preview: result.text.slice(0, 80),
+          });
+
           await supabaseAdmin
             .from('calls')
             .update({
@@ -116,12 +135,14 @@ export async function GET(req: NextRequest) {
 
           results.transcribing_polled++;
         } else if (result.status === 'error') {
+          log.error('call_processing_error', { callId: call.id, state: 'transcribing', error: result.error });
           await markFailed(call.id, `AssemblyAI error: ${result.error}`);
           results.failed++;
         }
         // If still queued/processing, leave it — next cron tick checks again
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
+        log.error('call_processing_error', { callId: call.id, state: 'transcribing', error: msg });
         results.errors.push(`transcribing ${call.id}: ${msg}`);
       }
     }
@@ -136,7 +157,10 @@ export async function GET(req: NextRequest) {
       .limit(BATCH_SIZE);
 
     for (const call of analyzingCalls || []) {
+      const analysisStart = Date.now();
       try {
+        log.info('call_processing_start', { callId: call.id, state: 'analyzing' });
+
         // analyzeCall takes (tenantId, callId) — sets processing_status to
         // 'complete' and populates score, coaching, next_steps, data_points
         await analyzeCall(call.tenant_id, call.id);
@@ -149,18 +173,40 @@ export async function GET(req: NextRequest) {
           })
           .eq('id', call.id);
 
+        // Read back the score for logging
+        const { data: updated } = await supabaseAdmin
+          .from('calls')
+          .select('score')
+          .eq('id', call.id)
+          .single();
+
+        const overall = (updated?.score as { overall?: number } | null)?.overall;
+
+        log.info('analysis_complete', {
+          callId: call.id,
+          overall_score: overall ?? null,
+          analysis_ms: Date.now() - analysisStart,
+        });
+
         results.analyzing_completed++;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
+        log.error('call_processing_error', { callId: call.id, state: 'analyzing', error: msg });
         results.errors.push(`analyzing ${call.id}: ${msg}`);
         await markFailed(call.id, `Analysis failed: ${msg}`);
         results.failed++;
       }
     }
 
+    log.info('cron_tick_end', {
+      ...results,
+      total_ms: Date.now() - tickStart,
+    });
+
     return NextResponse.json({ success: true, ...results });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
+    log.error('cron_tick_fatal', { error: msg, total_ms: Date.now() - tickStart });
     return NextResponse.json({
       success: false,
       error: msg,

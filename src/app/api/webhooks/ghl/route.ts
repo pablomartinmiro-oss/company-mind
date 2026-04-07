@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getTenantByLocationId } from '@/lib/tenant-context';
+import { log } from '@/lib/log';
 import crypto from 'crypto';
 
 function verifyGhlSignature(rawBody: string, signature: string | null): boolean {
@@ -37,7 +38,10 @@ export async function POST(req: NextRequest) {
   const locationId = (payload.locationId || payload.location_id) as string;
   const callId = (payload.callId || payload.messageId || payload.message_id || payload.id) as string;
 
+  log.info('ghl_webhook_received', { type: eventType, locationId, callId, signatureValid });
+
   if (!locationId) {
+    log.warn('ghl_webhook_rejected', { reason: 'no_location_id', type: eventType });
     return NextResponse.json({ error: 'No locationId' }, { status: 400 });
   }
 
@@ -69,6 +73,7 @@ export async function POST(req: NextRequest) {
 
   // ── 4. Reject invalid signatures in production ──
   if (!signatureValid && process.env.NODE_ENV === 'production' && process.env.GHL_WEBHOOK_SECRET) {
+    log.warn('ghl_webhook_rejected', { reason: 'invalid_signature', type: eventType, locationId });
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 

@@ -149,6 +149,7 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
           nextSteps={nextSteps}
           pendingDataPoints={pendingDataPoints}
           callId={id}
+          recordingUrl={call.ghl_recording_url ?? null}
         />
       </div>
     </div>

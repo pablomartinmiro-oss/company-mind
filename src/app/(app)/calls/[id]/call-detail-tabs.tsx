@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { approveAction, rejectAction, approveDataPoint, rejectDataPoint } from '@/app/actions';
 import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
-import { Sparkles, Play, Pause, SkipBack, SkipForward, Volume2, Heart, AlertTriangle, Info, Pencil, X } from 'lucide-react';
+import { Sparkles, AlertTriangle, Pencil, X } from 'lucide-react';
 import { NextStepsTab } from '@/components/calls/next-steps-tab';
 
 interface ScoreData {
@@ -78,6 +78,7 @@ interface Props {
   nextSteps?: NextStepItem[];
   pendingDataPoints?: number;
   callId?: string;
+  recordingUrl?: string | null;
 }
 
 const TABS = ['Coaching', 'Criteria', 'Transcript', 'Next Steps', 'Data Points'] as const;
@@ -87,7 +88,7 @@ function formatType(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, dataPoints, duration, contactGhlId, nextSteps, pendingDataPoints, callId }: Props) {
+export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, dataPoints, duration, contactGhlId, nextSteps, pendingDataPoints, callId, recordingUrl }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('Coaching');
   const pendingActions = actions.filter((a) => a.status === 'suggested');
 
@@ -124,7 +125,7 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
       <div className="flex-1 overflow-y-auto px-6 py-5">
         {activeTab === 'Coaching' && <CoachingView coaching={coaching} callSummary={callSummary} />}
         {activeTab === 'Criteria' && <CriteriaView score={score} />}
-        {activeTab === 'Transcript' && <TranscriptView text={transcript} duration={duration} />}
+        {activeTab === 'Transcript' && <TranscriptView text={transcript} duration={duration} recordingUrl={recordingUrl} />}
         {activeTab === 'Next Steps' && (
           nextSteps && nextSteps.length > 0
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
@@ -258,8 +259,8 @@ function CriteriaView({ score }: { score: ScoreData | null }) {
 
 /* ── Transcript Tab ── */
 
-function TranscriptView({ text, duration }: { text: string; duration: number }) {
-  const [playing, setPlaying] = useState(false);
+function TranscriptView({ text, duration, recordingUrl }: { text: string; duration: number; recordingUrl?: string | null }) {
+  const [audioError, setAudioError] = useState(false);
 
   // Parse transcript
   const lines: TranscriptLine[] = [];
@@ -277,38 +278,24 @@ function TranscriptView({ text, duration }: { text: string; duration: number }) 
     }
   }
 
-  const durationStr = `${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, '0')}`;
-
   return (
     <div>
       {/* Call Recording Player */}
       <div className="border border-zinc-100 rounded-xl p-4 mb-5">
         <p className="text-[11px] uppercase tracking-widest text-zinc-400 mb-3">Call Recording</p>
 
-        {/* Waveform */}
-        <div className="flex items-end gap-[2px] h-[32px]">
-          {Array.from({ length: 40 }, (_, i) => {
-            const h = 8 + Math.sin(i * 0.7) * 12 + Math.random() * 10;
-            return <div key={i} className="flex-1 bg-zinc-200 rounded-sm" style={{ height: `${Math.max(4, h)}px` }} />;
-          })}
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-3 mt-3">
-          <SkipBack className="h-4 w-4 text-zinc-400 cursor-pointer hover:text-zinc-600" />
-          <button
-            onClick={() => setPlaying(!playing)}
-            className="h-9 w-9 rounded-full bg-zinc-900 text-white flex items-center justify-center hover:bg-zinc-700"
-          >
-            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
-          </button>
-          <SkipForward className="h-4 w-4 text-zinc-400 cursor-pointer hover:text-zinc-600" />
-          <span className="text-[13px] font-mono text-zinc-500">— / {durationStr}</span>
-          <div className="ml-auto flex items-center gap-2">
-            <button className="text-[12px] font-medium text-zinc-500 border border-zinc-200 px-2 py-0.5 rounded">1x</button>
-            <Volume2 className="h-4 w-4 text-zinc-400" />
-          </div>
-        </div>
+        {recordingUrl && !audioError ? (
+          <audio
+            controls
+            src={recordingUrl}
+            onError={() => setAudioError(true)}
+            className="w-full h-10"
+          />
+        ) : (
+          <p className="text-[13px] text-[#71717a] py-2">
+            {audioError ? 'Recording unavailable' : 'No recording available'}
+          </p>
+        )}
       </div>
 
       {/* Transcript */}
