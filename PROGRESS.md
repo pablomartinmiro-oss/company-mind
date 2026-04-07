@@ -6,7 +6,13 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Company Model Refactor
+## Latest: UI Fixes + Stage Gate + Full Demo Seed
+- Phase 1: Per-person assignee pill colors, company meta pills (greyed when empty), call header frosted glass, data points badge, next steps tab with Push/Edit/Skip actions
+- Phase 2: Stage gate — Onboarding/Upsell blocked unless company is Closed in Sales Pipeline
+- Phase 3+4: Wiped old demo data and seeded fresh: 10 companies, 18 contacts, 15 calls, 14 tasks, 47 research fields, 11 next steps, 8 data points, 15 stage log entries
+- New tables: data_points (AI suggestions), next_steps (action items from calls)
+
+## Company Model Refactor
 - Companies are now first-class entities (companies table)
 - Contacts attached to companies via M2M (company_contacts) with primary flag and role
 - pipeline_contacts renamed to pipeline_companies with company_id FK
