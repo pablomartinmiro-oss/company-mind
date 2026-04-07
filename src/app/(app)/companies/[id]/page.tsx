@@ -62,11 +62,13 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     dpMap[dp.contact_ghl_id][dp.field_name] = dp.field_value;
   }
 
-  // Contact research grouped by contact_id
-  const contactResearchMap: Record<string, { field_name: string; field_value: string | null; source: string; section: string }[]> = {};
+  // Contact research — flat map per contact_id keyed by field_name
+  const contactResearchMap: Record<string, Record<string, { value: string; source: string; source_detail?: string }>> = {};
   for (const r of allContactResearchRes.data ?? []) {
-    if (!contactResearchMap[r.contact_id]) contactResearchMap[r.contact_id] = [];
-    contactResearchMap[r.contact_id].push({ field_name: r.field_name, field_value: r.field_value, source: r.source, section: r.section });
+    if (!contactResearchMap[r.contact_id]) contactResearchMap[r.contact_id] = {};
+    if (r.field_value) {
+      contactResearchMap[r.contact_id][r.field_name] = { value: r.field_value, source: r.source, source_detail: r.source_detail ?? undefined };
+    }
   }
 
   // Build pipeline name map
@@ -108,48 +110,39 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     contact_phone: c.contact_phone ?? dpMap[c.contact_id]?.phone ?? null,
   }));
 
-  // Company research grouped by section — merge from research table AND contact_data_points
-  const companyResearch: Record<string, { field_name: string; field_value: string | null; source: string }[]> = {};
+  // Company research — flat map keyed by field_name (matches catalog keys)
+  const companyResearch: Record<string, { value: string; source: string; source_detail?: string }> = {};
   for (const r of companyResearchRes.data ?? []) {
-    if (!companyResearch[r.section]) companyResearch[r.section] = [];
-    companyResearch[r.section].push({ field_name: r.field_name, field_value: r.field_value, source: r.source });
+    if (r.field_value) {
+      companyResearch[r.field_name] = { value: r.field_value, source: r.source, source_detail: r.source_detail ?? undefined };
+    }
   }
 
-  // Populate company research from contact_data_points of primary contact
+  // Also populate from contact_data_points of primary contact (map old keys → catalog keys)
   const primaryContactId = contacts.find((c: { is_primary: boolean }) => c.is_primary)?.contact_id ?? contactIds[0];
   const primaryDPs = primaryContactId ? dpMap[primaryContactId] ?? {} : {};
 
-  // Map known data point fields into research sections
-  const dpToResearch: Record<string, { section: string; field: string }> = {
-    company_name: { section: 'Business Info', field: 'Company name' },
-    industry: { section: 'Business Info', field: 'Industry' },
-    employees: { section: 'Business Info', field: 'Employees' },
-    annual_revenue: { section: 'Business Info', field: 'Annual revenue' },
-    years_in_business: { section: 'Business Info', field: 'Years in business' },
-    website: { section: 'Business Info', field: 'Website' },
-    location: { section: 'Business Info', field: 'Location' },
-    primary_pain: { section: 'Pain Points', field: 'Primary pain' },
-    current_crm: { section: 'Pain Points', field: 'Current CRM' },
-    lead_volume: { section: 'Pain Points', field: 'Lead volume per week' },
-    response_time: { section: 'Pain Points', field: 'Response time' },
-    lead_sources: { section: 'Pain Points', field: 'Lead sources' },
-    monthly_ad_spend: { section: 'Pain Points', field: 'Monthly ad spend' },
-    budget_range: { section: 'Buying Process', field: 'Budget range' },
-    timeline: { section: 'Buying Process', field: 'Timeline' },
-    key_objections: { section: 'Buying Process', field: 'Key objections' },
-    competitor_alternatives: { section: 'Buying Process', field: 'Competitor alternatives' },
-    overall_fit: { section: 'Account Health', field: 'Overall fit' },
-    next_step_agreed: { section: 'Account Health', field: 'Notes' },
-    referral_source: { section: 'Account Health', field: 'Last touch' },
+  const dpToCatalog: Record<string, string> = {
+    industry: 'industry_primary',
+    employees: 'employees_range',
+    annual_revenue: 'revenue_range',
+    years_in_business: 'year_founded',
+    website: 'domain',
+    location: 'city',
+    primary_pain: 'primary_pain_stated',
+    current_crm: 'crm_current',
+    lead_volume: 'monthly_lead_volume',
+    monthly_ad_spend: 'monthly_ad_spend',
+    budget_range: 'budget_range_stated',
+    timeline: 'timeline_stated',
+    key_objections: 'key_objections',
+    competitor_alternatives: 'competitor_alternatives',
+    overall_fit: 'fit_score',
   };
 
-  for (const [dpKey, mapping] of Object.entries(dpToResearch)) {
-    if (primaryDPs[dpKey]) {
-      if (!companyResearch[mapping.section]) companyResearch[mapping.section] = [];
-      const existing = companyResearch[mapping.section].find(f => f.field_name === mapping.field);
-      if (!existing) {
-        companyResearch[mapping.section].push({ field_name: mapping.field, field_value: primaryDPs[dpKey], source: 'api' });
-      }
+  for (const [dpKey, catalogKey] of Object.entries(dpToCatalog)) {
+    if (primaryDPs[dpKey] && !companyResearch[catalogKey]) {
+      companyResearch[catalogKey] = { value: primaryDPs[dpKey], source: 'api' };
     }
   }
 

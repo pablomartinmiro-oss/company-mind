@@ -7,7 +7,7 @@ import { ResearchField } from './research-field';
 
 interface ResearchData {
   value: string;
-  source: FieldSource;
+  source: string;
   source_detail?: string;
 }
 

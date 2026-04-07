@@ -7,7 +7,7 @@ import { SourceBadge } from './source-badge';
 interface ResearchFieldProps {
   field: FieldDefinition;
   value: string | null;
-  source?: FieldSource;
+  source?: string;
   sourceDetail?: string;
   onSave: (newValue: string) => Promise<void>;
 }
@@ -18,7 +18,7 @@ export function ResearchField({ field, value, source, sourceDetail, onSave }: Re
   const [saving, setSaving] = useState(false);
 
   const hasValue = value !== null && value !== undefined && value !== '';
-  const displaySource = source ?? field.primarySource;
+  const displaySource = (source ?? field.primarySource) as FieldSource;
 
   const handleSave = async () => {
     if (saving) return;

@@ -13,22 +13,22 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 
     const { data, error } = await supabaseAdmin
       .from('research')
-      .select('section, field_name, field_value, source')
+      .select('field_name, field_value, source, source_detail')
       .eq('tenant_id', tenantId)
+      .eq('scope', 'contact')
       .eq('contact_id', contactId);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Group by section
-    const grouped: Record<string, { field_name: string; field_value: string | null; source: string }[]> = {};
+    const shaped: Record<string, { value: string; source: string; source_detail?: string }> = {};
     for (const row of data ?? []) {
-      if (!grouped[row.section]) grouped[row.section] = [];
-      grouped[row.section].push({ field_name: row.field_name, field_value: row.field_value, source: row.source });
+      shaped[row.field_name] = {
+        value: row.field_value,
+        source: row.source,
+        source_detail: row.source_detail ?? undefined,
+      };
     }
-
-    return NextResponse.json(grouped);
+    return NextResponse.json({ research: shaped });
   } catch (err) {
     if (err instanceof Error && err.message === 'Not authenticated') {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -41,27 +41,27 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   try {
     const { tenantId } = await getTenantForUser();
     const { id: contactId } = await ctx.params;
-    const { fieldName, fieldValue, section, source } = await req.json();
+    const { fieldName, fieldValue, section, source, sourceDetail } = await req.json();
 
     const { error } = await supabaseAdmin
       .from('research')
       .upsert(
         {
           tenant_id: tenantId,
+          scope: 'contact',
+          company_id: null,
           contact_id: contactId,
-          section,
+          section: section ?? '',
           field_name: fieldName,
           field_value: fieldValue,
           source: source ?? 'manual',
+          source_detail: sourceDetail ?? null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'tenant_id,contact_id,field_name' }
       );
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err instanceof Error && err.message === 'Not authenticated') {

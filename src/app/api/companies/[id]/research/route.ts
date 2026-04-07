@@ -13,20 +13,22 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
 
     const { data, error } = await supabaseAdmin
       .from('research')
-      .select('section, field_name, field_value, source')
+      .select('field_name, field_value, source, source_detail')
       .eq('tenant_id', tenantId)
       .eq('scope', 'company')
       .eq('company_id', companyId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const grouped: Record<string, { field_name: string; field_value: string | null; source: string }[]> = {};
+    const shaped: Record<string, { value: string; source: string; source_detail?: string }> = {};
     for (const row of data ?? []) {
-      if (!grouped[row.section]) grouped[row.section] = [];
-      grouped[row.section].push({ field_name: row.field_name, field_value: row.field_value, source: row.source });
+      shaped[row.field_name] = {
+        value: row.field_value,
+        source: row.source,
+        source_detail: row.source_detail ?? undefined,
+      };
     }
-
-    return NextResponse.json(grouped);
+    return NextResponse.json({ research: shaped });
   } catch (err) {
     if (err instanceof Error && err.message === 'Not authenticated') {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   try {
     const { tenantId } = await getTenantForUser();
     const { id: companyId } = await ctx.params;
-    const { fieldName, fieldValue, section, source } = await req.json();
+    const { fieldName, fieldValue, source, sourceDetail } = await req.json();
 
     const { error } = await supabaseAdmin
       .from('research')
@@ -49,10 +51,11 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
           scope: 'company',
           company_id: companyId,
           contact_id: null,
-          section,
+          section: '',
           field_name: fieldName,
           field_value: fieldValue,
           source: source ?? 'manual',
+          source_detail: sourceDetail ?? null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'tenant_id,company_id,field_name' }

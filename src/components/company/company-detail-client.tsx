@@ -72,8 +72,8 @@ interface Props {
   calls: CallInfo[];
   tasks: TaskInfo[];
   teamMembers: { name: string; initials: string; role: string }[];
-  companyResearch: Record<string, { field_name: string; field_value: string | null; source: string }[]>;
-  contactResearchMap: Record<string, { field_name: string; field_value: string | null; source: string; section: string }[]>;
+  companyResearch: Record<string, { value: string; source: string; source_detail?: string }>;
+  contactResearchMap: Record<string, Record<string, { value: string; source: string; source_detail?: string }>>;
 }
 
 const TABS = ['Overview', 'Activity', 'Research'] as const;
@@ -348,7 +348,7 @@ export function CompanyDetailClient(props: Props) {
               selectedContactId={selectedContactId}
               selectedContactName={selectedContact?.contact_name ?? null}
               companyResearch={props.companyResearch}
-              contactResearch={selectedContactId ? (props.contactResearchMap[selectedContactId] ?? []) : []}
+              contactResearch={selectedContactId ? (props.contactResearchMap[selectedContactId] ?? {}) : {}}
             />
           )}
         </div>
