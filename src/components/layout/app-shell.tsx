@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { ChatDrawer } from '@/components/chat/chat-drawer';
 import { AiBar } from '@/components/ai/ai-bar';
+import { AiFloatingButton } from '@/components/ai/ai-floating-button';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
@@ -12,15 +13,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Listen for ai-query events from the AiBar
   useEffect(() => {
-    const handler = (e: Event) => {
+    const queryHandler = (e: Event) => {
       const query = (e as CustomEvent<{ query: string }>).detail.query;
       if (query) {
         pendingQueryRef.current = query;
         setChatOpen(true);
       }
     };
-    window.addEventListener('ai-query', handler);
-    return () => window.removeEventListener('ai-query', handler);
+    const openHandler = () => setChatOpen(true);
+
+    window.addEventListener('ai-query', queryHandler);
+    window.addEventListener('open-ai-panel', openHandler);
+    return () => {
+      window.removeEventListener('ai-query', queryHandler);
+      window.removeEventListener('open-ai-panel', openHandler);
+    };
   }, []);
 
   return (
@@ -39,6 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
+      <AiFloatingButton />
       <ChatDrawer isOpen={chatOpen} onClose={closeChat} />
     </div>
   );

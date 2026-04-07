@@ -74,6 +74,13 @@ export async function getGHLClientForTenant(tenantId: string): Promise<GHLClient
   );
 }
 
+// Current user — temporary until auth is fully wired
+export const CURRENT_USER = {
+  name: 'Corey Lavinder',
+  initials: 'CL',
+  email: 'corey@getgunner.ai',
+};
+
 // Helper: resolve tenant from GHL location ID (used by webhooks)
 export async function getTenantByLocationId(locationId: string) {
   const { data, error } = await supabaseAdmin
