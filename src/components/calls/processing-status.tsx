@@ -57,7 +57,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   skipped: {
     label: 'Skipped',
-    description: 'Call was under 45 seconds and not analyzed',
+    description: 'Call was under 60 seconds and not analyzed',
     color: 'zinc',
     icon: Clock,
     spinning: false,

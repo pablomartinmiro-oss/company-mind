@@ -69,5 +69,5 @@ GHL call ends
 ```
 
 State machine: `pending → transcribing → analyzing → complete`
-Error states: `failed` (retryable), `skipped` (under 45s)
+Error states: `failed` (retryable), `skipped` (under 60s)
 Max attempts: 3, timeout: 10 minutes per transcription

@@ -373,7 +373,7 @@ Tab styling:
 
 Tab filters:
   "needs_review" = WHERE processing_status = 'error'
-  "skipped" = WHERE duration_seconds < 45
+  "skipped" = WHERE duration_seconds < 60
   "archived" = WHERE archived = true
   "all" = no extra filter
 

@@ -24,9 +24,8 @@ Every GHL field mapping (pipeline, stage, user, calendar) must be a dropdown pop
 Server components fetch data via supabaseAdmin. Client components ('use client') handle interactivity only — clicks, state, forms. Never fetch data in client components.
 
 ### Rule 4 — Call Duration Routing
-Calls under 45 seconds: mark as 'skipped', reason 'no_answer'. Do NOT send to Claude for grading — it produces garbage scores on voicemails and no-answers.
-Calls 45-90 seconds: summary-only grade (lightweight analysis).
-Calls 90+ seconds: full grade with rubric scoring, coaching, data extraction.
+Calls under 60 seconds are skipped — not transcribed, not analyzed, shown only in the Skipped tab on the Calls page. Mark as 'skipped', reason 'no_answer'. Do NOT send to Claude for grading — it produces garbage scores on voicemails and no-answers.
+Calls 60+ seconds: full grade with rubric scoring, coaching, data extraction.
 
 ### Rule 5 — GHL Date Handling
 GHL returns dates as Unix milliseconds in many endpoints, NOT ISO strings. Always check and convert: `if (typeof date === 'number') new Date(date).toISOString()`
@@ -82,7 +81,7 @@ src/mastra/index.ts        — Mastra instance, exports { mastra }
 src/mastra/agents/company-mind.ts — 18 tools, dynamic system prompt via requestContext
 src/app/api/chat/route.ts  — streaming chat endpoint (agent.stream → createUIMessageStream)
 src/app/api/webhooks/ghl/route.ts — webhook handler, signature verify, dedup, job queue
-src/app/api/jobs/process-calls/route.ts — background worker, retry, locking, duration routing
+src/app/api/cron/process-calls/route.ts — cron worker: pending → transcribing → analyzing → complete
 src/app/actions.ts         — server actions for approve/reject mutations
 src/components/chat/chat-panel.tsx — collapsible chat panel with useChat
 scripts/seed-demo.ts       — demo data seeder (npm run seed)

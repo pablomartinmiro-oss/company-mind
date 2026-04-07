@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
   const duration = (payload.duration as number) || 0;
   const direction = (payload.direction as string) || 'unknown';
 
-  // ── 7. Skip calls under 45s (CLAUDE.md Rule 4) ──
-  if (duration > 0 && duration < 45) {
+  // ── 7. Skip calls under 60s (CLAUDE.md Rule 4) ──
+  if (duration > 0 && duration < 60) {
     await supabaseAdmin
       .from('calls')
       .upsert({
@@ -102,13 +102,13 @@ export async function POST(req: NextRequest) {
         direction,
         ghl_recording_url: recordingUrl,
         processing_status: 'skipped',
-        processing_error: 'No answer or too short (under 45s)',
+        processing_error: 'No answer or too short (under 60s)',
         called_at: (payload.startedAt as string) || new Date().toISOString(),
       }, {
         onConflict: 'tenant_id,ghl_call_id',
       });
 
-    return NextResponse.json({ received: true, processed: false, reason: 'Under 45s, skipped per Rule 4' });
+    return NextResponse.json({ received: true, processed: false, reason: 'Under 60s, skipped per Rule 4' });
   }
 
   // ── 8. Idempotent upsert — create call in pending state ──

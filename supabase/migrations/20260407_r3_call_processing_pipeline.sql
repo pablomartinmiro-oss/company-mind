@@ -22,7 +22,7 @@ ALTER TABLE calls ADD CONSTRAINT calls_processing_status_check
     'analyzing',         -- Transcript ready, R2 analysis running
     'complete',          -- All done, call is fully processed
     'failed',            -- Something broke, see processing_error
-    'skipped'            -- Under 45s or other skip reason
+    'skipped'            -- Under 60s or other skip reason
   ));
 
 -- Idempotency: never process the same GHL call twice
