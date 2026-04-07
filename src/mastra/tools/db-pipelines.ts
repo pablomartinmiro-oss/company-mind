@@ -35,61 +35,55 @@ export const getPipelineSummary = createTool({
   execute: async (input, executionContext) => {
     const tenantId = getTenantId(executionContext);
 
-    let query = supabaseAdmin
+    // Fetch pipeline contacts (actual columns: contact_id, pipeline_id, stage, deal_value)
+    const { data: pcRows } = await supabaseAdmin
       .from('pipeline_contacts')
-      .select('pipeline_name, current_stage, deal_value')
+      .select('pipeline_id, stage, deal_value')
       .eq('tenant_id', tenantId);
 
-    if (input.pipelineName) {
-      query = query.ilike('pipeline_name', `%${input.pipelineName}%`);
-    }
+    const rows = pcRows ?? [];
 
-    const { data } = await query;
-    const rows = data || [];
+    // Fetch pipeline names
+    const pipelineIds = [...new Set(rows.map((r) => r.pipeline_id))];
+    const { data: pipelines } = pipelineIds.length > 0
+      ? await supabaseAdmin.from('pipelines').select('id, name').in('id', pipelineIds)
+      : { data: [] };
+    const pipelineNameMap: Record<string, string> = {};
+    for (const p of pipelines ?? []) pipelineNameMap[p.id] = p.name;
 
-    // Group by pipeline, then by stage
-    const pipelineMap = new Map<
-      string,
-      Map<string, { count: number; totalValue: number }>
-    >();
+    // Group by pipeline_id, then by stage
+    const pipelineMap = new Map<string, Map<string, { count: number; totalValue: number }>>();
 
     for (const row of rows) {
-      const pName = row.pipeline_name || 'Unknown';
-      const stage = row.current_stage || 'Unknown';
-      const value = row.deal_value || 0;
+      const pId = row.pipeline_id;
+      const stage = row.stage || 'Unknown';
+      const value = row.deal_value ? parseFloat(String(row.deal_value).replace(/[^0-9.]/g, '')) : 0;
 
-      if (!pipelineMap.has(pName)) {
-        pipelineMap.set(pName, new Map());
-      }
-      const stageMap = pipelineMap.get(pName)!;
+      if (!pipelineMap.has(pId)) pipelineMap.set(pId, new Map());
+      const stageMap = pipelineMap.get(pId)!;
       const existing = stageMap.get(stage) || { count: 0, totalValue: 0 };
-      stageMap.set(stage, {
-        count: existing.count + 1,
-        totalValue: existing.totalValue + value,
-      });
+      stageMap.set(stage, { count: existing.count + 1, totalValue: existing.totalValue + (isNaN(value) ? 0 : value) });
     }
 
-    const pipelines = Array.from(pipelineMap.entries()).map(
-      ([pipelineName, stageMap]) => {
-        const stages = Array.from(stageMap.entries()).map(
-          ([stage, { count, totalValue }]) => ({
-            stage,
-            count,
-            total_deal_value: totalValue,
-          })
-        );
-        return {
-          pipeline_name: pipelineName,
-          stages,
-          total_contacts: stages.reduce((s, st) => s + st.count, 0),
-          total_deal_value: stages.reduce(
-            (s, st) => s + st.total_deal_value,
-            0
-          ),
-        };
-      }
-    );
+    let result = Array.from(pipelineMap.entries()).map(([pId, stageMap]) => {
+      const stages = Array.from(stageMap.entries()).map(([stage, { count, totalValue }]) => ({
+        stage,
+        count,
+        total_deal_value: totalValue,
+      }));
+      return {
+        pipeline_name: pipelineNameMap[pId] ?? 'Unknown',
+        stages,
+        total_contacts: stages.reduce((s, st) => s + st.count, 0),
+        total_deal_value: stages.reduce((s, st) => s + st.total_deal_value, 0),
+      };
+    });
 
-    return { pipelines };
+    if (input.pipelineName) {
+      const q = input.pipelineName.toLowerCase();
+      result = result.filter((p) => p.pipeline_name.toLowerCase().includes(q));
+    }
+
+    return { pipelines: result };
   },
 });

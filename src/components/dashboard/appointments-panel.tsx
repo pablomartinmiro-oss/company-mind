@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
 
 interface Appointment {
   id: string;
@@ -9,7 +9,12 @@ interface Appointment {
   contactName: string;
   type: string;
   startTime: string;
+  endTime?: string;
   status: string;
+  attendees?: Array<{ name?: string; email?: string }>;
+  meetingLink?: string;
+  description?: string;
+  calendarUrl?: string;
 }
 
 export function AppointmentsPanel() {
@@ -17,6 +22,7 @@ export function AppointmentsPanel() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   async function fetchAppointments(d: Date) {
@@ -26,8 +32,8 @@ export function AppointmentsPanel() {
 
     setLoading(true);
     setError(false);
+    setExpandedId(null);
 
-    // Timeout fallback: stop loading after 5 seconds
     const timeout = setTimeout(() => {
       controller.abort();
       setLoading(false);
@@ -41,7 +47,10 @@ export function AppointmentsPanel() {
       clearTimeout(timeout);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setAppointments(Array.isArray(data) ? data : []);
+      const list: Appointment[] = Array.isArray(data) ? data : [];
+      // Client-side sort as safety net
+      list.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      setAppointments(list);
     } catch (err) {
       clearTimeout(timeout);
       if ((err as Error).name !== 'AbortError') {
@@ -56,6 +65,7 @@ export function AppointmentsPanel() {
 
   function prevDay() { setDate(new Date(date.getTime() - 86400000)); }
   function nextDay() { setDate(new Date(date.getTime() + 86400000)); }
+  function toggleExpand(id: string) { setExpandedId(expandedId === id ? null : id); }
 
   const dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const isToday = new Date().toDateString() === date.toDateString();
@@ -78,7 +88,7 @@ export function AppointmentsPanel() {
         </div>
       </div>
 
-      {/* Body — fixed height to match inbox */}
+      {/* Body */}
       <div className="flex-1 overflow-y-auto" style={{ height: 480 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -106,22 +116,76 @@ export function AppointmentsPanel() {
             const time = new Date(appt.startTime);
             const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             const isConfirmed = appt.status === 'confirmed';
+            const isExpanded = expandedId === appt.id;
 
             return (
-              <div key={appt.id} className="flex items-start gap-2 px-3 py-2 border-b border-zinc-100 last:border-0">
-                <span className="text-[10px] font-mono text-zinc-400 w-[44px] shrink-0 pt-0.5 leading-tight">
-                  {timeStr}
-                </span>
-                <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-zinc-900' : 'bg-zinc-200'}`} />
-                <div>
-                  <p className="text-[12px] font-medium">{appt.contactName || appt.title}</p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">{appt.type || appt.title}</p>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
-                    isConfirmed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600'
-                  }`}>
-                    {isConfirmed ? 'Confirmed' : 'Pending'}
+              <div key={appt.id}>
+                <div
+                  onClick={() => toggleExpand(appt.id)}
+                  className="flex items-start gap-2 px-3 py-2 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60 cursor-pointer transition-colors"
+                >
+                  <span className="text-[10px] font-mono text-zinc-400 w-[44px] shrink-0 pt-0.5 leading-tight">
+                    {timeStr}
                   </span>
+                  <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-zinc-900' : 'bg-zinc-200'}`} />
+                  <div>
+                    <p className="text-[12px] font-medium">{appt.contactName || appt.title}</p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">{appt.type || appt.title}</p>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
+                      isConfirmed ? 'bg-emerald-50 text-emerald-700'
+                        : appt.status === 'cancelled' ? 'bg-red-50 text-red-600'
+                        : 'bg-amber-50 text-amber-600'
+                    }`}>
+                      {appt.status === 'confirmed' ? 'Confirmed' : appt.status === 'cancelled' ? 'Cancelled' : 'Pending'}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Expanded detail */}
+                {isExpanded && (
+                  <div className="bg-zinc-50 border-t border-zinc-100 px-3 py-3 space-y-2">
+                    <p className="text-[13px] font-medium text-zinc-900">{appt.title || appt.contactName}</p>
+                    <p className="text-[11px] font-mono text-zinc-500">
+                      {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {' '}
+                      {timeStr}
+                      {appt.endTime && ` — ${new Date(appt.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
+                    </p>
+                    {appt.attendees && appt.attendees.length > 0 && (
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-0.5">Attendees</p>
+                        <p className="text-[11px] text-zinc-600">
+                          {appt.attendees.map((a) => a.name || a.email || 'Unknown').join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {appt.meetingLink ? (
+                      <a
+                        href={appt.meetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" /> Join meeting
+                      </a>
+                    ) : (
+                      <p className="text-[11px] text-zinc-400">No meeting link</p>
+                    )}
+                    {appt.description && (
+                      <p className="text-[11px] text-zinc-500 leading-relaxed">{appt.description}</p>
+                    )}
+                    {appt.calendarUrl && (
+                      <a
+                        href={appt.calendarUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <Calendar className="h-3 w-3" /> Open in calendar
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })

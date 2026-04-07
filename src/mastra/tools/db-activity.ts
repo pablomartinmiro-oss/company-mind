@@ -36,7 +36,7 @@ export const getActivityFeed = createTool({
       .limit(input.limit || 20);
 
     if (input.contactId) {
-      query = query.eq('contact_ghl_id', input.contactId);
+      query = query.eq('contact_id', input.contactId);
     }
 
     const { data, count } = await query;

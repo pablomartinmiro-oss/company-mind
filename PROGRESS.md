@@ -152,10 +152,42 @@ AI Assistant Batch 4 complete.
 
 **Note:** Write tools (create/update/delete) deferred to a future batch.
 
+### Daily HQ Audit Fixes (2026-04-06)
+
+Daily HQ audit fixes complete (post-Batch 4).
+
+**Bugs resolved:**
+- A1: Stat cards clickable — centered 640x560 modal per card with search, scrollable list, click-through to detail pages
+- A2: Inbox channel UI — distinct visual layouts per channel (SMS phone-style, Email card layout with From/To/Subject, WhatsApp teal bubbles with double-check), channel tab highlighting fixed
+- A3: Appointments sorted by time ascending (client-side safety net), click-to-expand inline detail block (status, time range, attendees, meeting link, description)
+- A4: Task modal pipeline legend removed — now shows ONLY the company's actual current stages fetched via new `/api/contacts/[id]/pipelines` route
+- A5: Task rows and modal show exact dates ("Apr 2, 2026") with color-coding (red=overdue, amber=today, grey=future)
+- A6: Edit task button wired — switches to edit mode with editable fields, Save persists via new `PATCH /api/tasks/[id]` route
+- A7: Comprehensive test data seeded — 11 tasks across all 4 types with varied due dates, multi-pipeline contacts (Marcus: Sales+Onboarding, Sarah: Sales+Onboarding, Lisa: Sales+Upsell)
+
+**New files:**
+- `src/components/dashboard/stat-detail-modal.tsx` — 4 modal variants for stat cards
+- `src/components/dashboard/stat-cards.tsx` — clickable stat card client wrapper
+- `src/app/api/tasks/[id]/route.ts` — GET/PATCH for individual task editing
+- `src/app/api/contacts/[id]/pipelines/route.ts` — returns actual pipeline stages for a contact
+- `supabase/migrations/20260407015000_seed_comprehensive_test_data.sql` — comprehensive seed data
+
+**Modified files:**
+- `src/app/(app)/dashboard/page.tsx` — uses StatCards component, fetches extra data for modals, pipeline name lookup
+- `src/components/dashboard/inbox-panel.tsx` — channel-specific thread layouts (SMS/Email/WhatsApp), fixed tab highlighting
+- `src/components/dashboard/appointments-panel.tsx` — client-side sort, click-to-expand inline detail
+- `src/components/dashboard/task-list.tsx` — exact dates, edit mode, actual pipeline stages from API
+- `src/lib/format.ts` — added formatExactDate helper
+
+**Also fixed (from Batch 4):**
+- Mastra tools db-companies.ts, db-pipelines.ts, db-activity.ts — corrected column names (contact_id/stage instead of contact_ghl_id/current_stage)
+
+**Note:** Inbox conversations live in GHL, not Supabase — conversation seed data depends on GHL test data and was skipped.
+
 ## Next Session
-1. Verify Batch 4 on live site (drawer opens, closes, context shows, tools respond)
-2. Test full login flow on production with real credentials
-3. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
+1. Verify all Daily HQ audit fixes on live site
+2. Verify Batch 4 AI drawer on live site
+3. Test full login flow on production with real credentials
 4. Batch 5: Gmail inbox connector, Google Meet call import
 5. Button audit + AI assistant function check across the entire app
 6. Build settings page (team management, GHL connection status, password reset)

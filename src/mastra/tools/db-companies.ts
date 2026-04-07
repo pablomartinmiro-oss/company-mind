@@ -1,5 +1,7 @@
 // src/mastra/tools/db-companies.ts
 // Tools for querying companies (pipeline_contacts) from Supabase
+// Note: pipeline_contacts has columns: contact_id, pipeline_id, stage, deal_value, stage_entered_at
+// Names come from calls table (contact_name) and contact_data_points (company_name)
 
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
@@ -18,13 +20,12 @@ export const getCompanies = createTool({
   outputSchema: z.object({
     companies: z.array(
       z.object({
-        contact_ghl_id: z.string(),
+        contact_id: z.string(),
         contact_name: z.string().nullable(),
         company_name: z.string().nullable(),
         pipeline_name: z.string().nullable(),
         current_stage: z.string().nullable(),
         deal_value: z.number().nullable(),
-        stage_entered_at: z.string().nullable(),
         days_in_stage: z.number().nullable(),
       })
     ),
@@ -33,47 +34,68 @@ export const getCompanies = createTool({
   execute: async (input, executionContext) => {
     const tenantId = getTenantId(executionContext);
 
-    let query = supabaseAdmin
+    // Fetch pipeline contacts
+    const { data: pcRows } = await supabaseAdmin
       .from('pipeline_contacts')
-      .select('*', { count: 'exact' })
+      .select('contact_id, pipeline_id, stage, deal_value, stage_entered_at')
       .eq('tenant_id', tenantId)
       .order('stage_entered_at', { ascending: false })
-      .limit(50);
+      .limit(100);
 
+    const rows = pcRows ?? [];
+
+    // Fetch pipeline names
+    const pipelineIds = [...new Set(rows.map((r) => r.pipeline_id))];
+    const { data: pipelines } = pipelineIds.length > 0
+      ? await supabaseAdmin.from('pipelines').select('id, name').in('id', pipelineIds)
+      : { data: [] };
+    const pipelineNameMap: Record<string, string> = {};
+    for (const p of pipelines ?? []) pipelineNameMap[p.id] = p.name;
+
+    // Fetch contact names from calls
+    const contactIds = [...new Set(rows.map((r) => r.contact_id))];
+    const { data: callNames } = contactIds.length > 0
+      ? await supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
+      : { data: [] };
+    const nameMap: Record<string, string> = {};
+    for (const c of callNames ?? []) nameMap[c.contact_ghl_id] = c.contact_name;
+
+    // Company names from data points
+    const { data: companyDPs } = contactIds.length > 0
+      ? await supabaseAdmin.from('contact_data_points').select('contact_ghl_id, field_value').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds).eq('field_name', 'company_name')
+      : { data: [] };
+    const companyMap: Record<string, string> = {};
+    for (const dp of companyDPs ?? []) companyMap[dp.contact_ghl_id] = dp.field_value;
+
+    const now = Date.now();
+    let results = rows.map((r) => ({
+      contact_id: r.contact_id,
+      contact_name: nameMap[r.contact_id] ?? null,
+      company_name: companyMap[r.contact_id] ?? null,
+      pipeline_name: pipelineNameMap[r.pipeline_id] ?? null,
+      current_stage: r.stage ?? null,
+      deal_value: r.deal_value ? parseFloat(String(r.deal_value).replace(/[^0-9.]/g, '')) : null,
+      days_in_stage: r.stage_entered_at ? Math.floor((now - new Date(r.stage_entered_at).getTime()) / 86400000) : null,
+    }));
+
+    // Apply filters
     if (input.pipelineName) {
-      query = query.ilike('pipeline_name', `%${input.pipelineName}%`);
+      const q = input.pipelineName.toLowerCase();
+      results = results.filter((r) => (r.pipeline_name ?? '').toLowerCase().includes(q));
     }
     if (input.stage) {
-      query = query.ilike('current_stage', `%${input.stage}%`);
+      const q = input.stage.toLowerCase();
+      results = results.filter((r) => (r.current_stage ?? '').toLowerCase().includes(q));
     }
     if (input.search) {
-      query = query.or(
-        `contact_name.ilike.%${input.search}%,company_name.ilike.%${input.search}%`
+      const q = input.search.toLowerCase();
+      results = results.filter((r) =>
+        (r.contact_name ?? '').toLowerCase().includes(q) ||
+        (r.company_name ?? '').toLowerCase().includes(q)
       );
     }
 
-    const { data, count } = await query;
-    const now = Date.now();
-
-    return {
-      companies: (data || []).map((c) => ({
-        contact_ghl_id: c.contact_ghl_id,
-        contact_name: c.contact_name ?? null,
-        company_name: c.company_name ?? null,
-        pipeline_name: c.pipeline_name ?? null,
-        current_stage: c.current_stage ?? null,
-        deal_value: c.deal_value ?? null,
-        stage_entered_at: c.stage_entered_at
-          ? new Date(c.stage_entered_at).toISOString()
-          : null,
-        days_in_stage: c.stage_entered_at
-          ? Math.floor(
-              (now - new Date(c.stage_entered_at).getTime()) / 86400000
-            )
-          : null,
-      })),
-      total: count || 0,
-    };
+    return { companies: results.slice(0, 50), total: results.length };
   },
 });
 
@@ -82,9 +104,7 @@ export const getCompanyDetail = createTool({
   description:
     'Get full details for a specific company/contact including all pipeline memberships, recent calls, recent activity, and research data. Use when the user asks about a specific company or contact.',
   inputSchema: z.object({
-    contactId: z
-      .string()
-      .describe('The GHL contact ID (contact_ghl_id) to look up'),
+    contactId: z.string().describe('The GHL contact ID (contact_id) to look up'),
   }),
   outputSchema: z.object({
     pipelines: z.array(z.record(z.unknown())),
@@ -96,18 +116,16 @@ export const getCompanyDetail = createTool({
   execute: async (input, executionContext) => {
     const tenantId = getTenantId(executionContext);
 
-    const [pipelinesRes, callsRes, activityRes, researchRes, stageLogRes] =
+    const [pcRes, callsRes, activityRes, researchRes, stageLogRes] =
       await Promise.all([
         supabaseAdmin
           .from('pipeline_contacts')
-          .select('*')
+          .select('pipeline_id, stage, deal_value, stage_entered_at')
           .eq('tenant_id', tenantId)
-          .eq('contact_ghl_id', input.contactId),
+          .eq('contact_id', input.contactId),
         supabaseAdmin
           .from('calls')
-          .select(
-            'id, contact_name, call_type, outcome, duration_seconds, score, coaching, called_at'
-          )
+          .select('id, contact_name, call_type, outcome, duration_seconds, score, coaching, called_at')
           .eq('tenant_id', tenantId)
           .eq('contact_ghl_id', input.contactId)
           .order('called_at', { ascending: false })
@@ -116,7 +134,7 @@ export const getCompanyDetail = createTool({
           .from('activity_feed')
           .select('*')
           .eq('tenant_id', tenantId)
-          .eq('contact_ghl_id', input.contactId)
+          .eq('contact_id', input.contactId)
           .order('created_at', { ascending: false })
           .limit(15),
         supabaseAdmin
@@ -128,24 +146,35 @@ export const getCompanyDetail = createTool({
           .from('stage_log')
           .select('*')
           .eq('tenant_id', tenantId)
-          .eq('contact_ghl_id', input.contactId)
-          .order('moved_at', { ascending: false })
+          .eq('contact_id', input.contactId)
+          .order('entered_at', { ascending: false })
           .limit(20),
       ]);
 
+    // Get pipeline names
+    const pipelineIds = [...new Set((pcRes.data ?? []).map((r) => r.pipeline_id))];
+    const { data: pipelines } = pipelineIds.length > 0
+      ? await supabaseAdmin.from('pipelines').select('id, name').in('id', pipelineIds)
+      : { data: [] };
+    const pipelineNameMap: Record<string, string> = {};
+    for (const p of pipelines ?? []) pipelineNameMap[p.id] = p.name;
+
     return {
-      pipelines: pipelinesRes.data || [],
-      recentCalls: (callsRes.data || []).map((c) => ({
+      pipelines: (pcRes.data ?? []).map((r) => ({
+        pipeline_name: pipelineNameMap[r.pipeline_id] ?? 'Unknown',
+        stage: r.stage,
+        deal_value: r.deal_value,
+        stage_entered_at: r.stage_entered_at,
+      })),
+      recentCalls: (callsRes.data ?? []).map((c) => ({
         ...c,
         overall_score: c.score?.overall ?? null,
         summary: c.coaching?.summary ?? null,
-        called_at: c.called_at
-          ? new Date(c.called_at).toISOString()
-          : null,
+        called_at: c.called_at ? new Date(c.called_at).toISOString() : null,
       })),
-      recentActivity: activityRes.data || [],
-      research: researchRes.data || [],
-      stageHistory: stageLogRes.data || [],
+      recentActivity: activityRes.data ?? [],
+      research: researchRes.data ?? [],
+      stageHistory: stageLogRes.data ?? [],
     };
   },
 });
