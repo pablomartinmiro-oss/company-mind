@@ -72,28 +72,29 @@ export function AppointmentsPanel() {
   const isToday = new Date().toDateString() === date.toDateString();
 
   return (
-    <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] shadow-sm overflow-hidden flex flex-col" style={{ height: 516 }}>
+    <div className="relative glass-card rounded-3xl overflow-hidden flex flex-col" style={{ height: 516 }}>
+      <div className="glass-card-inner" />
       {/* Header */}
-      <div className="h-9 flex items-center justify-between px-3.5 border-b border-[rgba(28,25,22,0.06)] shrink-0">
+      <div className="relative h-9 flex items-center justify-between px-3.5 border-b border-white/40 shrink-0">
         <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Appointments</span>
         <div className="flex items-center gap-1.5">
-          <button onClick={prevDay} className="p-0.5 hover:bg-zinc-100 rounded">
+          <button onClick={prevDay} className="p-0.5 hover:bg-white/30 rounded">
             <ChevronLeft className="h-3 w-3 text-zinc-500" />
           </button>
           <span className="text-[11px] font-medium text-zinc-700 min-w-[50px] text-center">
             {isToday ? 'Today' : dateLabel}
           </span>
-          <button onClick={nextDay} className="p-0.5 hover:bg-zinc-100 rounded">
+          <button onClick={nextDay} className="p-0.5 hover:bg-white/30 rounded">
             <ChevronRight className="h-3 w-3 text-zinc-500" />
           </button>
         </div>
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto" style={{ height: 480 }}>
+      <div className="relative flex-1 overflow-y-auto" style={{ height: 480 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="h-4 w-4 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-full gap-1.5 text-center px-4">
@@ -102,7 +103,7 @@ export function AppointmentsPanel() {
             <p className="text-[11px] text-zinc-400">Check GHL connection</p>
             <button
               onClick={() => fetchAppointments(date)}
-              className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-[rgba(28,25,22,0.1)] text-zinc-600 hover:bg-[#faf8f5]"
+              className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-white/50 text-zinc-600 hover:bg-white/30"
             >
               Retry
             </button>
@@ -123,12 +124,12 @@ export function AppointmentsPanel() {
               <div key={appt.id}>
                 <div
                   onClick={() => toggleExpand(appt.id)}
-                  className="flex items-start gap-2 px-3 py-2 border-b border-[rgba(28,25,22,0.04)] last:border-0 hover:bg-[#faf8f5] cursor-pointer transition-colors"
+                  className="flex items-start gap-2 px-3 py-2 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer transition-colors"
                 >
                   <span className="text-[10px] font-mono text-zinc-500 w-[80px] shrink-0 pt-0.5 leading-tight">
                     {timeStr}
                   </span>
-                  <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-[#1c1916]' : 'bg-zinc-200'}`} />
+                  <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-[#1a1a1a]' : 'bg-zinc-200'}`} />
                   <div>
                     <p className="text-[12px] font-medium text-zinc-800">{appt.contactName || appt.title}</p>
                     <p className="text-[10px] text-zinc-500 mt-0.5">{appt.type || appt.title}</p>
@@ -144,8 +145,8 @@ export function AppointmentsPanel() {
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="bg-[#faf8f5] border-t border-[rgba(28,25,22,0.04)] px-3 py-3 space-y-2">
-                    <p className="text-[13px] font-medium text-[#1c1916]">{appt.title || appt.contactName}</p>
+                  <div className="bg-white/30 border-t border-white/30 px-3 py-3 space-y-2">
+                    <p className="text-[13px] font-medium text-[#1a1a1a]">{appt.title || appt.contactName}</p>
                     <p className="text-[11px] font-mono text-zinc-500">
                       {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                       {' '}

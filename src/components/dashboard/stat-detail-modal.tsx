@@ -90,20 +90,21 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-[640px] h-[560px] bg-white rounded-2xl shadow-2xl border border-[rgba(28,25,22,0.06)] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative z-10 w-[640px] h-[560px] glass-card rounded-3xl overflow-hidden flex flex-col">
+        <div className="glass-card-inner" />
         {/* Header */}
-        <div className="h-12 px-5 border-b border-[rgba(28,25,22,0.06)] flex items-center justify-between shrink-0">
-          <span className="text-[13px] font-semibold text-[#1c1916]">
+        <div className="relative h-12 px-5 border-b border-white/40 flex items-center justify-between shrink-0">
+          <span className="text-[13px] font-semibold text-[#1a1a1a]">
             {title} ({count})
           </span>
-          <button onClick={onClose} className="text-zinc-400 hover:text-[#1c1916]">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-5 py-2.5 border-b border-[rgba(28,25,22,0.04)] shrink-0">
+        <div className="relative px-5 py-2.5 border-b border-white/30 shrink-0">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
             <input
@@ -111,13 +112,13 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={placeholder}
-              className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-[rgba(28,25,22,0.1)] bg-white text-[#1c1916] rounded-lg focus:outline-none focus:border-[#ff6a3d] placeholder:text-zinc-400"
+              className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-white/60 bg-white/50 text-[#1a1a1a] rounded-lg focus:outline-none focus:border-[#ff6a3d] placeholder:text-zinc-400"
             />
           </div>
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="relative flex-1 overflow-y-auto">
           {type === 'calls' && <CallsList calls={calls} search={q} />}
           {type === 'score' && <ScoreList calls={calls} search={q} />}
           {type === 'pipeline' && <PipelineList contacts={pipelineContacts} search={q} />}
@@ -147,10 +148,10 @@ function CallsList({ calls, search }: { calls: CallRow[]; search: string }) {
             href={`/calls/${c.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(28,25,22,0.04)] hover:bg-[#faf8f5] cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/30 hover:bg-white/30 cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#1c1916] truncate">{c.contact_name ?? 'Unknown'}</p>
+              <p className="text-[12px] font-medium text-[#1a1a1a] truncate">{c.contact_name ?? 'Unknown'}</p>
               {c.company_name && <p className="text-[11px] text-zinc-500 truncate">{c.company_name}</p>}
             </div>
             {score != null && (
@@ -189,13 +190,13 @@ function ScoreList({ calls, search }: { calls: CallRow[]; search: string }) {
             href={`/calls/${c.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(28,25,22,0.04)] hover:bg-[#faf8f5] cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/30 hover:bg-white/30 cursor-pointer"
           >
             <span className={`text-[18px] font-semibold font-mono min-w-[40px] ${score >= 80 ? 'text-emerald-600' : score >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
               {score}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#1c1916] truncate">{c.contact_name ?? 'Unknown'}</p>
+              <p className="text-[12px] font-medium text-[#1a1a1a] truncate">{c.contact_name ?? 'Unknown'}</p>
             </div>
             <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[typeKey] ?? 'bg-zinc-100 text-zinc-500'}`}>
               {CALL_TYPE_LABELS[typeKey] ?? typeKey}
@@ -237,10 +238,10 @@ function PipelineList({ contacts, search }: { contacts: PipelineRow[]; search: s
             href={`/contacts/${ghlId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(28,25,22,0.04)] hover:bg-[#faf8f5] cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/30 hover:bg-white/30 cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#1c1916] truncate">
+              <p className="text-[12px] font-medium text-[#1a1a1a] truncate">
                 {first.company_name ?? first.contact_name ?? 'Unknown'}
               </p>
               <div className="flex flex-wrap gap-1 mt-1">
@@ -255,7 +256,7 @@ function PipelineList({ contacts, search }: { contacts: PipelineRow[]; search: s
               </div>
             </div>
             {totalValue > 0 && (
-              <span className="text-[12px] font-semibold text-[#1c1916] font-mono">
+              <span className="text-[12px] font-semibold text-[#1a1a1a] font-mono">
                 ${totalValue >= 1000 ? `${(totalValue / 1000).toFixed(0)}k` : totalValue}
               </span>
             )}
@@ -284,10 +285,10 @@ function TasksList({ tasks, search }: { tasks: TaskRow[]; search: string }) {
             href={t.contact_id ? `/contacts/${t.contact_id}` : '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(28,25,22,0.04)] hover:bg-[#faf8f5] cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/30 hover:bg-white/30 cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#1c1916] truncate">{t.title}</p>
+              <p className="text-[12px] font-medium text-[#1a1a1a] truncate">{t.title}</p>
               {t.contact_name && <p className="text-[11px] text-zinc-500 truncate">{t.contact_name}</p>}
             </div>
             <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TASK_TYPE_PILL[typeKey] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200'}`}>

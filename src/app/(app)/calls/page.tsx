@@ -113,7 +113,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="p-5 animate-fade-in">
-      <h1 className="text-[28px] font-semibold tracking-tight text-[#1c1916]">Calls</h1>
+      <h1 className="text-[28px] font-semibold tracking-tight text-[#1a1a1a]">Calls</h1>
       <p className="mt-1 text-[13px] text-zinc-400">All recorded calls and scores.</p>
 
       <div className="flex items-center gap-1 mt-5">
@@ -124,12 +124,12 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
               key={t.key}
               href={`/calls?tab=${t.key}`}
               className={`rounded-md px-3 py-1.5 text-[13px] font-medium flex items-center gap-1.5 transition-all duration-150 ${
-                isActive ? 'bg-[#1c1916] text-white' : 'text-zinc-500 hover:bg-[#faf8f5] hover:text-[#1c1916]'
+                isActive ? 'bg-white/80 backdrop-blur border border-white/80 text-zinc-900 shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]' : 'text-zinc-500 hover:bg-white/40'
               }`}
             >
               {t.label}
               <span className={`text-[10px] px-1.5 rounded-full ${
-                isActive ? 'bg-white/30 text-white/80' : 'bg-zinc-100 text-zinc-500'
+                isActive ? 'bg-zinc-200/50 text-zinc-600' : 'bg-white/30 text-zinc-500'
               }`}>
                 {counts[t.key] > 100 ? '100+' : counts[t.key]}
               </span>
@@ -146,7 +146,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
         <CallFilters />
       </Suspense>
 
-      <div className="mt-5 border border-[rgba(28,25,22,0.06)] rounded-xl overflow-hidden">
+      <div className="mt-5 border border-white/40 rounded-xl overflow-hidden">
         {!calls || calls.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-[13px] text-zinc-400">No calls found.</p>
@@ -163,12 +163,12 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
               <Link
                 key={call.id}
                 href={`/calls/${call.id}`}
-                className={`flex items-start gap-4 px-4 py-4 border-b border-[rgba(28,25,22,0.04)] last:border-0 hover:bg-[#faf8f5]/60 cursor-pointer transition-colors ${
+                className={`flex items-start gap-4 px-4 py-4 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer transition-colors ${
                   isError ? 'border-l-2 border-l-red-400' : ''
                 }`}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-[#1c1916]">{call.contact_name ?? 'Unknown'}</p>
+                  <p className="text-[14px] font-medium text-[#1a1a1a]">{call.contact_name ?? 'Unknown'}</p>
                   {company && <p className="text-[13px] text-zinc-500 mt-0.5">{company}</p>}
                   {address && <p className="text-[11px] text-zinc-500">{address}</p>}
                   <div className="flex items-center gap-2 mt-1 text-[13px] text-zinc-400">

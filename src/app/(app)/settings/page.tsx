@@ -23,7 +23,7 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-3xl px-8 py-8 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl font-semibold tracking-tight text-[#1c1916]">Settings</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-[#1a1a1a]">Settings</h1>
         <p className="mt-1 text-[13px] text-zinc-500">
           Configure your Company Mind instance, scoring rubrics, and
           integrations.
@@ -86,7 +86,7 @@ export default async function SettingsPage() {
                   </span>
                 </div>
                 {/* Weight bar */}
-                <div className="h-2 w-full rounded-full bg-zinc-100">
+                <div className="h-2 w-full rounded-full bg-white/30">
                   <div
                     className={`h-full rounded-full ${criterion.color} transition-all`}
                     style={{ width: `${criterion.weight}%` }}
@@ -98,7 +98,7 @@ export default async function SettingsPage() {
             <div className="pt-3">
               <Button variant="outline" disabled className="text-zinc-500 cursor-not-allowed">
                 Edit Rubric
-                <span className="ml-1.5 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">Soon</span>
+                <span className="ml-1.5 rounded bg-white/30 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">Soon</span>
               </Button>
             </div>
           </CardContent>
@@ -113,14 +113,14 @@ export default async function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="divide-y divide-[rgba(28,25,22,0.04)]">
+            <div className="divide-y divide-white/30">
               <div className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50">
                     <span className="text-[11px] font-bold text-orange-600">GHL</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1c1916]">Go High Level</p>
+                    <p className="text-sm font-medium text-[#1a1a1a]">Go High Level</p>
                     <p className="text-[11px] text-zinc-500">CRM &amp; pipeline sync</p>
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default async function SettingsPage() {
                     <span className="text-[11px] font-bold text-blue-600">AI</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1c1916]">AssemblyAI</p>
+                    <p className="text-sm font-medium text-[#1a1a1a]">AssemblyAI</p>
                     <p className="text-[11px] text-zinc-500">Call transcription &amp; analysis</p>
                   </div>
                 </div>

@@ -1,35 +1,23 @@
-# Golden Assertions — Self-Verification (Payoneer Edition)
+# Frosted Glass Refactor — Verification
 
-## Layout
-- [ ] Body bg is #1c1916 with p-6 padding
-- [ ] White app container is rounded-[28px] with warm shadow
-- [ ] Container min-height calc(100vh - 48px)
-- [ ] Sidebar 64px wide, dark (#1c1916), inside container left
-- [ ] Active sidebar item has coral wash + left bar
-- [ ] Brand mark 32x32 coral square at top of sidebar
-- [ ] Main content has sticky header bar inside white area
-- [ ] NO top bar, NO floating pill nav
+## Hard rules (zero tolerance)
+- [ ] grep src/ for `bg-zinc-900` -> 0 results (excluding locked files)
+- [ ] grep src/ for `bg-black` -> 0 results
+- [ ] grep src/ for `bg-[#1f1a16]` -> 0 results
+- [ ] grep src/ for `bg-[#1c1916]` -> 0 results (excluding locked files)
+- [ ] No element wider than 48px uses solid coral as background
 
-## Dashboard
-- [ ] 4 stat cards use DARK CARD pattern (#1f1a16)
-- [ ] Dark cards have coral stat values and coral icons
-- [ ] Inbox, appointments, task list use WHITE panels
-- [ ] All numbers font-mono
+## Visual checks
+- [ ] Page bg is warm grey-cream (#ebe7e0)
+- [ ] Subtle noise texture visible on bg
+- [ ] Sidebar is frosted glass (translucent)
+- [ ] Sidebar brand mark is a coral gradient circle
+- [ ] Active sidebar item is frosted white pill with coral icon
+- [ ] "Ask AI" button is a small circle (40x40)
+- [ ] Daily HQ stat cards are frosted glass with backdrop blur
+- [ ] Stat card big numbers are coral, 48px, mono
+- [ ] All panels are frosted glass
+- [ ] No hard black rectangles anywhere
 
-## Calls
-- [ ] White panel for calls list
-- [ ] Score circles 90+ use coral
-- [ ] Pills from pipeline-config.ts
-
-## Pipeline
-- [ ] White panel, dense rows
-- [ ] Stage circles with dark active state
-
-## Contact Detail
-- [ ] White panels for all sections
-- [ ] 3 tabs: Overview, Activity, Research
-
-## Final
-- [ ] Coral used in 7 or fewer contexts
-- [ ] No leftover dark-everywhere classes from previous theme
-- [ ] TypeScript build clean
+## Build checks
+- [ ] TypeScript build succeeds with zero errors

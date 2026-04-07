@@ -10,25 +10,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const closeChat = useCallback(() => setChatOpen(false), []);
 
   return (
-    <div
-      className="bg-white rounded-[28px] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.4)] min-h-[calc(100vh-48px)] flex overflow-hidden"
-    >
-      {/* Sidebar — thin dark icon nav (Payoneer signature) */}
+    <div className="relative flex min-h-screen">
       <Sidebar />
 
-      {/* Main content area */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Content header bar */}
-        <div className="h-14 shrink-0 flex items-center justify-between px-8 border-b border-[rgba(28,25,22,0.06)]">
+      <main className="flex-1 flex flex-col pl-[72px]">
+        {/* Content header — transparent */}
+        <div className="h-16 shrink-0 flex items-center justify-between px-8 border-b border-black/[0.04]">
           <div />
           <div className="flex items-center gap-3">
-            {/* Ask AI button (coral use #3 — primary CTA) */}
+            {/* Ask AI — small 40x40 coral circle */}
             <button
               onClick={() => setChatOpen(true)}
-              className="flex h-8 items-center gap-1.5 rounded-full bg-[#ff6a3d] px-4 text-[12px] font-medium text-white transition-colors hover:bg-[#f5552a]"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white shadow-[0_4px_12px_rgba(255,106,61,0.3),inset_0_1px_0_rgba(255,255,255,0.3)] hover:shadow-[0_6px_16px_rgba(255,106,61,0.4)] transition-all"
+              title="Ask AI"
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              Ask AI
+              <Sparkles className="h-[18px] w-[18px]" />
             </button>
           </div>
         </div>
@@ -39,7 +35,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      {/* Chat drawer */}
       <ChatDrawer isOpen={chatOpen} onClose={closeChat} />
     </div>
   );

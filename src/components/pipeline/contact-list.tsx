@@ -42,18 +42,18 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
   return (
     <>
       {/* Search + filter bar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/30">
         <input
           type="text"
           placeholder="Search name, company..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[12px] px-3 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400 placeholder:text-zinc-500"
+          className="flex-1 text-[12px] px-3 py-1.5 bg-white/50 border border-white/60 rounded-lg text-[#1a1a1a] focus:outline-none focus:border-zinc-400 placeholder:text-zinc-500"
         />
         {selectedStage && (
           <button
             onClick={onClearStage}
-            className="text-[11px] font-medium px-3 py-1 rounded-full bg-zinc-100 text-zinc-600 flex items-center gap-1.5 cursor-pointer"
+            className="text-[11px] font-medium px-3 py-1 rounded-full bg-white/30 text-zinc-600 flex items-center gap-1.5 cursor-pointer"
           >
             {selectedStage}
             <span className="text-zinc-400">✕</span>
@@ -71,7 +71,7 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
           <Link
             key={`${contact.contact_id}-${contact.stage}`}
             href={`/contacts/${contact.contact_id}`}
-            className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/50 cursor-pointer"
+            className="flex items-center gap-3 px-4 py-3 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer"
           >
             {/* Days badge */}
             <span className={`text-[10px] font-medium font-mono px-1.5 py-0.5 rounded text-center w-[44px] flex-shrink-0 ${daysBadgeClass(contact.days_in_stage)}`}>
@@ -80,7 +80,7 @@ export function ContactList({ contacts, selectedStage, onClearStage }: Props) {
 
             {/* Company info — company name primary, contact name secondary */}
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-[#1c1916]">{contact.company_name || contact.contact_name}</p>
+              <p className="text-[13px] font-medium text-[#1a1a1a]">{contact.company_name || contact.contact_name}</p>
               {contact.company_name && (
                 <p className="text-[11px] text-zinc-400 mt-0.5">{contact.contact_name}</p>
               )}

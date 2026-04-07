@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen bg-[#1c1916] p-6 font-sans text-[#1c1916]">
+      <body className="min-h-screen relative bg-[#ebe7e0] font-sans text-[#1a1a1a] before:fixed before:inset-0 before:pointer-events-none before:bg-[url('/noise.svg')] before:opacity-[0.04] before:mix-blend-overlay">
         {children}
       </body>
     </html>

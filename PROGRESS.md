@@ -281,10 +281,30 @@ Complete visual overhaul from dark-everywhere to Payoneer 3-layer sandwich desig
 
 **Locked files NOT touched:** ghl.ts, supabase.ts, mastra/**, calls/[id]/*, chat-panel.tsx, format.ts
 
+### Frosted Glass Refactor (2026-04-07)
+
+Pivoted from hard dark surfaces to frosted glass on warm grey-cream. Previous build had hard black sidebar, solid dark stat cards, wide coral buttons — all wrong per the real Payoneer reference.
+
+**What changed:**
+- Page bg: #ebe7e0 warm grey-cream with SVG noise texture at 4%
+- Sidebar: frosted glass (bg-white/40 backdrop-blur-xl), not solid black
+- Brand mark: 40x40 coral gradient circle (not square)
+- Active sidebar: frosted white pill with coral icon (not black bg)
+- Ask AI: small 40x40 coral circle (not wide pill)
+- Content header: transparent (no fill)
+- All panels: frosted glass (glass-card utility class in globals.css)
+- Stat cards: frosted glass with 48px coral stat values
+- Buttons: coral gradient pills (small), frosted pills (secondary), ghost
+- Chat drawer: frosted glass bg
+- Login: frosted glass card
+- No solid black surfaces anywhere (zero bg-zinc-900, bg-[#1f1a16], bg-[#1c1916] in UI)
+- Brand tokens updated for frosted palette
+- Brand showcase updated with frosted glass demos
+
 ## Next Session
-1. Verify Payoneer redesign on live site
-2. Call detail page (/calls/[id]) needs Payoneer treatment (locked)
-3. Score circles 90+ coral ring (coral use #5)
+1. Verify frosted glass on live site
+2. Call detail page (/calls/[id]) needs treatment (locked)
+3. Score circles 90+ coral ring
 4. Batch 5: Gmail inbox connector, Google Meet call import
 5. Button audit + AI assistant function check
 6. Build settings page

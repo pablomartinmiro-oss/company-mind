@@ -114,9 +114,10 @@ export function InboxPanel() {
   const activeChannel = selected ? detectChannel(selected) : 'SMS';
 
   return (
-    <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] shadow-sm overflow-hidden flex flex-col" style={{ height: 516 }}>
+    <div className="relative glass-card rounded-3xl overflow-hidden flex flex-col" style={{ height: 516 }}>
+      <div className="glass-card-inner" />
       {/* Header */}
-      <div className="h-9 flex items-center justify-between px-3.5 border-b border-[rgba(28,25,22,0.06)]">
+      <div className="relative h-9 flex items-center justify-between px-3.5 border-b border-white/40">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Inbox</span>
           {totalUnread > 0 && (
@@ -131,12 +132,12 @@ export function InboxPanel() {
       </div>
 
       {/* Body */}
-      <div className="flex" style={{ height: 480 }}>
+      <div className="relative flex" style={{ height: 480 }}>
         {/* Left: conversation list */}
-        <div className="w-[240px] border-r border-[rgba(28,25,22,0.06)] overflow-y-auto">
+        <div className="w-[240px] border-r border-white/40 overflow-y-auto">
           {conversations.unread.length > 0 && (
             <>
-              <div className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 bg-[#faf8f5] px-3 py-1.5 border-b border-[rgba(28,25,22,0.04)] flex items-center gap-1.5">
+              <div className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 bg-white/30 px-3 py-1.5 border-b border-white/30 flex items-center gap-1.5">
                 Unread
                 <span className="text-[9px] px-1 py-0.5 rounded-full bg-red-50 text-red-600">{conversations.unread.length}</span>
               </div>
@@ -147,7 +148,7 @@ export function InboxPanel() {
           )}
           {conversations.needsReply.length > 0 && (
             <>
-              <div className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 bg-[#faf8f5] px-3 py-1.5 border-b border-[rgba(28,25,22,0.04)] flex items-center gap-1.5">
+              <div className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 bg-white/30 px-3 py-1.5 border-b border-white/30 flex items-center gap-1.5">
                 Needs Reply
                 <span className="text-[9px] px-1 py-0.5 rounded-full bg-amber-50 text-amber-700">{conversations.needsReply.length}</span>
               </div>
@@ -165,7 +166,7 @@ export function InboxPanel() {
                   <p className="text-[11px] text-zinc-400">Check GHL connection</p>
                   <button
                     onClick={fetchInbox}
-                    className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-[rgba(28,25,22,0.1)] text-zinc-600 hover:bg-[#faf8f5]"
+                    className="mt-2 text-[11px] font-medium px-3 py-1.5 rounded-lg border border-white/50 text-zinc-600 hover:bg-white/30"
                   >
                     Retry
                   </button>
@@ -186,13 +187,13 @@ export function InboxPanel() {
           {selected ? (
             <>
               {/* Thread header */}
-              <div className="h-10 flex items-center gap-2.5 px-3.5 border-b border-[rgba(28,25,22,0.06)]">
-                <div className="h-7 w-7 rounded-full bg-[#1c1916] text-white text-[10px] font-semibold flex items-center justify-center">
+              <div className="h-10 flex items-center gap-2.5 px-3.5 border-b border-white/40">
+                <div className="h-7 w-7 rounded-full bg-zinc-700 text-white text-[10px] font-semibold flex items-center justify-center">
                   {selected.contactName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[13px] font-medium text-zinc-800">{selected.contactName}</span>
-                  <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${CHANNEL_ICONS[activeChannel]?.bg ?? 'bg-[#faf8f5]'} ${CHANNEL_ICONS[activeChannel]?.text ?? 'text-zinc-500'}`}>
+                  <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${CHANNEL_ICONS[activeChannel]?.bg ?? 'bg-white/30'} ${CHANNEL_ICONS[activeChannel]?.text ?? 'text-zinc-500'}`}>
                     {activeChannel}
                   </span>
                 </div>
@@ -200,7 +201,7 @@ export function InboxPanel() {
               </div>
 
               {/* Messages — channel-specific layout */}
-              <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2 bg-[#faf8f5]">
+              <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2 bg-white/20">
                 {activeChannel === 'Email'
                   ? <EmailThread messages={selected.messages} contactName={selected.contactName} contactEmail={selected.contactEmail} />
                   : activeChannel === 'WhatsApp'
@@ -210,7 +211,7 @@ export function InboxPanel() {
               </div>
 
               {/* Reply area */}
-              <div className="border-t border-[rgba(28,25,22,0.06)] px-3 py-2.5 bg-white shrink-0">
+              <div className="border-t border-white/40 px-3 py-2.5 bg-white/30 shrink-0">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[9px] font-medium tracking-widest uppercase text-zinc-500">Reply via</span>
                   {CHANNEL_TABS.map((ch) => {
@@ -221,8 +222,8 @@ export function InboxPanel() {
                         onClick={() => setReplyChannel(ch)}
                         className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
                           isActive
-                            ? 'bg-[#1c1916] text-white border-[#1c1916]'
-                            : 'text-zinc-500 border-[rgba(28,25,22,0.1)] hover:bg-[#faf8f5]'
+                            ? 'bg-white/70 backdrop-blur text-zinc-900 border-white/60'
+                            : 'text-zinc-500 border-white/40 hover:bg-white/30'
                         }`}
                       >
                         {ch}
@@ -238,7 +239,7 @@ export function InboxPanel() {
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     placeholder="Subject..."
-                    className="w-full text-[12px] px-2.5 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400 mb-2"
+                    className="w-full text-[12px] px-2.5 py-1.5 border border-white/60 rounded-lg bg-white/50 text-[#1a1a1a] focus:outline-none focus:border-zinc-400 mb-2"
                   />
                 )}
 
@@ -248,13 +249,13 @@ export function InboxPanel() {
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Type a message..."
                     rows={replyChannel === 'Email' ? 3 : 1}
-                    className={`flex-1 resize-none text-[12px] px-2.5 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400 ${replyChannel === 'Email' ? 'min-h-[100px]' : ''}`}
+                    className={`flex-1 resize-none text-[12px] px-2.5 py-1.5 border border-white/60 rounded-lg bg-white/50 text-[#1a1a1a] focus:outline-none focus:border-zinc-400 ${replyChannel === 'Email' ? 'min-h-[100px]' : ''}`}
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && replyChannel !== 'Email') { e.preventDefault(); handleSend(); } }}
                   />
                   <button
                     onClick={handleSend}
                     disabled={sending || !replyText.trim()}
-                    className="px-3.5 py-1.5 bg-[#ff6a3d] text-white text-[12px] font-medium rounded-lg hover:bg-[#f5552a] disabled:opacity-40 flex items-center gap-1.5 self-end"
+                    className="px-3.5 py-1.5 bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white text-[12px] font-medium rounded-full hover:opacity-90 disabled:opacity-40 flex items-center gap-1.5 self-end"
                   >
                     <Send className="h-3.5 w-3.5" />
                     <span className="text-[11px]">
@@ -293,8 +294,8 @@ function SMSThread({ messages, contactName, contactPhone }: { messages: Message[
           </span>
           <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
             msg.direction === 'inbound'
-              ? 'self-start bg-white border border-emerald-200 rounded-2xl text-zinc-800'
-              : 'self-end bg-emerald-600 text-white rounded-2xl'
+              ? 'self-start bg-white/60 border border-emerald-200 rounded-2xl text-zinc-800'
+              : 'self-end bg-emerald-500 text-white rounded-2xl'
           }`}>
             {msg.body}
           </div>
@@ -315,14 +316,14 @@ function EmailThread({ messages, contactName, contactEmail }: { messages: Messag
   return (
     <>
       {messages.map((msg) => (
-        <div key={msg.id} className="bg-white border border-blue-100 rounded-lg p-3 mb-2">
+        <div key={msg.id} className="bg-white/60 border border-blue-100 rounded-lg p-3 mb-2">
           <div className="text-[10px] text-zinc-500 leading-relaxed space-y-0.5">
             <p>From: {msg.direction === 'inbound' ? (msg.meta?.from ?? contactFull) : (msg.meta?.from ?? tenantFull)}</p>
             <p>To: {msg.direction === 'outbound' ? (msg.meta?.to ?? contactFull) : (msg.meta?.to ?? tenantFull)}</p>
             {msg.meta?.subject && <p>Subject: {msg.meta.subject}</p>}
             <p>{formatExactDateTime(msg.dateAdded)}</p>
           </div>
-          <div className="border-t border-[rgba(28,25,22,0.04)] my-2" />
+          <div className="border-t border-white/30 my-2" />
           <div className="text-[12px] text-zinc-800 whitespace-pre-wrap">{msg.body}</div>
         </div>
       ))}
@@ -344,8 +345,8 @@ function WhatsAppThread({ messages, contactName, contactPhone }: { messages: Mes
           </span>
           <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
             msg.direction === 'inbound'
-              ? 'self-start bg-white border border-teal-200 rounded-lg text-zinc-800'
-              : 'self-end bg-teal-600 text-white rounded-lg'
+              ? 'self-start bg-white/60 border border-teal-200 rounded-lg text-zinc-800'
+              : 'self-end bg-teal-500 text-white rounded-lg'
           }`}>
             {msg.body}
           </div>
@@ -377,8 +378,8 @@ function ConvoRow({
   return (
     <button
       onClick={onSelect}
-      className={`w-full text-left px-3 py-2 border-b border-[rgba(28,25,22,0.04)] flex items-start gap-2 cursor-pointer hover:bg-[#faf8f5] ${
-        isSelected ? 'bg-[#faf8f5] border-l-2 border-l-[#1c1916]' : ''
+      className={`w-full text-left px-3 py-2 border-b border-white/30 flex items-start gap-2 cursor-pointer hover:bg-white/30 ${
+        isSelected ? 'bg-white/50 border-l-2 border-l-[#ff6a3d]' : ''
       }`}
     >
       <div className={`h-4 w-4 rounded text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5 ${icon.bg} ${icon.text}`}>
@@ -386,7 +387,7 @@ function ConvoRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-[12px] font-medium text-[#1c1916] truncate">{convo.contactName}</span>
+          <span className="text-[12px] font-medium text-[#1a1a1a] truncate">{convo.contactName}</span>
           <span className="text-[10px] text-zinc-500 font-mono flex-shrink-0">
             {formatExactTime(convo.lastMessageDate)}
           </span>
@@ -394,7 +395,7 @@ function ConvoRow({
         <p className="text-[11px] text-zinc-500 truncate">{convo.lastMessageBody}</p>
       </div>
       {convo.unreadCount > 0 && (
-        <span className="w-1.5 h-1.5 rounded-full bg-[#1c1916] flex-shrink-0 mt-2" />
+        <span className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a] flex-shrink-0 mt-2" />
       )}
     </button>
   );

@@ -1,43 +1,43 @@
-# Design Decisions — Locked (Payoneer Edition)
+# Design Decisions — Payoneer Frosted Glass (FINAL)
 
-**Job:** Operator CRM for Pablo + Corey (primary), client demo showpiece (secondary).
+**Visual reference:** Real Payoneer redesign by Nixtio. Warm grey-cream page bg with subtle noise. Frosted glass cards with backdrop blur and gradient fills. Soft inner glows. Coral as small circular accents only.
 
-**Visual reference:** Payoneer redesign by Nixtio. Warm dark page, floating white app container, thin dark sidebar, dark cards on white as signature, coral pill CTAs.
-
-## The 3-layer sandwich
-
-LAYER 1 — Page background: #1c1916 (warm dark charcoal) with p-6 padding
-LAYER 2 — App container: bg-white rounded-[28px] shadow-2xl, min-h-[calc(100vh-48px)]
-LAYER 3 — Content: dark cards (#1f1a16) for stat tiles + white panels for data lists
+**Critical anti-patterns (what the previous build did wrong):**
+- Hard black sidebar -> Soft cream sidebar with frosted nav items
+- Hard black active tab -> Soft frosted pill with subtle highlight
+- Flat solid dark stat cards -> Frosted glass cards with gradient
+- Wide coral "Ask AI" button -> Small circular coral icon button
+- Pure white page bg -> Warm grey-cream #ebe7e0 with noise
+- Coral used everywhere -> Coral only on small icons and accents
 
 ## Color system
 
-- pageBg: #1c1916
-- containerBg: #ffffff
-- sidebarBg: #1c1916 (64px wide, icons only)
-- contentBg: #ffffff
-- contentMutedBg: #faf8f5
-- darkCardBg: #1f1a16, darkCardBgHover: #2a231e
-- textPrimary: #1c1916, textSecondary: #52525b, textTertiary: #71717a
-- accent (coral): #ff6a3d, accentHover: #f5552a, accentMuted: #fff1ec
+### Page: #ebe7e0 warm grey-cream with subtle SVG noise at 4% opacity
+### Frosted glass cards: bg-white/55 backdrop-blur-xl border-white/60 with soft layered shadows
+### Sidebar: bg-white/40 backdrop-blur-xl (frosted, not solid), 72px wide
+### Text: #1a1a1a primary, #52525b secondary, #71717a tertiary
+### Coral: #ff6a3d — small accents only (circles, icons, small pills)
 
-## Sidebar (CRITICAL — replaces top bar)
+## Coral budget (strict)
+1. Sidebar brand mark (40x40 coral gradient circle)
+2. Active sidebar nav item icon (coral-tinted)
+3. Small circular icon buttons (Ask AI 40x40, add, refresh)
+4. Score circles 90+ (coral ring + text)
+5. Stat card primary values (coral text on frosted card)
+6. Chart bar emphasis (accentDeep)
+7. Send/Confirm form pills (small coral gradient pills)
 
-64px wide, bg-[#1c1916], inside the white container on the left.
-Active item: coral wash bg + 2px coral left bar.
-Brand mark: 32x32 coral square with brain icon.
+NEVER: wide coral buttons, coral tab backgrounds, coral sidebar fills
 
-## Coral budget (7 uses max)
-
-1. Brand mark in sidebar
-2. Active sidebar item
-3. Primary CTAs (one per visible area)
-4. Coral icons inside dark cards (36x36 rounded-full)
-5. Score circles 90+
-6. Stat card values on dark cards
-7. Chart bar emphasis
+## Frosted glass card recipe
+```
+bg-white/55 backdrop-blur-xl backdrop-saturate-150
+border border-white/60
+rounded-3xl
+shadow-[0_8px_32px_-8px_rgba(28,25,22,0.12),0_2px_8px_-2px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.8)]
+```
+With gradient overlay: `bg-gradient-to-br from-white/30 to-transparent`
 
 ## Locked files — do NOT modify
-
-- src/lib/ghl.ts, src/lib/supabase.ts, src/lib/format.ts (score helpers)
+- src/lib/ghl.ts, src/lib/supabase.ts, src/lib/format.ts
 - src/mastra/**, src/app/(app)/calls/[id]/page.tsx, ChatPanel component

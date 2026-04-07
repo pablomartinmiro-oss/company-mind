@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Phone, Building2, Settings, LogOut, Brain } from 'lucide-react';
+import { LayoutDashboard, Phone, Building2, Settings, Brain } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 
 const navItems = [
@@ -20,14 +20,14 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-16 shrink-0 bg-[#1c1916] flex flex-col items-center py-4 gap-2 rounded-l-[28px] border-r border-white/[0.06]">
-      {/* Brand mark — coral square with brain icon (coral use #1) */}
-      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff6a3d] mb-4">
-        <Brain className="h-4 w-4 text-white" />
+    <div className="fixed left-0 top-0 bottom-0 w-[72px] z-20 flex flex-col items-center py-5 gap-3 bg-white/40 backdrop-blur-xl border-r border-white/50">
+      {/* Brand mark — 40x40 coral gradient circle */}
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] shadow-[0_4px_12px_rgba(255,106,61,0.3),inset_0_1px_0_rgba(255,255,255,0.3)] mb-3">
+        <Brain className="h-[18px] w-[18px] text-white" />
       </div>
 
       {/* Nav items */}
-      <div className="flex flex-col items-center gap-1 flex-1">
+      <div className="flex flex-col items-center gap-1.5 flex-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
@@ -36,35 +36,31 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               title={item.label}
-              className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors duration-150 ${
+              className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-150 ${
                 isActive
-                  ? 'text-white bg-[rgba(255,106,61,0.12)]'
-                  : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'
+                  ? 'bg-white/70 backdrop-blur border border-white/60 shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] text-[#ff6a3d]'
+                  : 'text-zinc-500 hover:bg-white/40 hover:text-zinc-700'
               }`}
             >
-              {/* Coral left bar for active item (coral use #2) */}
-              {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 rounded-full bg-[#ff6a3d]" />
-              )}
               <Icon className="h-[18px] w-[18px]" />
             </a>
           );
         })}
       </div>
 
-      {/* Bottom: settings + avatar */}
+      {/* Bottom */}
       <div className="flex flex-col items-center gap-2 mt-auto">
         <a
           href="/settings"
           title="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl text-zinc-400 hover:bg-white/40 hover:text-zinc-700 transition-all"
         >
           <Settings className="h-[18px] w-[18px]" />
         </a>
         <button
           onClick={handleSignOut}
           title="Sign out"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-700 text-white text-[10px] font-semibold hover:bg-zinc-600 transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/50 backdrop-blur border border-white/60 text-zinc-600 text-[10px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white/70 transition-all"
         >
           PM
         </button>

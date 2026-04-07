@@ -83,7 +83,7 @@ export function ResearchTab({ contactId, researchData, pipelineNames }: Props) {
           placeholder="Search fields..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[12px] px-3 py-1.5 border border-[rgba(28,25,22,0.1)] rounded-lg bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400"
+          className="flex-1 text-[12px] px-3 py-1.5 bg-white/50 border border-white/60 rounded-lg text-[#1a1a1a] focus:outline-none focus:border-zinc-400"
         />
         <div className="flex items-center gap-3">
           {(['api', 'ai', 'manual'] as const).map((src) => (
@@ -105,7 +105,7 @@ export function ResearchTab({ contactId, researchData, pipelineNames }: Props) {
 
         return (
           <div key={sectionName} className="mb-5">
-            <h3 className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 pb-1.5 mb-2 border-b border-[rgba(28,25,22,0.04)]">
+            <h3 className="text-[9px] font-semibold tracking-widest uppercase text-zinc-500 pb-1.5 mb-2 border-b border-white/30">
               {sectionName}
             </h3>
             <div className="grid grid-cols-3 gap-2">
@@ -122,7 +122,7 @@ export function ResearchTab({ contactId, researchData, pipelineNames }: Props) {
                         setEditValue(fieldData?.field_value ?? '');
                       }
                     }}
-                    className="border border-[rgba(28,25,22,0.06)] rounded-lg p-2.5 cursor-pointer hover:border-[rgba(28,25,22,0.12)] transition-colors"
+                    className="border border-white/40 rounded-lg p-2.5 cursor-pointer hover:border-white/60 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-medium text-zinc-500 tracking-wide uppercase">{fieldName}</span>
@@ -143,13 +143,13 @@ export function ResearchTab({ contactId, researchData, pipelineNames }: Props) {
                             if (e.key === 'Enter') saveField(sectionName, fieldName);
                             if (e.key === 'Escape') setEditingField(null);
                           }}
-                          className="text-[12px] w-full px-1.5 py-0.5 border border-[rgba(28,25,22,0.1)] rounded bg-white text-[#1c1916] focus:outline-none focus:border-zinc-400"
+                          className="text-[12px] w-full px-1.5 py-0.5 bg-white/50 border border-white/60 rounded text-[#1a1a1a] focus:outline-none focus:border-zinc-400"
                           onClick={(e) => e.stopPropagation()}
                         />
                         <div className="flex gap-1 mt-1">
                           <button
                             onClick={(e) => { e.stopPropagation(); saveField(sectionName, fieldName); }}
-                            className="text-[10px] px-2 py-0.5 bg-[#1c1916] text-white rounded"
+                            className="text-[10px] px-2 py-0.5 bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white rounded-full"
                           >
                             Save
                           </button>
@@ -162,7 +162,7 @@ export function ResearchTab({ contactId, researchData, pipelineNames }: Props) {
                         </div>
                       </div>
                     ) : (
-                      <p className={`text-[12px] mt-1 leading-snug ${fieldData?.field_value ? 'font-medium text-[#1c1916]' : 'text-zinc-400'}`}>
+                      <p className={`text-[12px] mt-1 leading-snug ${fieldData?.field_value ? 'font-medium text-[#1a1a1a]' : 'text-zinc-400'}`}>
                         {fieldData?.field_value ?? '—'}
                       </p>
                     )}

@@ -9,29 +9,30 @@ export default function BrandPage() {
   return (
     <div className="space-y-10 max-w-5xl">
       <div>
-        <h1 className="text-[22px] font-medium tracking-tight text-[#1c1916]">Brand Kit</h1>
-        <p className="text-[13px] text-zinc-500 mt-1">Company Mind design system — Payoneer Edition. Dense operator CRM meets premium financial confidence.</p>
+        <h1 className="text-[22px] font-medium tracking-tight text-[#1a1a1a]">Brand Kit</h1>
+        <p className="text-[13px] text-zinc-500 mt-1">Company Mind design system — Frosted Glass Edition. Dense operator CRM with warm grey-cream and glass morphism.</p>
       </div>
 
-      {/* ── 3-Layer Sandwich Demo ── */}
+      {/* ── Frosted Glass Demo ── */}
       <section>
-        <h2 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-3">The 3-Layer Sandwich</h2>
-        <div className="bg-[#1c1916] rounded-[28px] p-6 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.4)]">
-          <div className="bg-white rounded-2xl p-6">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[#1f1a16] rounded-2xl p-5 border border-white/[0.04]">
-                <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">Dark Card</p>
+        <h2 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-3">Frosted Glass Cards</h2>
+        <div className="rounded-[28px] p-6 bg-gradient-to-br from-[#f5f0eb] to-[#ebe5de]">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="relative glass-card rounded-3xl overflow-hidden p-5">
+              <div className="glass-card-inner" />
+              <div className="relative">
+                <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">Glass Card</p>
                 <p className="text-[#ff6a3d] text-[36px] font-mono font-medium leading-none">12</p>
-                <p className="text-zinc-400 text-[11px] mt-1">On white container, on dark page</p>
+                <p className="text-zinc-400 text-[11px] mt-1">Frosted glass on warm grey-cream bg</p>
               </div>
-              <div className="bg-white rounded-2xl p-5 border border-[rgba(28,25,22,0.06)]">
-                <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">White Panel</p>
-                <p className="text-[#1c1916] text-[13px]">Dense data rows go here — calls list, tasks, activity feed.</p>
-              </div>
-              <div className="bg-[#faf8f5] rounded-2xl p-5">
-                <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">Muted Inset</p>
-                <p className="text-zinc-600 text-[13px]">Warm cream for inset sections and message backgrounds.</p>
-              </div>
+            </div>
+            <div className="bg-white/30 rounded-3xl p-5 border border-white/40">
+              <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">Subtle Panel</p>
+              <p className="text-[#1a1a1a] text-[13px]">Dense data rows go here — calls list, tasks, activity feed.</p>
+            </div>
+            <div className="bg-white/50 backdrop-blur rounded-3xl p-5 border border-white/60">
+              <p className="text-zinc-400 text-[10px] uppercase tracking-widest mb-2">Strong Frost</p>
+              <p className="text-zinc-600 text-[13px]">Higher opacity for inputs, active tabs, and focused elements.</p>
             </div>
           </div>
         </div>
@@ -49,12 +50,12 @@ export default function BrandPage() {
             { label: 'Wordmark — Light', bg: 'bg-[#1c1916]', border: false, src: '/brand/wordmark-light.svg' },
             { label: 'Wordmark — Dark', bg: 'bg-white', border: true, src: '/brand/wordmark-dark.svg' },
           ].map((logo) => (
-            <div key={logo.label} className={`rounded-2xl overflow-hidden ${logo.border ? 'border border-[rgba(28,25,22,0.06)]' : ''}`}>
+            <div key={logo.label} className={`rounded-2xl overflow-hidden ${logo.border ? 'border border-white/40' : ''}`}>
               <div className={`${logo.bg} h-24 flex items-center justify-center p-4`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logo.src} alt={logo.label} className="h-10 w-auto" />
               </div>
-              <div className="px-3 py-2 bg-white border-t border-[rgba(28,25,22,0.04)]">
+              <div className="px-3 py-2 bg-white border-t border-white/30">
                 <p className="text-[11px] text-zinc-500">{logo.label}</p>
               </div>
             </div>
@@ -69,10 +70,10 @@ export default function BrandPage() {
           {colorEntries.map(([name, value]) => {
             const isDark = (value as string).startsWith('#1') || (value as string).startsWith('#0') || (value as string).startsWith('rgba(255');
             return (
-              <div key={name} className="rounded-xl overflow-hidden border border-[rgba(28,25,22,0.06)]">
+              <div key={name} className="rounded-xl overflow-hidden border border-white/40">
                 <div className="h-10" style={{ background: value as string }} />
                 <div className="px-2 py-1.5 bg-white">
-                  <p className={`text-[10px] font-medium font-mono ${isDark ? 'text-[#1c1916]' : 'text-[#1c1916]'}`}>{name}</p>
+                  <p className={`text-[10px] font-medium font-mono ${isDark ? 'text-[#1a1a1a]' : 'text-[#1a1a1a]'}`}>{name}</p>
                   <p className="text-[8px] text-zinc-400 font-mono truncate">{value as string}</p>
                 </div>
               </div>
@@ -84,19 +85,19 @@ export default function BrandPage() {
       {/* ── Typography ── */}
       <section>
         <h2 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-3">Typography Scale</h2>
-        <div className="space-y-2 bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] p-5">
+        <div className="space-y-2 bg-white rounded-2xl border border-white/40 p-5">
           {Object.entries(typography.fontSize).map(([name, size]) => (
             <div key={name} className="flex items-baseline gap-4">
               <span className="text-[10px] text-zinc-400 font-mono w-14 shrink-0">{name}</span>
               <span className="text-[10px] text-zinc-300 font-mono w-10 shrink-0">{size}</span>
-              <span style={{ fontSize: size }} className="text-[#1c1916] font-sans">
+              <span style={{ fontSize: size }} className="text-[#1a1a1a] font-sans">
                 The quick brown fox jumps over the lazy dog
               </span>
             </div>
           ))}
-          <div className="border-t border-[rgba(28,25,22,0.04)] pt-3 mt-3">
+          <div className="border-t border-white/30 pt-3 mt-3">
             <p className="text-[10px] text-zinc-400 mb-2">Mono (numbers, times, scores)</p>
-            <span className="text-[13px] text-[#1c1916] font-mono">91 / 100 — $45,000 — 2:15 PM CDT — 4m 32s</span>
+            <span className="text-[13px] text-[#1a1a1a] font-mono">91 / 100 — $45,000 — 2:15 PM CDT — 4m 32s</span>
           </div>
         </div>
       </section>
@@ -108,7 +109,7 @@ export default function BrandPage() {
           {Object.entries(radii).map(([name, value]) => (
             <div key={name} className="flex flex-col items-center gap-1.5">
               <div
-                className="w-14 h-14 border border-[rgba(28,25,22,0.1)] bg-[#faf8f5]"
+                className="w-14 h-14 border border-white/50 bg-white/30"
                 style={{ borderRadius: value }}
               />
               <span className="text-[9px] text-zinc-400 font-mono">{name}</span>
@@ -136,18 +137,21 @@ export default function BrandPage() {
         <h2 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-3">Components</h2>
         <div className="space-y-4">
           {/* Buttons */}
-          <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] p-5">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Buttons</p>
-            <div className="flex gap-3 items-center flex-wrap">
-              <button className="bg-[#ff6a3d] hover:bg-[#f5552a] text-white text-[13px] font-medium px-5 py-2.5 rounded-full">Primary CTA</button>
-              <button className="bg-white border border-[rgba(28,25,22,0.1)] text-[#1c1916] text-[13px] font-medium px-5 py-2.5 rounded-full hover:bg-[#faf8f5]">Secondary</button>
-              <button className="text-zinc-600 hover:text-[#1c1916] hover:bg-[rgba(28,25,22,0.04)] text-[13px] font-medium px-3 py-1.5 rounded-lg">Ghost</button>
-              <button className="bg-white text-[#1c1916] hover:bg-zinc-100 text-[13px] font-medium px-4 py-2 rounded-full">Dark Inverse</button>
+          <div className="relative glass-card rounded-3xl overflow-hidden p-5">
+            <div className="glass-card-inner" />
+            <div className="relative">
+              <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Buttons</p>
+              <div className="flex gap-3 items-center flex-wrap">
+                <button className="bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white text-[13px] font-medium px-5 py-2.5 rounded-full">Primary CTA</button>
+                <button className="bg-white/60 backdrop-blur border border-white/60 text-zinc-700 text-[13px] font-medium px-5 py-2.5 rounded-full hover:bg-white/80">Secondary</button>
+                <button className="text-zinc-600 hover:text-[#1a1a1a] hover:bg-white/30 text-[13px] font-medium px-3 py-1.5 rounded-lg">Ghost</button>
+                <button className="bg-white/80 backdrop-blur border border-white/80 text-zinc-900 text-[13px] font-medium px-4 py-2 rounded-full shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">Frosted Pill</button>
+              </div>
             </div>
           </div>
 
           {/* Pills */}
-          <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] p-5">
+          <div className="bg-white rounded-2xl border border-white/40 p-5">
             <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Pills & Badges</p>
             <div className="flex gap-2 items-center flex-wrap">
               <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Closed</span>
@@ -159,31 +163,37 @@ export default function BrandPage() {
             </div>
           </div>
 
-          {/* Dark stat card */}
-          <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] p-5">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Dark Stat Cards (Signature)</p>
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: 'Calls', value: '12', icon: 'Phone' },
-                { label: 'Avg Score', value: '84', icon: 'BarChart' },
-                { label: 'Pipeline', value: '$195k', icon: 'TrendingUp' },
-                { label: 'Tasks', value: '8', icon: 'CheckSquare' },
-              ].map((card) => (
-                <div key={card.label} className="bg-[#1f1a16] rounded-2xl p-5 border border-white/[0.04] shadow-[0_4px_16px_rgba(28,25,22,0.12)]">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-zinc-400 text-[10px] uppercase tracking-widest">{card.label}</p>
-                    <div className="h-9 w-9 rounded-full bg-[#ff6a3d] flex items-center justify-center">
-                      <span className="text-white text-[12px]">{card.icon[0]}</span>
+          {/* Frosted stat card */}
+          <div className="relative glass-card rounded-3xl overflow-hidden p-5">
+            <div className="glass-card-inner" />
+            <div className="relative">
+              <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Frosted Stat Cards</p>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { label: 'Calls', value: '12', icon: 'Phone' },
+                  { label: 'Avg Score', value: '84', icon: 'BarChart' },
+                  { label: 'Pipeline', value: '$195k', icon: 'TrendingUp' },
+                  { label: 'Tasks', value: '8', icon: 'CheckSquare' },
+                ].map((card) => (
+                  <div key={card.label} className="relative glass-card rounded-2xl overflow-hidden p-5">
+                    <div className="glass-card-inner" />
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-zinc-500 text-[10px] uppercase tracking-widest">{card.label}</p>
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] flex items-center justify-center">
+                          <span className="text-white text-[12px]">{card.icon[0]}</span>
+                        </div>
+                      </div>
+                      <p className="text-[#ff6a3d] text-[36px] font-mono font-medium leading-none">{card.value}</p>
                     </div>
                   </div>
-                  <p className="text-[#ff6a3d] text-[36px] font-mono font-medium leading-none">{card.value}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Score circles */}
-          <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] p-5">
+          <div className="bg-white rounded-2xl border border-white/40 p-5">
             <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Score Circles</p>
             <div className="flex gap-4 items-center">
               {[
@@ -207,10 +217,10 @@ export default function BrandPage() {
       {/* ── Voice ── */}
       <section>
         <h2 className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-3">Voice & Tone</h2>
-        <div className="bg-white rounded-2xl border border-[rgba(28,25,22,0.06)] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-white/40 overflow-hidden">
           <div className="grid grid-cols-2">
-            <div className="px-4 py-2 border-b border-[rgba(28,25,22,0.04)] text-[10px] font-medium text-red-600 uppercase tracking-widest">Don&apos;t say</div>
-            <div className="px-4 py-2 border-b border-[rgba(28,25,22,0.04)] text-[10px] font-medium text-emerald-600 uppercase tracking-widest">Say instead</div>
+            <div className="px-4 py-2 border-b border-white/30 text-[10px] font-medium text-red-600 uppercase tracking-widest">Don&apos;t say</div>
+            <div className="px-4 py-2 border-b border-white/30 text-[10px] font-medium text-emerald-600 uppercase tracking-widest">Say instead</div>
           </div>
           {[
             ['"Oops! Something went wrong."', '"Couldn\'t load calls. Retry."'],
@@ -219,16 +229,16 @@ export default function BrandPage() {
             ['"Welcome back, user!"', '"Good morning, Pablo."'],
             ['"No items to display"', '"No calls yet."'],
           ].map(([bad, good], i) => (
-            <div key={i} className="grid grid-cols-2 border-b border-[rgba(28,25,22,0.04)] last:border-0">
+            <div key={i} className="grid grid-cols-2 border-b border-white/30 last:border-0">
               <div className="px-4 py-2 text-[12px] text-zinc-400">{bad}</div>
-              <div className="px-4 py-2 text-[12px] text-[#1c1916]">{good}</div>
+              <div className="px-4 py-2 text-[12px] text-[#1a1a1a]">{good}</div>
             </div>
           ))}
         </div>
       </section>
 
       <div className="pb-8">
-        <p className="text-[11px] text-zinc-300">Company Mind Brand Kit v2.0 (Payoneer Edition) — {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+        <p className="text-[11px] text-zinc-300">Company Mind Brand Kit v3.0 (Frosted Glass Edition) — {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
       </div>
     </div>
   );
