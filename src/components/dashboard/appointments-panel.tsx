@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
 import { formatExactTime } from '@/lib/format';
+import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_PILL, APPOINTMENT_STATUS_ORDER } from '@/lib/pipeline-config';
 
 interface Appointment {
   id: string;
@@ -133,13 +134,7 @@ export function AppointmentsPanel() {
                   <div>
                     <p className="text-[12px] font-medium text-zinc-800">{appt.contactName || appt.title}</p>
                     <p className="text-[10px] text-zinc-500 mt-0.5">{appt.type || appt.title}</p>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${
-                      isConfirmed ? 'bg-emerald-50 text-emerald-700'
-                        : appt.status === 'cancelled' ? 'bg-red-50 text-red-600'
-                        : 'bg-amber-50 text-amber-700'
-                    }`}>
-                      {appt.status === 'confirmed' ? 'Confirmed' : appt.status === 'cancelled' ? 'Cancelled' : 'Pending'}
-                    </span>
+                    <StatusPill ghlEventId={appt.id} initial={appt.status || 'confirmed'} />
                   </div>
                 </div>
 
@@ -194,5 +189,46 @@ export function AppointmentsPanel() {
         )}
       </div>
     </div>
+  );
+}
+
+function StatusPill({ ghlEventId, initial }: { ghlEventId: string; initial: string }) {
+  // Normalize incoming status to a valid key
+  const normalizeStatus = (s: string) => {
+    const valid = APPOINTMENT_STATUS_ORDER as readonly string[];
+    return valid.includes(s) ? s : 'confirmed';
+  };
+
+  const [status, setStatus] = useState(normalizeStatus(initial));
+  const [updating, setUpdating] = useState(false);
+
+  const cycle = async () => {
+    if (updating) return;
+    const idx = APPOINTMENT_STATUS_ORDER.indexOf(status as typeof APPOINTMENT_STATUS_ORDER[number]);
+    const next = APPOINTMENT_STATUS_ORDER[(idx + 1) % APPOINTMENT_STATUS_ORDER.length];
+    setUpdating(true);
+    setStatus(next);
+    try {
+      await fetch('/api/appointments/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ghl_event_id: ghlEventId, status: next }),
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        cycle();
+      }}
+      className={`text-[9px] font-medium px-2 py-0.5 rounded-full mt-1 inline-block cursor-pointer hover:opacity-80 transition-opacity ${APPOINTMENT_STATUS_PILL[status] ?? 'bg-zinc-100 text-zinc-500'}`}
+      title="Click to cycle status"
+    >
+      {APPOINTMENT_STATUS_LABELS[status] ?? status}
+    </button>
   );
 }

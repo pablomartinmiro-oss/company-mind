@@ -92,6 +92,22 @@ export const NEXT_STEP_TYPE_PILL: Record<string, string> = {
   new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
 };
 
+export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
+  confirmed: 'Confirmed',
+  showed: 'Showed',
+  no_show: 'No Show',
+  cancelled: 'Cancelled',
+};
+
+export const APPOINTMENT_STATUS_PILL: Record<string, string> = {
+  confirmed: 'bg-emerald-100/60 text-emerald-700 border border-emerald-200/40',
+  showed: 'bg-blue-100/60 text-blue-700 border border-blue-200/40',
+  no_show: 'bg-amber-100/60 text-amber-700 border border-amber-200/40',
+  cancelled: 'bg-zinc-100/60 text-zinc-500 border border-zinc-200/40',
+};
+
+export const APPOINTMENT_STATUS_ORDER = ['confirmed', 'showed', 'no_show', 'cancelled'] as const;
+
 export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
   qualification_call: 'Qualification Call',
   closing_call:       'Closing Call',
