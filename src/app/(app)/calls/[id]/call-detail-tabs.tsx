@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { approveAction, rejectAction, approveDataPoint, rejectDataPoint } from '@/app/actions';
+import { approveAction, rejectAction } from '@/app/actions';
 import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
 import { Sparkles, AlertTriangle, Pencil, X } from 'lucide-react';
 import { NextStepsTab } from '@/components/calls/next-steps-tab';
+import { DataPointsView } from '@/components/calls/data-points-view';
 
 interface ScoreData {
   overall: number;
@@ -37,14 +38,6 @@ interface Action {
   suggested_payload?: { reasoning?: string } | null;
 }
 
-interface DataPoint {
-  id: string;
-  field_name: string;
-  field_value: string;
-  confidence: string;
-  source: string;
-}
-
 interface TranscriptLine {
   speaker: 'rep' | 'contact';
   speakerName: string;
@@ -72,9 +65,11 @@ interface Props {
   coaching: CoachingData | null;
   callSummary: string;
   actions: Action[];
-  dataPoints: DataPoint[];
+  /** @deprecated Page passes these from contact_data_points; ignored by new DataPointsView */
+  dataPoints?: unknown[];
   duration: number;
-  contactGhlId: string;
+  /** @deprecated Page passes this; ignored by new DataPointsView */
+  contactGhlId?: string;
   nextSteps?: NextStepItem[];
   pendingDataPoints?: number;
   callId?: string;
@@ -88,7 +83,7 @@ function formatType(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, dataPoints, duration, contactGhlId, nextSteps, pendingDataPoints, callId, recordingUrl }: Props) {
+export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, duration, nextSteps, pendingDataPoints, callId, recordingUrl }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('Coaching');
   const pendingActions = actions.filter((a) => a.status === 'suggested');
 
@@ -131,7 +126,7 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
             : <NextStepsView actions={actions} />
         )}
-        {activeTab === 'Data Points' && <DataPointsView dataPoints={dataPoints} contactGhlId={contactGhlId} />}
+        {activeTab === 'Data Points' && <DataPointsView callId={callId ?? ''} />}
       </div>
     </div>
   );
@@ -459,77 +454,7 @@ function NextStepsView({ actions }: { actions: Action[] }) {
   );
 }
 
-/* ── Data Points Tab ── */
-
-function DataPointsView({ dataPoints, contactGhlId }: { dataPoints: DataPoint[]; contactGhlId: string }) {
-  const [approved, setApproved] = useState<Set<string>>(new Set());
-
-  function confidenceBadge(c: string) {
-    const n = parseFloat(c);
-    if (n >= 0.9) return { cls: 'bg-green-50 text-green-700', label: 'high' };
-    if (n >= 0.7) return { cls: 'bg-amber-50 text-amber-700', label: 'medium' };
-    return { cls: 'bg-zinc-100 text-zinc-500', label: 'low' };
-  }
-
-  async function handleApprove(dp: DataPoint) {
-    setApproved((prev) => new Set(prev).add(dp.id));
-    await approveDataPoint(dp.id);
-    // Also push to contact research
-    await fetch(`/api/contacts/${contactGhlId}/research`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fieldName: dp.field_name, fieldValue: dp.field_value, section: 'Sales Context', source: 'ai' }),
-    });
-  }
-
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-[16px] font-medium text-zinc-900">Deal Intelligence from Call</span>
-        <button className="bg-zinc-900 text-white text-[13px] font-medium px-3 py-1.5 rounded-lg">
-          Approve All ({dataPoints.filter((dp) => !approved.has(dp.id) && dp.source === 'call').length})
-        </button>
-      </div>
-
-      {dataPoints.length === 0 ? (
-        <p className="py-8 text-center text-[13px] text-zinc-400">No data points extracted.</p>
-      ) : (
-        dataPoints.map((dp) => {
-          const conf = confidenceBadge(dp.confidence);
-          const isApproved = approved.has(dp.id);
-
-          return (
-            <div key={dp.id} className={`flex items-start gap-3 py-3 border-b border-zinc-50 ${isApproved ? 'opacity-50' : ''}`}>
-              <div className="flex-1">
-                <span className="text-[13px] font-medium text-zinc-700">{formatType(dp.field_name)}</span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[13px] text-zinc-900 font-medium">{dp.field_value}</span>
-                </div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full mt-1 inline-block ${conf.cls}`}>
-                  {conf.label}
-                </span>
-              </div>
-
-              {!isApproved && dp.source === 'call' ? (
-                <div className="flex gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => handleApprove(dp)}
-                    className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[12px] font-medium px-2.5 py-1 rounded-lg"
-                  >
-                    Approve
-                  </button>
-                  <button className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1">Edit</button>
-                  <form action={rejectDataPoint.bind(null, dp.id)}>
-                    <button type="submit" className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1">Skip</button>
-                  </form>
-                </div>
-              ) : isApproved ? (
-                <span className="text-emerald-600 text-[12px]">✓</span>
-              ) : null}
-            </div>
-          );
-        })
-      )}
-    </div>
-  );
-}
+/* ── Data Points Tab ──
+ * Moved to src/components/calls/data-points-view.tsx
+ * Renders via import above, self-fetches from /api/calls/[id]/data-points
+ */

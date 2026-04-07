@@ -1,12 +1,31 @@
 # PROGRESS.md — Company Mind Build Tracker
 
 ## Current Status
-- **Phase**: Post-R3 bug backlog complete
+- **Phase**: Data Points approval flow shipped
 - **App state**: tsc clean, build passes, all routes auth-protected
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Post-R3 Bug Backlog Batch (2026-04-07)
+## Latest: Data Points Approval Flow (2026-04-07)
+
+- Rewrote `approveDataPoint`/`rejectDataPoint` to operate on R2 `data_points` table (was reading empty `contact_data_points`)
+- Added tenant check to both actions via `getTenantForUser()` (closed cross-tenant mutation hole)
+- Approved data points now promote to `research` catalog with `source='call'`, section lookup from catalog, `confidence='medium'`
+- Built new `DataPointsView` component: pending/approved/rejected sections, bulk approve/reject, inline per-row actions, frosted glass design
+- Component self-fetches from new `GET /api/calls/[id]/data-points` route (bypasses locked page.tsx)
+- Reject uses ConfirmModal; approve is one-way in MVP
+- Added `approveDataPointsBulk` and `rejectDataPointsBulk` server actions
+- calls/[id]/page.tsx is locked — kept deprecated props in CallDetailTabs interface, new DataPointsView ignores them
+
+**New files:**
+- `src/components/calls/data-points-view.tsx` — full approval UI
+- `src/app/api/calls/[id]/data-points/route.ts` — data_points query endpoint
+
+**Modified files:**
+- `src/app/actions.ts` — rewrote approve/reject + added bulk actions + tenant checks
+- `src/app/(app)/calls/[id]/call-detail-tabs.tsx` — imports new DataPointsView, removed old inline version
+
+## Post-R3 Bug Backlog Batch (2026-04-07)
 
 9 of 10 backlog bugs resolved in 3 commits. Bug #8 was already done (call_jobs dropped).
 
