@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { approveAction, rejectAction, approveDataPoint, rejectDataPoint } from '@/app/actions';
-import { Sparkles, Play, Pause, SkipBack, SkipForward, Volume2, Heart, AlertTriangle, Info } from 'lucide-react';
+import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
+import { Sparkles, Play, Pause, SkipBack, SkipForward, Volume2, Heart, AlertTriangle, Info, Pencil, X } from 'lucide-react';
 
 interface ScoreData {
   overall: number;
@@ -129,6 +130,42 @@ function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null
         </div>
       )}
 
+      {/* Strengths */}
+      {coaching.strengths && coaching.strengths.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
+            <span className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600">✓</span>
+            Strengths
+          </h3>
+          <div className="space-y-2">
+            {coaching.strengths.map((s, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
+                <span className="text-[13px] text-zinc-600 leading-relaxed">{s}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Red Flags */}
+      {coaching.improvements && coaching.improvements.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
+            <span className="h-4 w-4 rounded-full bg-amber-100 flex items-center justify-center text-[10px] text-amber-600">⚠</span>
+            Red Flags
+          </h3>
+          <div className="space-y-2">
+            {coaching.improvements.map((imp, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 shrink-0" />
+                <span className="text-[13px] text-zinc-600 leading-relaxed">{imp.area}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Areas for Improvement */}
       {coaching.improvements.length > 0 && (
         <div className="mt-6">
@@ -179,7 +216,7 @@ function CriteriaView({ score }: { score: ScoreData | null }) {
   return (
     <div className="grid grid-cols-2 gap-4">
       {score.criteria.map((c) => {
-        const maxScore = c.weight > 0 ? Math.round(c.weight / 10) : 10;
+        const maxScore = 10;
         const pct = (c.score / maxScore) * 100;
         return (
           <div key={c.name} className="border border-zinc-100 rounded-xl p-4">
@@ -282,6 +319,42 @@ function TranscriptView({ text, duration }: { text: string; duration: number }) 
 
 function NextStepsView({ actions }: { actions: Action[] }) {
   const pending = actions.filter((a) => a.status === 'suggested');
+  const [pushing, setPushing] = useState<Set<string>>(new Set());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+
+  async function handlePush(action: Action) {
+    setPushing((prev) => new Set(prev).add(action.id));
+    try {
+      await fetch(`/api/calls/${action.id}/next-steps/push`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actionId: action.id }),
+      });
+    } catch { /* ignore */ }
+    setPushing((prev) => { const n = new Set(prev); n.delete(action.id); return n; });
+  }
+
+  function startEdit(action: Action) {
+    setEditingId(action.id);
+    setEditText(action.description);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditText('');
+  }
+
+  async function saveEdit(actionId: string) {
+    await rejectAction(actionId);
+    setEditingId(null);
+    setEditText('');
+  }
+
+  function getStepType(action: Action): string {
+    const payload = action.suggested_payload as Record<string, unknown> | null;
+    return (payload?.type as string) ?? 'follow_up';
+  }
 
   return (
     <div>
@@ -297,10 +370,19 @@ function NextStepsView({ actions }: { actions: Action[] }) {
       ) : (
         actions.map((action) => {
           const reasoning = (action.suggested_payload as { reasoning?: string } | null)?.reasoning;
+          const stepType = getStepType(action);
+          const typePill = NEXT_STEP_TYPE_PILL[stepType] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
+          const typeLabel = NEXT_STEP_TYPE_LABELS[stepType] ?? formatType(stepType);
+          const isEditing = editingId === action.id;
+          const isPushing = pushing.has(action.id);
+
           return (
             <div key={action.id} className="border border-zinc-100 rounded-xl p-4 mb-3">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typePill}`}>
+                    {typeLabel}
+                  </span>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
                     {formatType(action.action_type)}
                   </span>
@@ -308,26 +390,56 @@ function NextStepsView({ actions }: { actions: Action[] }) {
                 </div>
               </div>
 
-              <p className="text-[14px] text-zinc-700 mb-2">{action.description}</p>
+              {isEditing ? (
+                <div className="mb-3">
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    rows={3}
+                    className="w-full text-[13px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 resize-none"
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => saveEdit(action.id)}
+                      className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1.5 flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[14px] text-zinc-700 mb-2">{action.description}</p>
+              )}
 
-              {reasoning && (
+              {reasoning && !isEditing && (
                 <div className="pl-3 border-l-2 border-zinc-200 italic text-[13px] text-zinc-400 mb-3">
                   {reasoning}
                 </div>
               )}
 
-              {action.status === 'suggested' && (
+              {action.status === 'suggested' && !isEditing && (
                 <div className="flex gap-2">
-                  <form action={approveAction.bind(null, action.id)}>
-                    <button type="submit" className="bg-zinc-900 text-white text-[13px] font-medium px-3 py-1.5 rounded-lg">
-                      Push to CRM
-                    </button>
-                  </form>
+                  <button
+                    onClick={() => handlePush(action)}
+                    disabled={isPushing}
+                    className="bg-zinc-900 text-white text-[13px] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-700 disabled:opacity-40"
+                  >
+                    {isPushing ? 'Pushing…' : 'Push to CRM'}
+                  </button>
+                  <button
+                    onClick={() => startEdit(action)}
+                    className="border border-zinc-200 text-[13px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50 flex items-center gap-1"
+                  >
+                    <Pencil className="h-3 w-3" /> Edit
+                  </button>
                   <form action={rejectAction.bind(null, action.id)}>
-                    <button type="submit" className="text-[13px] text-zinc-400 hover:text-zinc-700 px-2">Edit</button>
-                  </form>
-                  <form action={rejectAction.bind(null, action.id)}>
-                    <button type="submit" className="text-[13px] text-zinc-400 hover:text-zinc-700 px-2">Skip</button>
+                    <button type="submit" className="text-[13px] text-zinc-400 hover:text-zinc-700 px-2 py-1.5">Skip</button>
                   </form>
                 </div>
               )}

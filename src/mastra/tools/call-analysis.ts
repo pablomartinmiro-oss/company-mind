@@ -118,6 +118,7 @@ Analyze this call and return a JSON object with this EXACT structure (no other t
   "next_steps": [
     {
       "action_type": "<create_note|create_task|move_pipeline|update_contact|send_email>",
+      "type": "<follow_up|scheduling|admin|new_lead>",
       "description": "<human-readable description>",
       "payload": {},
       "priority": "<high|medium|low>",

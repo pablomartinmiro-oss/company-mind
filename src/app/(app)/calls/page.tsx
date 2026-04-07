@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
-import { scoreGrade, scoreBg, scoreColor, formatDuration, timeAgo } from '@/lib/format';
+import { scoreGrade, scoreBg, scoreColor, formatDuration, formatExactDateTime } from '@/lib/format';
 import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
 import { CallFilters } from '@/components/calls/call-filters';
 import { getTenantForUser } from '@/lib/get-tenant';
@@ -176,7 +176,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
                     <span className="text-zinc-200">·</span>
                     {call.duration_seconds != null && <span className="font-mono">{formatDuration(call.duration_seconds)}</span>}
                     <span className="text-zinc-200">·</span>
-                    <span>{timeAgo(call.called_at)}</span>
+                    <span>{formatExactDateTime(call.called_at)}</span>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {call.call_type && (

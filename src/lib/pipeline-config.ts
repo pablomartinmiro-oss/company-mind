@@ -77,6 +77,20 @@ export const TASK_TYPE_PILL: Record<string, string> = {
   scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
 };
 
+export const NEXT_STEP_TYPE_LABELS: Record<string, string> = {
+  follow_up:  'Follow Up',
+  scheduling: 'Scheduling',
+  admin:      'Admin',
+  new_lead:   'New Lead',
+};
+
+export const NEXT_STEP_TYPE_PILL: Record<string, string> = {
+  follow_up:  'bg-amber-50 text-amber-700 border border-amber-200',
+  scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
+  admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
+  new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
+};
+
 export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
   qualification_call: 'Qualification Call',
   closing_call:       'Closing Call',

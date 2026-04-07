@@ -99,41 +99,6 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
           </div>
           <p className={`text-[12px] text-center mt-2 cursor-pointer ${scoreColor(overall)}`}>Flag a scoring issue</p>
 
-          {/* Strengths */}
-          {coaching?.strengths && coaching.strengths.length > 0 && (
-            <div className="mt-6">
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600">✓</span>
-                <span className="text-[11px] font-semibold tracking-widest uppercase text-zinc-500">Strengths</span>
-              </div>
-              <div className="mt-2 space-y-2">
-                {coaching.strengths.map((s, i) => (
-                  <div key={i} className="flex gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                    <span className="text-[13px] text-zinc-600 leading-relaxed">{s}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Red Flags — from improvements as proxy */}
-          {coaching?.improvements && coaching.improvements.length > 0 && (
-            <div className="mt-5">
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="h-4 w-4 rounded-full bg-amber-100 flex items-center justify-center text-[10px] text-amber-600">⚠</span>
-                <span className="text-[11px] font-semibold tracking-widest uppercase text-zinc-500">Red Flags</span>
-              </div>
-              <div className="mt-2 space-y-2">
-                {coaching.improvements.map((imp, i) => (
-                  <div key={i} className="flex gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 shrink-0" />
-                    <span className="text-[13px] text-zinc-600 leading-relaxed">{imp.area}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* RIGHT COLUMN — tabs */}
