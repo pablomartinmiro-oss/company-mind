@@ -1,21 +1,20 @@
 // src/lib/supabase.ts
-// Supabase client for server-side and client-side usage
+// Supabase client for server-side usage ONLY
+import 'server-only';
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
 // Server-side client with service role (bypasses RLS)
 // Use this in API routes, webhooks, and background jobs
-export const supabaseAdmin = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const supabaseAdmin = createSupabaseClient(url, serviceKey);
 
 // Server-side client with anon key (respects RLS)
 // Use this when you want tenant-scoped queries
-export const supabase = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export const supabase = createSupabaseClient(url, anonKey);
 
 // Helper: get a tenant-scoped query helper
 export function tenantQuery(tenantId: string) {
