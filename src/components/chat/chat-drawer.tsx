@@ -134,7 +134,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40"
+          className="fixed inset-0 z-40 bg-zinc-900/20 backdrop-blur-sm"
           onClick={onClose}
         />
       )}
@@ -142,12 +142,12 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
       {/* Drawer */}
       <div
         className={cn(
-          'fixed right-0 top-0 z-50 flex h-screen w-full flex-col glass-card border-l border-white/60 shadow-2xl transition-transform duration-200 ease-out sm:w-[420px] rounded-none',
+          'fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-white/95 backdrop-blur-2xl border-l border-white/80 shadow-[0_24px_64px_-12px_rgba(28,25,22,0.25),0_8px_24px_-4px_rgba(28,25,22,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] transition-transform duration-200 ease-out sm:w-[420px]',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
         {/* Header */}
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/40 px-4">
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200/60 px-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-[#ff6a3d]" />
             <span className="text-[13px] font-semibold text-[#1a1a1a]">Ask AI</span>
@@ -167,7 +167,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
         </div>
 
         {/* Context indicator */}
-        <div className="shrink-0 border-b border-white/30 bg-white/30 px-4 py-2">
+        <div className="shrink-0 border-b border-zinc-200/40 bg-zinc-50/50 px-4 py-2">
           <div className="text-[10px] uppercase tracking-widest text-zinc-400">Context</div>
           <div className="mt-0.5 text-[11px] text-zinc-600">{contextLabel}</div>
         </div>
@@ -200,7 +200,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
         </div>
 
         {/* Input area */}
-        <form onSubmit={handleSubmit} className="shrink-0 border-t border-white/40 px-3 py-2.5">
+        <form onSubmit={handleSubmit} className="shrink-0 border-t border-zinc-200/60 px-3 py-2.5">
           <div className="flex items-end gap-2">
             <textarea
               ref={inputRef}
@@ -208,7 +208,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
               disabled={isStreaming}
               rows={1}
               onKeyDown={handleKeyDown}
-              className="max-h-[96px] min-h-[36px] flex-1 resize-none rounded-lg border border-white/60 bg-white/50 px-3 py-2 text-[12px] text-[#1a1a1a] placeholder:text-zinc-400 focus:border-[#ff6a3d] focus:outline-none disabled:opacity-50"
+              className="max-h-[96px] min-h-[36px] flex-1 resize-none rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-[12px] text-[#1a1a1a] placeholder:text-zinc-400 focus:border-[#ff6a3d] focus:outline-none disabled:opacity-50"
             />
             <button
               type="submit"
@@ -239,7 +239,7 @@ function MessageBubble({ message }: { message: UIMessage }) {
           'max-w-[85%] px-3 py-2 text-[12px] leading-relaxed',
           isUser
             ? 'rounded-tl-xl rounded-b-xl bg-zinc-800 text-white'
-            : 'rounded-tr-xl rounded-b-xl border border-white/60 bg-white/50 text-zinc-800'
+            : 'rounded-tr-xl rounded-b-xl border border-zinc-200/60 bg-white text-zinc-800'
         )}
       >
         {message.parts.map((part, i) => {
