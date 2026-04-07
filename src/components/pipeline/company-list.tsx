@@ -8,6 +8,7 @@ interface CompanyRow {
   company_id: string;
   company_name: string;
   industry?: string | null;
+  lead_source?: string | null;
   enrollments: { pipeline_name: string; stage: string }[];
   deal_value: string | null;
   days_in_stage: number;
@@ -99,6 +100,13 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
               <p className="text-[13px] font-medium text-[#1a1a1a] truncate">{company.company_name}</p>
               <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{company.industry ?? 'Unknown industry'}</p>
             </div>
+
+            {/* Lead source */}
+            {company.lead_source && (
+              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 bg-teal-100/60 text-teal-700 border border-teal-200/40">
+                {company.lead_source}
+              </span>
+            )}
 
             {/* Stage pills */}
             <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end max-w-[200px]">

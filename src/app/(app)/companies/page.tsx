@@ -11,7 +11,7 @@ export default async function CompaniesPage() {
   const { data: companiesRaw } = await supabaseAdmin
     .from('companies')
     .select(`
-      id, name, industry, location,
+      id, name, industry, location, lead_source,
       pipeline_companies(id, pipeline_id, stage, deal_value, stage_entered_at),
       company_contacts(contact_id, is_primary, role)
     `)
@@ -89,6 +89,7 @@ export default async function CompaniesPage() {
     company_id: string;
     company_name: string;
     industry: string | null;
+    lead_source: string | null;
     enrollments: { pipeline_name: string; stage: string }[];
     deal_value: string | null;
     days_in_stage: number;
@@ -102,6 +103,7 @@ export default async function CompaniesPage() {
       id: string;
       name: string;
       industry: string | null;
+      lead_source: string | null;
       pipeline_companies: { pipeline_id: string; stage: string; deal_value: string | null; stage_entered_at: string }[];
       company_contacts: { contact_id: string; is_primary: boolean; role: string | null }[];
     };
@@ -127,6 +129,7 @@ export default async function CompaniesPage() {
       company_id: typed.id,
       company_name: typed.name,
       industry: typed.industry,
+      lead_source: typed.lead_source,
       enrollments,
       deal_value: totalDeal > 0 ? `$${totalDeal}` : null,
       days_in_stage: maxDays,

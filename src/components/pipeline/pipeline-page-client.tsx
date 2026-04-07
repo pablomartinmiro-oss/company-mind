@@ -27,6 +27,7 @@ interface CompanyRow {
   company_id: string;
   company_name: string;
   industry?: string | null;
+  lead_source?: string | null;
   enrollments: { pipeline_name: string; stage: string }[];
   deal_value: string | null;
   days_in_stage: number;

@@ -1,6 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { getTenantForUser } from '@/lib/get-tenant';
+import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 import { CompanyDetailClient } from '@/components/company/company-detail-client';
+import { scoreGrade } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,43 +26,45 @@ export default async function CompanyDetailPage({ params }: PageProps) {
 
   const company = companyRes.data;
   if (!company) {
-    return (
-      <div className="p-5">
-        <p className="text-[13px] text-red-500">Company not found.</p>
-      </div>
-    );
+    return <div className="p-5"><p className="text-[13px] text-red-500">Company not found.</p></div>;
   }
 
   const contacts = contactsRes.data ?? [];
-
-  // Get contact names from calls
   const contactIds = contacts.map((c: { contact_id: string }) => c.contact_id);
-  const { data: callNames } = contactIds.length > 0
-    ? await supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
-    : { data: [] };
 
+  // Fetch contact names, calls, tasks, data points in parallel
+  const [callNamesRes, callsRes, tasksRes, dataPointsRes, allContactResearchRes] = await Promise.all([
+    contactIds.length > 0
+      ? supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
+      : Promise.resolve({ data: [] }),
+    contactIds.length > 0
+      ? supabaseAdmin.from('calls').select('id, contact_name, contact_ghl_id, score, call_summary, call_type, called_at, duration_seconds').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds).order('called_at', { ascending: false }).limit(20)
+      : Promise.resolve({ data: [] }),
+    contactIds.length > 0
+      ? supabaseAdmin.from('tasks').select('*').eq('tenant_id', tenantId).in('contact_id', contactIds).order('due_date', { ascending: true, nullsFirst: false })
+      : Promise.resolve({ data: [] }),
+    contactIds.length > 0
+      ? supabaseAdmin.from('contact_data_points').select('contact_ghl_id, field_name, field_value').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
+      : Promise.resolve({ data: [] }),
+    contactIds.length > 0
+      ? supabaseAdmin.from('research').select('*').eq('tenant_id', tenantId).eq('scope', 'contact').in('contact_id', contactIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  // Name map
   const nameMap: Record<string, string> = {};
-  for (const c of callNames ?? []) nameMap[c.contact_ghl_id] = c.contact_name;
+  for (const c of callNamesRes.data ?? []) nameMap[c.contact_ghl_id] = c.contact_name;
 
-  // Get contact details from data points
-  const { data: dataPoints } = contactIds.length > 0
-    ? await supabaseAdmin.from('contact_data_points').select('contact_ghl_id, field_name, field_value').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds).in('field_name', ['email', 'phone'])
-    : { data: [] };
-
+  // Data points map (for contact details + company research population)
   const dpMap: Record<string, Record<string, string>> = {};
-  for (const dp of dataPoints ?? []) {
+  for (const dp of dataPointsRes.data ?? []) {
     if (!dpMap[dp.contact_ghl_id]) dpMap[dp.contact_ghl_id] = {};
     dpMap[dp.contact_ghl_id][dp.field_name] = dp.field_value;
   }
 
-  // Fetch contact-level research for all contacts
-  const { data: allContactResearch } = contactIds.length > 0
-    ? await supabaseAdmin.from('research').select('*').eq('tenant_id', tenantId).eq('scope', 'contact').in('contact_id', contactIds)
-    : { data: [] };
-
-  // Group contact research by contact_id
+  // Contact research grouped by contact_id
   const contactResearchMap: Record<string, { field_name: string; field_value: string | null; source: string; section: string }[]> = {};
-  for (const r of allContactResearch ?? []) {
+  for (const r of allContactResearchRes.data ?? []) {
     if (!contactResearchMap[r.contact_id]) contactResearchMap[r.contact_id] = [];
     contactResearchMap[r.contact_id].push({ field_name: r.field_name, field_value: r.field_value, source: r.source, section: r.section });
   }
@@ -93,7 +97,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     };
   }).filter((x): x is NonNullable<typeof x> => x !== null);
 
-  // Build enriched contacts
+  // Enriched contacts
   const enrichedContacts = contacts.map((c: { id: string; contact_id: string; is_primary: boolean; role: string | null }) => ({
     id: c.id,
     contact_id: c.contact_id,
@@ -104,31 +108,85 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     contact_phone: dpMap[c.contact_id]?.phone ?? null,
   }));
 
-  // Company research grouped by section
+  // Company research grouped by section — merge from research table AND contact_data_points
   const companyResearch: Record<string, { field_name: string; field_value: string | null; source: string }[]> = {};
   for (const r of companyResearchRes.data ?? []) {
     if (!companyResearch[r.section]) companyResearch[r.section] = [];
     companyResearch[r.section].push({ field_name: r.field_name, field_value: r.field_value, source: r.source });
   }
 
-  // Get company data from contact_data_points (employees count etc.)
+  // Populate company research from contact_data_points of primary contact
   const primaryContactId = contacts.find((c: { is_primary: boolean }) => c.is_primary)?.contact_id ?? contactIds[0];
-  const { data: companyDPs } = primaryContactId
-    ? await supabaseAdmin.from('contact_data_points').select('field_name, field_value').eq('tenant_id', tenantId).eq('contact_ghl_id', primaryContactId).in('field_name', ['company_name', 'employees', 'industry', 'location'])
-    : { data: [] };
+  const primaryDPs = primaryContactId ? dpMap[primaryContactId] ?? {} : {};
 
-  const companyMeta: Record<string, string> = {};
-  for (const dp of companyDPs ?? []) companyMeta[dp.field_name] = dp.field_value;
+  // Map known data point fields into research sections
+  const dpToResearch: Record<string, { section: string; field: string }> = {
+    company_name: { section: 'Business Info', field: 'Company name' },
+    industry: { section: 'Business Info', field: 'Industry' },
+    employees: { section: 'Business Info', field: 'Employees' },
+    annual_revenue: { section: 'Business Info', field: 'Annual revenue' },
+    years_in_business: { section: 'Business Info', field: 'Years in business' },
+    website: { section: 'Business Info', field: 'Website' },
+    location: { section: 'Business Info', field: 'Location' },
+    primary_pain: { section: 'Pain Points', field: 'Primary pain' },
+    current_crm: { section: 'Pain Points', field: 'Current CRM' },
+    lead_volume: { section: 'Pain Points', field: 'Lead volume per week' },
+    response_time: { section: 'Pain Points', field: 'Response time' },
+    lead_sources: { section: 'Pain Points', field: 'Lead sources' },
+    monthly_ad_spend: { section: 'Pain Points', field: 'Monthly ad spend' },
+    budget_range: { section: 'Buying Process', field: 'Budget range' },
+    timeline: { section: 'Buying Process', field: 'Timeline' },
+    key_objections: { section: 'Buying Process', field: 'Key objections' },
+    competitor_alternatives: { section: 'Buying Process', field: 'Competitor alternatives' },
+    overall_fit: { section: 'Account Health', field: 'Overall fit' },
+    next_step_agreed: { section: 'Account Health', field: 'Notes' },
+    referral_source: { section: 'Account Health', field: 'Last touch' },
+  };
+
+  for (const [dpKey, mapping] of Object.entries(dpToResearch)) {
+    if (primaryDPs[dpKey]) {
+      if (!companyResearch[mapping.section]) companyResearch[mapping.section] = [];
+      const existing = companyResearch[mapping.section].find(f => f.field_name === mapping.field);
+      if (!existing) {
+        companyResearch[mapping.section].push({ field_name: mapping.field, field_value: primaryDPs[dpKey], source: 'api' });
+      }
+    }
+  }
+
+  // Calls for overview
+  const calls = (callsRes.data ?? []).map((c) => ({
+    id: c.id,
+    score: typeof c.score === 'object' && c.score !== null ? (c.score as { overall?: number }).overall ?? null : null,
+    call_summary: c.call_summary,
+    call_type: c.call_type,
+    called_at: c.called_at,
+    duration_seconds: c.duration_seconds,
+  }));
+
+  // Tasks for overview
+  const tasks = (tasksRes.data ?? []).map((t: Record<string, unknown>) => ({
+    id: t.id as string,
+    title: t.title as string,
+    description: t.description as string | null,
+    due_date: t.due_date as string | null,
+    completed: t.completed as boolean,
+  }));
+
+  // Team members
+  const teamMembers = TEAM_MEMBERS.map((m) => ({ name: m.name, initials: m.initials, role: 'Rep' }));
 
   return (
     <CompanyDetailClient
       companyId={companyId}
       companyName={company.name}
-      industry={company.industry ?? companyMeta.industry ?? null}
-      location={company.location ?? companyMeta.location ?? null}
-      employeeCount={companyMeta.employees ?? null}
+      industry={company.industry ?? primaryDPs.industry ?? null}
+      leadSource={company.lead_source ?? null}
+      location={company.location ?? primaryDPs.location ?? null}
       enrollments={enrollments}
       contacts={enrichedContacts}
+      calls={calls}
+      tasks={tasks}
+      teamMembers={teamMembers}
       companyResearch={companyResearch}
       contactResearchMap={contactResearchMap}
     />
