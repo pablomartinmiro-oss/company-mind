@@ -16,7 +16,7 @@ export default async function CompaniesPage() {
 
   // Fetch pipeline contacts
   const { data: pipelineContacts } = await supabaseAdmin
-    .from('pipeline_contacts')
+    .from('pipeline_companies')
     .select('id, contact_id, pipeline_id, stage, deal_value, stage_entered_at')
     .eq('tenant_id', tenantId);
 

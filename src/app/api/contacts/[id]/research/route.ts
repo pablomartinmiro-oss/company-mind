@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
     const { id: contactId } = await ctx.params;
 
     const { data, error } = await supabaseAdmin
-      .from('contact_research')
+      .from('research')
       .select('section, field_name, field_value, source')
       .eq('tenant_id', tenantId)
       .eq('contact_id', contactId);
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     const { fieldName, fieldValue, section, source } = await req.json();
 
     const { error } = await supabaseAdmin
-      .from('contact_research')
+      .from('research')
       .upsert(
         {
           tenant_id: tenantId,

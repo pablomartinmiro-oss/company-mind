@@ -1,6 +1,6 @@
 // src/mastra/tools/db-companies.ts
-// Tools for querying companies (pipeline_contacts) from Supabase
-// Note: pipeline_contacts has columns: contact_id, pipeline_id, stage, deal_value, stage_entered_at
+// Tools for querying companies (pipeline_companies) from Supabase
+// Note: pipeline_companies has columns: contact_id, pipeline_id, stage, deal_value, stage_entered_at
 // Names come from calls table (contact_name) and contact_data_points (company_name)
 
 import { createTool } from '@mastra/core/tools';
@@ -36,7 +36,7 @@ export const getCompanies = createTool({
 
     // Fetch pipeline contacts
     const { data: pcRows } = await supabaseAdmin
-      .from('pipeline_contacts')
+      .from('pipeline_companies')
       .select('contact_id, pipeline_id, stage, deal_value, stage_entered_at')
       .eq('tenant_id', tenantId)
       .order('stage_entered_at', { ascending: false })
@@ -119,7 +119,7 @@ export const getCompanyDetail = createTool({
     const [pcRes, callsRes, activityRes, researchRes, stageLogRes] =
       await Promise.all([
         supabaseAdmin
-          .from('pipeline_contacts')
+          .from('pipeline_companies')
           .select('pipeline_id, stage, deal_value, stage_entered_at')
           .eq('tenant_id', tenantId)
           .eq('contact_id', input.contactId),

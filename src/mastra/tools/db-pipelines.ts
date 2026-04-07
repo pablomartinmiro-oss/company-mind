@@ -37,7 +37,7 @@ export const getPipelineSummary = createTool({
 
     // Fetch pipeline contacts (actual columns: contact_id, pipeline_id, stage, deal_value)
     const { data: pcRows } = await supabaseAdmin
-      .from('pipeline_contacts')
+      .from('pipeline_companies')
       .select('pipeline_id, stage, deal_value')
       .eq('tenant_id', tenantId);
 

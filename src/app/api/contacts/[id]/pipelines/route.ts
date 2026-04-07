@@ -6,9 +6,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { tenantId } = await getTenantForUser();
   const { id } = await params;
 
-  // Fetch pipeline_contacts (actual columns: contact_id, pipeline_id, stage)
+  // Fetch pipeline_companies (actual columns: contact_id, pipeline_id, stage)
   const { data: pcRows } = await supabaseAdmin
-    .from('pipeline_contacts')
+    .from('pipeline_companies')
     .select('pipeline_id, stage')
     .eq('tenant_id', tenantId)
     .eq('contact_id', id);

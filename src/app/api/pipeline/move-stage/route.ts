@@ -5,9 +5,9 @@ export async function POST(req: NextRequest) {
   try {
     const { contactId, pipelineId, newStage, tenantId, movedBy, note } = await req.json();
 
-    // Update pipeline_contacts
+    // Update pipeline_companies
     await supabaseAdmin
-      .from('pipeline_contacts')
+      .from('pipeline_companies')
       .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
       .eq('tenant_id', tenantId)
       .eq('contact_id', contactId)

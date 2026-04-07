@@ -21,7 +21,7 @@ export default async function DashboardPage() {
       .order('called_at', { ascending: false }),
     supabaseAdmin.from('calls').select('score').eq('tenant_id', tenantId).eq('status', 'complete'),
     supabaseAdmin
-      .from('pipeline_contacts')
+      .from('pipeline_companies')
       .select('contact_id, pipeline_id, stage, deal_value, stage_entered_at')
       .eq('tenant_id', tenantId),
     supabaseAdmin

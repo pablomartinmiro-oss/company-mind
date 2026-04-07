@@ -16,11 +16,11 @@ export default async function ContactDetailPage({ params }: PageProps) {
   // Fetch all data in parallel
   const [callsRes, pipelineContactsRes, pipelinesRes, tasksRes, activityRes, researchRes, dataPointsRes] = await Promise.all([
     supabaseAdmin.from('calls').select('id, contact_name, contact_ghl_id, score, call_summary, call_type, called_at, duration_seconds').eq('tenant_id', tenantId).eq('contact_ghl_id', contactId).order('called_at', { ascending: false }),
-    supabaseAdmin.from('pipeline_contacts').select('pipeline_id, stage, stage_entered_at, deal_value').eq('tenant_id', tenantId).eq('contact_id', contactId),
+    supabaseAdmin.from('pipeline_companies').select('pipeline_id, stage, stage_entered_at, deal_value').eq('tenant_id', tenantId).eq('contact_id', contactId),
     supabaseAdmin.from('pipelines').select('id, name, stages').eq('tenant_id', tenantId),
     supabaseAdmin.from('tasks').select('*').eq('tenant_id', tenantId).eq('contact_id', contactId).order('due_date', { ascending: true, nullsFirst: false }),
     supabaseAdmin.from('activity_feed').select('*').eq('tenant_id', tenantId).eq('contact_id', contactId).order('created_at', { ascending: false }),
-    supabaseAdmin.from('contact_research').select('section, field_name, field_value, source').eq('tenant_id', tenantId).eq('contact_id', contactId),
+    supabaseAdmin.from('research').select('section, field_name, field_value, source').eq('tenant_id', tenantId).eq('contact_id', contactId),
     supabaseAdmin.from('contact_data_points').select('field_name, field_value').eq('tenant_id', tenantId).eq('contact_ghl_id', contactId),
   ]);
 
