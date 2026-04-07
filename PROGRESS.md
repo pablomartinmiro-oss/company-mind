@@ -301,8 +301,14 @@ Pivoted from hard dark surfaces to frosted glass on warm grey-cream. Previous bu
 - Brand tokens updated for frosted palette
 - Brand showcase updated with frosted glass demos
 
+### Quick Fixes (2026-04-07)
+
+- Inbox routing strings removed — no more "From: Company Mind (+1...) -> To: Sarah Chen (+1...)" debug lines. Bubbles now show only message text + timestamp.
+- Ask AI panel solidified — bg-white/95 backdrop-blur-2xl replaces double-frost translucency. Solid inputs, clear borders, readable content.
+- Contact detail header unified — back link, name, meta, pipeline tracker, and tabs all inside one frosted glass container instead of separate floating elements.
+
 ## Next Session
-1. Verify frosted glass on live site
+1. Verify quick fixes on live site
 2. Call detail page (/calls/[id]) needs treatment (locked)
 3. Score circles 90+ coral ring
 4. Batch 5: Gmail inbox connector, Google Meet call import
