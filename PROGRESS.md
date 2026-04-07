@@ -6,7 +6,18 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Batch 1 — 18 UI/Logic Fixes
+## Latest: Phase R1 — Research Catalog Foundation
+- 159-field catalog locked as source of truth (92 company + 67 contact)
+- 9 company sections: Identity, Business Profile, Tech & Tools, Marketing, Pain & Opportunity, Buying Process, Engagement History, Account Health, Predictive
+- 7 contact sections: Identity, Role & Authority, Communication Profile, Relationship, Personal Context, Triggers & Signals, Predictive
+- Each field has type, primarySource, options, apiProvider for future enrichment
+- Research tab renders all sections with collapsible headers and completion progress bars
+- Inline-editable fields with type-aware inputs (text, longtext, select, number, date, score)
+- Source badges: API (violet), AI (blue), Call (green), Manual (amber)
+- New tables: predictive_scores, enrichment_jobs
+- Research table extended with confidence, source_detail, source_call_id, locked columns
+
+## Batch 1 — 18 UI/Logic Fixes
 - Chunk 1: Task type pills replace stage pills, fixed-width aligned columns
 - Chunk 2: Calls under 60s only in Skipped tab, all selects use frosted SelectPill, solid stat modals
 - Chunk 3: MRR/setup fee replace ARR, unified meta pills, real contact names with email/phone from company_contacts
