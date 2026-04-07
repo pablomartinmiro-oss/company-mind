@@ -68,6 +68,7 @@ export function TaskList({ initialTasks }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', due_date: '', task_type: '', assigned_to: '' });
   const [pipelineStages, setPipelineStages] = useState<Record<string, PipelineInfo[]>>({});
+  const [companyNames, setCompanyNames] = useState<Record<string, string | null>>({});
 
   const filtered = tasks
     .filter((t) => {
@@ -95,19 +96,32 @@ export function TaskList({ initialTasks }: Props) {
       return da - db;
     });
 
-  // Fetch actual pipeline stages when a task is expanded
+  // Fetch pipeline stages and company name when a task is expanded
   useEffect(() => {
     if (!expandedId) return;
     const task = tasks.find((t) => t.id === expandedId);
-    if (!task?.contact_id || pipelineStages[task.contact_id]) return;
+    if (!task?.contact_id) return;
 
-    fetch(`/api/contacts/${task.contact_id}/pipelines`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data: PipelineInfo[]) => {
-        setPipelineStages((prev) => ({ ...prev, [task.contact_id!]: data }));
-      })
-      .catch(() => {});
-  }, [expandedId, tasks, pipelineStages]);
+    if (!pipelineStages[task.contact_id]) {
+      fetch(`/api/contacts/${task.contact_id}/pipelines`)
+        .then((r) => r.ok ? r.json() : [])
+        .then((data: PipelineInfo[]) => {
+          setPipelineStages((prev) => ({ ...prev, [task.contact_id!]: data }));
+        })
+        .catch(() => {});
+    }
+
+    if (companyNames[task.contact_id] === undefined) {
+      fetch(`/api/contacts/${task.contact_id}/company`)
+        .then((r) => r.ok ? r.json() : { company_name: null })
+        .then((data: { company_name: string | null }) => {
+          setCompanyNames((prev) => ({ ...prev, [task.contact_id!]: data.company_name }));
+        })
+        .catch(() => {
+          setCompanyNames((prev) => ({ ...prev, [task.contact_id!]: null }));
+        });
+    }
+  }, [expandedId, tasks, pipelineStages, companyNames]);
 
   async function completeTask(id: string) {
     setCompletedIds((prev) => new Set(prev).add(id));
@@ -335,65 +349,75 @@ export function TaskList({ initialTasks }: Props) {
                   ) : (
                     /* ─── View Mode ─── */
                     <>
-                      <p className="text-[14px] font-semibold text-[#1a1a1a] mb-1">{task.title}</p>
-
-                      {task.description && (
-                        <p className="text-[13px] text-zinc-500 leading-relaxed mb-3">{task.description}</p>
-                      )}
-
-                      {/* Meta row — exact date stays in modal */}
-                      <div className="flex items-center gap-3 mb-3">
-                        {task.due_date && (
-                          <span className={`text-[11px] font-mono ${dateColor}`}>
-                            {formatExactDate(task.due_date)}
+                      {/* Contact + Company hierarchy */}
+                      <div className="mb-3">
+                        {task.contact_id ? (
+                          <a
+                            href={`/contacts/${task.contact_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[16px] font-semibold text-zinc-900 hover:text-[#ff6a3d] transition-colors"
+                          >
+                            {task.contact_name || task.title}
+                          </a>
+                        ) : (
+                          <span className="text-[16px] font-semibold text-zinc-900">
+                            {task.contact_name || task.title}
                           </span>
                         )}
-                        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typeClass}`}>
-                          {typeLabel}
-                        </span>
-                        {task.assigned_to && (
-                          <span className="text-[11px] text-blue-600">@{task.assigned_to}</span>
-                        )}
-                      </div>
-
-                      {/* Pipeline stages — actual stages only */}
-                      <div className="mb-3">
-                        <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1.5">Pipeline Stages</p>
-                        {stages === undefined ? (
-                          <p className="text-[11px] text-zinc-400">Loading...</p>
-                        ) : stages.length === 0 ? (
-                          <p className="text-[11px] text-zinc-500">Not in any pipeline</p>
-                        ) : (
-                          <div className="flex flex-wrap gap-1.5">
-                            {stages.map((s, i) => (
-                              <span
-                                key={i}
-                                className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STAGE_PILL_CLASSES[s.current_stage] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200'}`}
-                              >
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500">{s.pipeline_name}</span>
-                                {' · '}
-                                {s.current_stage}
-                              </span>
-                            ))}
+                        {task.contact_id && companyNames[task.contact_id] && (
+                          <div className="text-[12px] text-zinc-500 mt-0.5">
+                            {companyNames[task.contact_id]}
                           </div>
                         )}
                       </div>
 
+                      {/* Task title */}
+                      <h3 className="text-[14px] font-medium text-zinc-900 mb-1">{task.title}</h3>
+
+                      {task.description && (
+                        <p className="text-[12px] text-zinc-600 leading-relaxed mb-4">{task.description}</p>
+                      )}
+
+                      {/* Meta row */}
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        {task.due_date && (
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                            dateColor === 'text-red-600' ? 'bg-red-100/60 text-red-700' : 'bg-zinc-100/60 text-zinc-600'
+                          }`}>
+                            {formatExactDate(task.due_date)}
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${typeClass}`}>
+                          {typeLabel}
+                        </span>
+                        {task.assigned_to && (
+                          <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-blue-100/60 text-blue-700 border border-blue-200/40">
+                            @{task.assigned_to}
+                          </span>
+                        )}
+                        {stages && stages.length > 0 && (
+                          <span className="text-[10px] text-zinc-400">
+                            · {stages[0].pipeline_name}
+                          </span>
+                        )}
+                      </div>
+
                       {/* Actions */}
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         {task.contact_id && (
                           <a
                             href={`/contacts/${task.contact_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-white/60 backdrop-blur text-zinc-700 border border-white/60 text-[12px] font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-white/80"
+                            className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 transition-colors inline-flex items-center gap-1.5"
                           >
-                            <ExternalLink className="h-3 w-3" /> Go to company
+                            <ExternalLink className="w-3 h-3" /> Go to company
                           </a>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); startEdit(task); }}
-                          className="text-[12px] text-zinc-500 px-3 py-1.5 rounded-full hover:bg-white/30 flex items-center gap-1.5"
+                          className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 transition-colors inline-flex items-center gap-1.5"
                         >
                           <Pencil className="h-3 w-3" /> Edit task
                         </button>
