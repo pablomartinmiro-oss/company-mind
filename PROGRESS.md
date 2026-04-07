@@ -6,6 +6,15 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
+## Latest: 7-Fix UX Polish Round
+- Top header AI bar with voice input (Web Speech API) replaces small Ask AI circle
+- Inbox contact names are clickable, open /contacts/{id} in new tab
+- Appointment status pill cycles on click: Confirmed → Showed → No Show → Cancelled (persisted to DB)
+- Task row reorganized: checkbox first, stage pill, assignee pill, content, due date, chevron
+- Task detail shows company name + reorganized layout with contact hierarchy
+- Pipeline stages show Lucide icons instead of numbers/checkmarks
+- Pipeline funnel uses symmetric CSS grid alignment across pipelines of different lengths
+
 ## Completed Phases
 
 ### 1. Seed Data Fix
