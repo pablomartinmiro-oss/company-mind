@@ -121,10 +121,43 @@
 - Modified: app-shell.tsx, pipeline-page-client.tsx, pipeline-funnel.tsx, contact-detail-client.tsx, pipeline/page.tsx (redirect)
 - New files: `src/app/(app)/companies/page.tsx`, `src/components/pipeline/company-list.tsx`
 
+### Bug Fix Batch 4 — AI Assistant Slide-in Drawer + Tenant Data Tools (2026-04-06)
+
+AI Assistant Batch 4 complete.
+
+**Bugs resolved:**
+- Bug 25: AI Assistant transformed from full-page chat into slide-in side panel
+  - "Ask AI" button in top nav header (before settings gear), opens 420px drawer from right
+  - Backdrop overlay + Esc key to close, animated slide-in/out
+  - Context indicator shows current page at top of drawer
+  - Old ChatPanel FAB removed from page tree; drawer is now the only chat entry point
+- Bug 26: Chat agent has full read access to all tenant data
+  - 6 new Mastra tools added: `get_companies`, `get_company_detail`, `get_tasks`, `get_pipeline_summary`, `get_appointments`, `get_activity_feed`
+  - Existing `search_calls` and `get_call_detail` tools already covered call queries
+  - Agent system prompt updated with data access instructions and expanded tool selection guide
+  - Page context (currentPage, contactId, callId) now passed on every chat message so the agent knows what the user is looking at
+
+**New files:**
+- `src/components/chat/chat-drawer.tsx` — slide-in chat drawer component
+- `src/mastra/tools/db-companies.ts` — get_companies, get_company_detail
+- `src/mastra/tools/db-tasks.ts` — get_tasks
+- `src/mastra/tools/db-pipelines.ts` — get_pipeline_summary
+- `src/mastra/tools/db-appointments.ts` — get_appointments
+- `src/mastra/tools/db-activity.ts` — get_activity_feed
+
+**Modified files:**
+- `src/components/layout/app-shell.tsx` — replaced ChatPanel with ChatDrawer, added "Ask AI" nav button
+- `src/mastra/agents/company-mind.ts` — registered 6 new tools, updated system prompt
+- `src/app/api/chat/route.ts` — passes currentCallId through to agent context
+
+**Note:** Write tools (create/update/delete) deferred to a future batch.
+
 ## Next Session
-1. Test full login flow on production with real credentials
-2. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
-3. Onboard first real client — needs onboarding flow design
-4. Build settings page (team management, GHL connection status, password reset)
-5. Build rubric editor UI (currently disabled)
-6. Add second tenant to verify multi-tenancy isolation
+1. Verify Batch 4 on live site (drawer opens, closes, context shows, tools respond)
+2. Test full login flow on production with real credentials
+3. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
+4. Batch 5: Gmail inbox connector, Google Meet call import
+5. Button audit + AI assistant function check across the entire app
+6. Build settings page (team management, GHL connection status, password reset)
+7. Build rubric editor UI (currently disabled)
+8. Add second tenant to verify multi-tenancy isolation

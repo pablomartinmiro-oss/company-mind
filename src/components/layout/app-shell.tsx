@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { ChatPanel } from '@/components/chat/chat-panel';
-import { Brain, Settings, LogOut } from 'lucide-react';
+import { ChatDrawer } from '@/components/chat/chat-drawer';
+import { Brain, Settings, LogOut, Sparkles } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 
 const navItems = [
@@ -14,20 +14,14 @@ const navItems = [
   { href: '/companies', label: 'Companies' },
 ];
 
-const pageNames: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/companies': 'Companies',
-  '/calls': 'Calls',
-  '/settings': 'Settings',
-};
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const currentPage = pageNames[pathname] ?? pageNames[Object.keys(pageNames).find(k => pathname.startsWith(k)) ?? ''] ?? 'Dashboard';
+
+  const closeChat = useCallback(() => setChatOpen(false), []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -48,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
-      {/* ── Top bar ── */}
+      {/* Top bar */}
       <header className="h-[52px] shrink-0 border-b border-zinc-200/60 bg-white flex items-center px-5 gap-6 z-10">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
@@ -81,6 +75,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2.5">
+          {/* Ask AI button */}
+          <button
+            onClick={() => setChatOpen(true)}
+            className="flex h-7 items-center gap-1.5 rounded-md bg-zinc-900 px-2.5 text-[12px] font-medium text-white transition-colors hover:bg-zinc-700"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Ask AI
+          </button>
+
           <Link href="/settings">
             <Settings className="h-4 w-4 text-zinc-400 hover:text-zinc-600 transition-colors" />
           </Link>
@@ -106,17 +109,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-white">
         {children}
       </main>
 
-      {/* ── Chat panel ── */}
-      <ChatPanel
-        currentPage={currentPage}
-        isOpen={chatOpen}
-        onToggle={() => setChatOpen(!chatOpen)}
-      />
+      {/* Chat drawer */}
+      <ChatDrawer isOpen={chatOpen} onClose={closeChat} />
     </div>
   );
 }

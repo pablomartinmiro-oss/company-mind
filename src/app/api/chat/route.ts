@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   requestContext.set('currentPage', context.currentPage ?? 'dashboard');
   requestContext.set('currentContactId', context.currentContactId ?? null);
   requestContext.set('currentContactName', context.currentContactName ?? null);
+  requestContext.set('currentCallId', context.currentCallId ?? null);
 
   // Save user message
   const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === 'user');
