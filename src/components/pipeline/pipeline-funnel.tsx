@@ -31,6 +31,9 @@ interface Props {
 export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Props) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ [pipelines[0]?.id]: true });
 
+  // Use the longest pipeline to set the grid column count
+  const maxStages = Math.max(...pipelines.map((p) => p.stages.length), 1);
+
   function togglePipeline(id: string) {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   }
@@ -60,36 +63,39 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
               </span>
             </button>
 
-            {/* Stage circles — display/filter only */}
+            {/* Stage grid — symmetric alignment via fixed column count */}
             {isExpanded && (
-              <div className="flex items-center w-full px-6 pb-5 pt-3">
+              <div
+                className="grid items-start gap-1 px-6 pb-5 pt-3"
+                style={{ gridTemplateColumns: `repeat(${maxStages}, 1fr)` }}
+              >
                 {pipeline.stages.map((stage, sIdx) => {
                   const count = contactsInStage(stage);
                   const isSelected = selectedStage === stage;
+                  const Icon = STAGE_ICONS[stage] ?? User;
+                  const stateClasses = isSelected
+                    ? 'border-[#ff6a3d] bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white shadow-[0_4px_12px_rgba(255,106,61,0.3)]'
+                    : count > 0
+                    ? 'border-white/60 bg-white/60 text-zinc-500'
+                    : 'border-white/60 bg-white/40 text-zinc-400';
 
                   return (
-                    <div key={stage} className="contents">
+                    <div key={stage} className="flex items-center justify-center relative">
+                      {/* Connector lines */}
                       {sIdx > 0 && (
-                        <div className="flex-1 border-t-[1.5px] border-dashed border-zinc-300/50 mb-[20px] min-w-[20px]" />
+                        <div className="absolute left-0 right-1/2 top-[18px] border-t-[1.5px] border-dashed border-zinc-300/50 -z-10" />
+                      )}
+                      {sIdx < pipeline.stages.length - 1 && (
+                        <div className="absolute right-0 left-1/2 top-[18px] border-t-[1.5px] border-dashed border-zinc-300/50 -z-10" />
                       )}
                       <button
                         onClick={() => handleStageClick(stage)}
-                        className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer"
+                        className="flex flex-col items-center gap-1.5 cursor-pointer"
                       >
                         <div className="relative">
-                          {(() => {
-                            const Icon = STAGE_ICONS[stage] ?? User;
-                            const stateClasses = isSelected
-                              ? 'border-[#ff6a3d] bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white shadow-[0_4px_12px_rgba(255,106,61,0.3)]'
-                              : count > 0
-                              ? 'border-white/60 bg-white/60 text-zinc-500'
-                              : 'border-white/60 bg-white/40 text-zinc-400';
-                            return (
-                              <div className={`h-[36px] w-[36px] rounded-full border backdrop-blur flex items-center justify-center transition-all duration-150 ${stateClasses}`}>
-                                <Icon className="w-4 h-4" />
-                              </div>
-                            );
-                          })()}
+                          <div className={`h-[36px] w-[36px] rounded-full border backdrop-blur flex items-center justify-center transition-all duration-150 ${stateClasses}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
                           {count > 0 && (
                             <span className="absolute -top-1 -right-1 h-[18px] min-w-[18px] px-1 rounded-full bg-zinc-900 text-white text-[9px] font-medium flex items-center justify-center">
                               {count}
@@ -107,6 +113,10 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
                     </div>
                   );
                 })}
+                {/* Empty trailing cells for shorter pipelines */}
+                {Array.from({ length: maxStages - pipeline.stages.length }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
               </div>
             )}
           </div>
