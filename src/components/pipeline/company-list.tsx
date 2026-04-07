@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
 import { ChevronRight } from 'lucide-react';
+import { getCompanyLabel } from '@/lib/company-labels';
 
 interface CompanyRow {
   company_id: string;
@@ -97,8 +98,13 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
 
             {/* Company info */}
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-[#1a1a1a] truncate">{company.company_name}</p>
-              <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{company.industry ?? 'Unknown industry'}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[13px] font-medium text-[#1a1a1a] truncate">{company.company_name}</p>
+                {(() => {
+                  const label = getCompanyLabel(company.industry);
+                  return label.label ? <span className={label.className}>{label.label}</span> : null;
+                })()}
+              </div>
             </div>
 
             {/* Lead source */}

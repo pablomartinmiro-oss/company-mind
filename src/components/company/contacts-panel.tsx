@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Star, Plus, ChevronDown, Mail, Phone } from 'lucide-react';
+import { formatPhone } from '@/lib/format-phone';
 
 interface ContactInfo {
   id: string;
@@ -38,6 +40,37 @@ function getInitials(name: string): string {
 
 export function ContactsPanel({ companyId, contacts, selectedContactId, onSelectContact, onContactUpdate }: Props) {
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!editingContactId) return;
+    function handler(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setEditingContactId(null);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [editingContactId]);
+
+  function openRoleDropdown(contactId: string) {
+    if (editingContactId === contactId) {
+      setEditingContactId(null);
+      return;
+    }
+    const trigger = triggerRefs.current[contactId];
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setEditingContactId(contactId);
+  }
 
   async function updateRole(contactId: string, role: string) {
     onContactUpdate(contactId, { role });
@@ -90,7 +123,8 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                     {/* Editable role pill */}
                     <div className="mt-1">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setEditingContactId(isEditing ? null : contact.contact_id); }}
+                        ref={(el) => { triggerRefs.current[contact.contact_id] = el; }}
+                        onClick={(e) => { e.stopPropagation(); openRoleDropdown(contact.contact_id); }}
                         className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 ${ROLE_PILL[contact.role ?? ''] ?? 'bg-zinc-100/60 text-zinc-500'}`}
                       >
                         {ROLE_LABEL[contact.role ?? ''] ?? 'Set role'}
@@ -105,16 +139,20 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                       )}
                       {contact.contact_phone && (
                         <a href={`tel:${contact.contact_phone}`} className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-[#ff6a3d] transition-colors font-mono" onClick={(e) => e.stopPropagation()}>
-                          <Phone className="w-2.5 h-2.5" /> {contact.contact_phone}
+                          <Phone className="w-2.5 h-2.5" /> {formatPhone(contact.contact_phone)}
                         </a>
                       )}
                     </div>
                   </div>
                 </button>
 
-                {/* Role dropdown */}
-                {isEditing && (
-                  <div className="absolute left-12 top-[60px] z-10 bg-white/95 backdrop-blur-xl border border-white/80 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2)] py-1 min-w-[160px]">
+                {/* Role dropdown — rendered via portal to avoid overflow clipping */}
+                {isEditing && mounted && dropdownPos && createPortal(
+                  <div
+                    ref={dropdownRef}
+                    className="fixed z-[9999] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1 min-w-[160px]"
+                    style={{ top: dropdownPos.top, left: dropdownPos.left }}
+                  >
                     {ROLES.map(r => (
                       <button
                         key={r.value}
@@ -136,7 +174,8 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                         </button>
                       </>
                     )}
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             );

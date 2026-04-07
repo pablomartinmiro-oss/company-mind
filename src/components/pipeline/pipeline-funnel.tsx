@@ -103,7 +103,7 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
                           )}
                         </div>
                         <span
-                          className={`text-[9px] text-center max-w-[60px] leading-tight ${
+                          className={`text-[9px] text-center max-w-[60px] leading-tight h-7 flex items-start justify-center ${
                             isSelected ? 'font-medium text-[#1a1a1a]' : 'text-zinc-500'
                           }`}
                         >
