@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Brain } from 'lucide-react'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,7 +17,13 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error: authError } = await supabaseBrowser.auth.signInWithPassword({
+    const sb = getSupabaseBrowser();
+    if (!sb) {
+      setError('Authentication not configured');
+      setLoading(false);
+      return;
+    }
+    const { error: authError } = await sb.auth.signInWithPassword({
       email,
       password,
     })

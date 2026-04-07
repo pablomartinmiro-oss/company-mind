@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Phone, Building2, Settings, Brain, LogOut } from 'lucide-react';
-import { supabaseBrowser } from '@/lib/supabase-browser';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import { CURRENT_USER } from '@/lib/tenant-context';
 import { getTeamMember } from '@/lib/pipeline-config';
 
@@ -29,7 +29,8 @@ function UserAvatarMenu() {
 
   const handleSignOut = async () => {
     if (!confirm('Sign out?')) return;
-    await supabaseBrowser.auth.signOut();
+    const sb = getSupabaseBrowser();
+    if (sb) await sb.auth.signOut();
     router.push('/login');
   };
 
