@@ -94,6 +94,21 @@
 ### Phase 7 — Shared Config
 - `src/lib/pipeline-config.ts` — all shared constants
 
+### Bug Fix Batch 1 — Daily HQ
+- Panel heights fixed (inbox + appointments same 356px)
+- Task sorting by stage, expandable task rows
+- Channel theming on inbox messages
+- Modal cleanup
+
+### Bug Fix Batch 2 — Calls Page
+- Bug 13: Exact timestamps (Apr 4, 2:15 PM) instead of relative "X ago"
+- Bug 15: Push to CRM + Edit buttons on next step actions (new API route)
+- Bug 16: Color-coded type pills on next steps (follow_up, scheduling, admin, new_lead)
+- Bug 17: Strengths/red flags moved from sidebar to coaching tab
+- Bug 18: Criteria scoring fixed — shows X/10 instead of broken X/2, X/3
+- New file: `src/app/api/calls/[id]/next-steps/push/route.ts`
+- Modified: call-detail-tabs.tsx, page.tsx (calls list + detail), format.ts, pipeline-config.ts, call-analysis.ts
+
 ## Next Session
 1. Test full login flow on production with real credentials
 2. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
