@@ -91,7 +91,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
           moved_by: sl.moved_by, source: sl.source, note: sl.note, entry_number: sl.entry_number,
         })),
     };
-  }).filter(Boolean);
+  }).filter((x): x is NonNullable<typeof x> => x !== null);
 
   // Build enriched contacts
   const enrichedContacts = contacts.map((c: { id: string; contact_id: string; is_primary: boolean; role: string | null }) => ({

@@ -6,7 +6,18 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: 7-Fix UX Polish Round
+## Latest: Company Model Refactor
+- Companies are now first-class entities (companies table)
+- Contacts attached to companies via M2M (company_contacts) with primary flag and role
+- pipeline_contacts renamed to pipeline_companies with company_id FK
+- contact_research renamed to research with scope column (company/contact)
+- Companies list page shows company rows with contact count, primary contact + role
+- Company detail page: company header, contacts sidebar, dual-scope research tabs
+- New API routes: /api/companies/[id]/research, /api/companies/[id]/contacts (CRUD)
+- All existing code updated to use renamed tables (8 files)
+- 5 companies backfilled from existing pipeline contacts
+
+## 7-Fix UX Polish Round
 - Top header AI bar with voice input (Web Speech API) replaces small Ask AI circle
 - Inbox contact names are clickable, open /contacts/{id} in new tab
 - Appointment status pill cycles on click: Confirmed → Showed → No Show → Cancelled (persisted to DB)
