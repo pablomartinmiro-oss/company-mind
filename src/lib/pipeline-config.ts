@@ -2,6 +2,34 @@
 // Tenant: Company Mind (Pablo Martin + Corey Lavinder)
 // Payoneer edition — pills on white content area
 
+import {
+  User, Search, Handshake, CheckCircle,
+  Sparkles, Wrench, Rocket, Target,
+  ArrowUpRight, TrendingUp, Crown,
+  Zap, Skull,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+export const STAGE_ICONS: Record<string, LucideIcon> = {
+  // Sales Pipeline
+  'New Lead': User,
+  'Qualification': Search,
+  'Closing': Handshake,
+  'Closed': CheckCircle,
+  // Onboarding
+  'New Client': Sparkles,
+  'Building': Wrench,
+  'Built': Rocket,
+  'Operating': Target,
+  // Upsell
+  'Tier 1': ArrowUpRight,
+  'Tier 2': TrendingUp,
+  'Tier 3': Crown,
+  // Follow Up
+  'Nurture': Zap,
+  'Dead': Skull,
+};
+
 export const TEAM_MEMBERS = [
   { name: 'Pablo Martin',   initials: 'PM', avatarClass: 'bg-[#1c1916]' },
   { name: 'Corey Lavinder', initials: 'CL', avatarClass: 'bg-zinc-600' },

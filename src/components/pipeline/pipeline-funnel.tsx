@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { User } from 'lucide-react';
+import { STAGE_ICONS } from '@/lib/pipeline-config';
 
 interface StageLogEntry {
   id: string;
@@ -72,28 +74,30 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
                       )}
                       <button
                         onClick={() => handleStageClick(stage)}
-                        className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer"
+                        className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer"
                       >
                         <div className="relative">
-                          <div
-                            className={`h-[44px] w-[44px] rounded-full border-[1.5px] flex items-center justify-center ${
-                              isSelected
-                                ? 'border-[2px] bg-white/80 text-zinc-900 border-white/80 text-[14px] font-bold'
-                                : count > 0
-                                ? 'border-zinc-300 bg-white/30 text-zinc-500 text-[14px]'
-                                : 'border-zinc-300 bg-white/30 text-zinc-400 text-[13px] font-mono'
-                            }`}
-                          >
-                            {count > 0 && !isSelected ? '✓' : sIdx + 1}
-                          </div>
+                          {(() => {
+                            const Icon = STAGE_ICONS[stage] ?? User;
+                            const stateClasses = isSelected
+                              ? 'border-[#ff6a3d] bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white shadow-[0_4px_12px_rgba(255,106,61,0.3)]'
+                              : count > 0
+                              ? 'border-white/60 bg-white/60 text-zinc-500'
+                              : 'border-white/60 bg-white/40 text-zinc-400';
+                            return (
+                              <div className={`h-[36px] w-[36px] rounded-full border backdrop-blur flex items-center justify-center transition-all duration-150 ${stateClasses}`}>
+                                <Icon className="w-4 h-4" />
+                              </div>
+                            );
+                          })()}
                           {count > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 h-[20px] w-[20px] rounded-full bg-zinc-700 text-white text-[10px] font-semibold flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 h-[18px] min-w-[18px] px-1 rounded-full bg-zinc-900 text-white text-[9px] font-medium flex items-center justify-center">
                               {count}
                             </span>
                           )}
                         </div>
                         <span
-                          className={`text-[10px] text-center max-w-[64px] leading-tight mt-1 ${
+                          className={`text-[9px] text-center max-w-[60px] leading-tight ${
                             isSelected ? 'font-medium text-[#1a1a1a]' : 'text-zinc-500'
                           }`}
                         >
