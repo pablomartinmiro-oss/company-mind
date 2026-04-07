@@ -1,12 +1,51 @@
 # PROGRESS.md — Company Mind Build Tracker
 
 ## Current Status
-- **Phase**: Production-ready, auth live, all 6 build phases complete
-- **App state**: tsc clean, all routes auth-protected, login flow live
+- **Phase**: R3 — Live Call Processing Pipeline (just committed, pending deploy)
+- **App state**: tsc clean, build passes, all routes auth-protected
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Phase R2 — AI Inference Engines (deployed)
+## Latest: Phase R3 — Live Call Processing Pipeline (2026-04-07)
+
+End-to-end: GHL records a call → webhook fires → queue processes → AssemblyAI transcribes with diarization → R2 call analysis runs → call appears scored and analyzed in the app.
+
+**Schema changes:**
+- 7 new columns on calls table: ghl_call_id, ghl_recording_url, assemblyai_transcript_id, processing_started_at, processing_completed_at, processing_error, processing_attempts
+- processing_status state machine constraint: pending → transcribing → analyzing → complete | failed | skipped
+- Idempotency index on (tenant_id, ghl_call_id)
+- Worker index on processing_status for fast pending lookups
+- New table: webhook_events (audit log for all incoming webhooks)
+
+**New files:**
+- `src/lib/transcription/assemblyai.ts` — async submit/poll client with speaker diarization
+- `src/app/api/cron/process-calls/route.ts` — cron worker: pending → transcribing → analyzing → complete
+- `src/app/api/calls/[id]/status/route.ts` — polling endpoint for processing status
+- `src/app/api/calls/[id]/retry/route.ts` — manual retry for failed calls
+- `src/components/calls/processing-status.tsx` — live status banner with auto-polling
+- `docs/SETUP.md` — full setup guide (env vars, GHL webhook, AssemblyAI, cron)
+- `docs/BACKLOG.md` — 10 tracked post-R3 bugs
+- `supabase/migrations/20260407_r3_call_processing_pipeline.sql`
+
+**Modified files:**
+- `src/app/api/webhooks/ghl/route.ts` — rewritten to use processing_status state machine + webhook_events audit log
+- `src/app/(app)/calls/[id]/page.tsx` — ProcessingStatusBanner wired above header
+- `vercel.json` — cron pointed to /api/cron/process-calls
+- `docs/DECISIONS.md` — 5 new R3 judgment calls logged
+
+**Pipeline flow:**
+1. GHL webhook → creates call row with processing_status='pending'
+2. Cron (every 1min) → submits audio to AssemblyAI → processing_status='transcribing'
+3. Cron next tick → polls AssemblyAI → transcript ready → processing_status='analyzing'
+4. Cron next tick → runs R2 analyzeCall() → processing_status='complete'
+5. Call detail page polls /status every 3s → auto-reloads on complete
+
+**Not yet done (requires env vars):**
+- GHL_WEBHOOK_SECRET and CRON_SECRET need to be set in .env.local and Vercel
+- Migration SQL needs to be run in Supabase
+- GHL webhook URL needs to be configured in the GHL sub-account
+
+## Phase R2 — AI Inference Engines (deployed)
 - Deep enrichment engine: web search + Claude inference populates 159-field catalog
   - Respects locked/manual fields, runs predictive scores, enriches each contact
   - Tracked via enrichment_jobs table
