@@ -6,7 +6,7 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Phase R2 — AI Inference Engines
+## Latest: Phase R2 — AI Inference Engines (deployed)
 - Deep enrichment engine: web search + Claude inference populates 159-field catalog
   - Respects locked/manual fields, runs predictive scores, enriches each contact
   - Tracked via enrichment_jobs table
