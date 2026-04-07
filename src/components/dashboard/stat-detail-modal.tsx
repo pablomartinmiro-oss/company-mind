@@ -49,6 +49,7 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
     setSearch('');
   }, [type]);
 
+  // Esc to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -56,6 +57,14 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (!type) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [type]);
 
   if (!type) return null;
 
@@ -75,44 +84,42 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
   const { title, count, placeholder } = config[type];
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 bg-zinc-900/40" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <div className="pointer-events-auto w-[640px] h-[560px] bg-white rounded-xl shadow-2xl border border-zinc-200/60 overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="h-12 px-5 border-b border-zinc-200/60 flex items-center justify-between shrink-0">
-            <span className="text-[13px] font-semibold text-zinc-900">
-              {title} ({count})
-            </span>
-            <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-zinc-900/40" onClick={onClose} />
+      <div className="relative z-10 w-[640px] h-[560px] bg-white rounded-xl shadow-2xl border border-zinc-200/60 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="h-12 px-5 border-b border-zinc-200/60 flex items-center justify-between shrink-0">
+          <span className="text-[13px] font-semibold text-zinc-900">
+            {title} ({count})
+          </span>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
 
-          {/* Search */}
-          <div className="px-5 py-2.5 border-b border-zinc-100 shrink-0">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={placeholder}
-                className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:border-zinc-400"
-              />
-            </div>
-          </div>
-
-          {/* List */}
-          <div className="flex-1 overflow-y-auto">
-            {type === 'calls' && <CallsList calls={calls} search={q} />}
-            {type === 'score' && <ScoreList calls={calls} search={q} />}
-            {type === 'pipeline' && <PipelineList contacts={pipelineContacts} search={q} />}
-            {type === 'tasks' && <TasksList tasks={tasks} search={q} />}
+        {/* Search */}
+        <div className="px-5 py-2.5 border-b border-zinc-100 shrink-0">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={placeholder}
+              className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:border-zinc-400"
+            />
           </div>
         </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {type === 'calls' && <CallsList calls={calls} search={q} />}
+          {type === 'score' && <ScoreList calls={calls} search={q} />}
+          {type === 'pipeline' && <PipelineList contacts={pipelineContacts} search={q} />}
+          {type === 'tasks' && <TasksList tasks={tasks} search={q} />}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

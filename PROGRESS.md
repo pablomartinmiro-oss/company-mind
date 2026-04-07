@@ -184,8 +184,27 @@ Daily HQ audit fixes complete (post-Batch 4).
 
 **Note:** Inbox conversations live in GHL, not Supabase — conversation seed data depends on GHL test data and was skipped.
 
+### Daily HQ Audit Round 2 (2026-04-06)
+
+Daily HQ audit round 2 complete.
+
+**Bugs resolved:**
+- B1: Stat modal now truly viewport-centered — restructured to single `fixed inset-0` container with backdrop as sibling, modal as `relative z-10` child. Body scroll locked while open.
+- B2: Inbox threads show real contact names, emails, and phone numbers instead of "Contact" / "You" placeholders. SMS/WhatsApp meta lines show `From: {name} ({phone}) → To: {tenant} ({phone})`. Email cards show `From: {name} <{email}>`. Demo data enriched with per-contact email/phone. GHL conversations pass through `contactEmail`/`contactPhone` when available.
+- B3: Appointments sort diagnosed and fixed. **Root cause:** demo appointment dates were computed at module load time (`todayAt`, `futureDay` called in `const DEMO_APPOINTMENTS`), so they froze on serverless cold start and went stale on warm instances. Additionally, demo data was never filtered by the requested date — all 6 appointments appeared regardless of which day was viewed. **Fix:** moved date computation into a `getDemoAppointments()` function called per-request; added `filterByDate()` that filters demo appointments to match the `?date=` query param before returning. Also added `endTime` and `description` to demo appointments for the expand detail block.
+- B4: Task row layout rearranged to `[Task type pill] [Time status pill] [Circle] [Content]`. Time status pill shows "3d overdue" (red), "Due today" (amber), "Due in 5d" (grey), or "No due date" (grey). Exact date removed from row right side (still visible in task modal).
+- B5: Edit task now includes "Assigned To" dropdown with TEAM_MEMBERS options. PATCH API route updated to persist `assigned_to`.
+
+**Modified files:**
+- `src/components/dashboard/stat-detail-modal.tsx` — B1 viewport centering + body scroll lock
+- `src/components/dashboard/inbox-panel.tsx` — B2 real contact metadata in all thread layouts
+- `src/app/api/inbox/route.ts` — B2 enriched demo data with email/phone, GHL passthrough
+- `src/app/api/appointments/route.ts` — B3 request-time date computation + date filtering
+- `src/components/dashboard/task-list.tsx` — B4 row layout + B5 assignee in edit mode
+- `src/app/api/tasks/[id]/route.ts` — B5 accepts assigned_to in PATCH
+
 ## Next Session
-1. Verify all Daily HQ audit fixes on live site
+1. Verify all Daily HQ audit round 2 fixes on live site
 2. Verify Batch 4 AI drawer on live site
 3. Test full login flow on production with real credentials
 4. Batch 5: Gmail inbox connector, Google Meet call import

@@ -21,6 +21,8 @@ interface Conversation {
   id: string;
   contactId: string;
   contactName: string;
+  contactEmail?: string;
+  contactPhone?: string;
   lastMessageBody: string;
   lastMessageType: string;
   lastMessageDate: string;
@@ -199,10 +201,10 @@ export function InboxPanel() {
               {/* Messages — channel-specific layout */}
               <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2 bg-zinc-50/40">
                 {activeChannel === 'Email'
-                  ? <EmailThread messages={selected.messages} />
+                  ? <EmailThread messages={selected.messages} contactName={selected.contactName} contactEmail={selected.contactEmail} />
                   : activeChannel === 'WhatsApp'
-                    ? <WhatsAppThread messages={selected.messages} />
-                    : <SMSThread messages={selected.messages} />
+                    ? <WhatsAppThread messages={selected.messages} contactName={selected.contactName} contactPhone={selected.contactPhone} />
+                    : <SMSThread messages={selected.messages} contactName={selected.contactName} contactPhone={selected.contactPhone} />
                 }
               </div>
 
@@ -272,14 +274,21 @@ export function InboxPanel() {
   );
 }
 
+const TENANT_DISPLAY = 'Company Mind';
+const TENANT_EMAIL = 'pablo.martin.miro@gmail.com';
+const TENANT_PHONE = '+1 (555) 100-0001';
+
 /* ─── SMS Thread ─── */
-function SMSThread({ messages }: { messages: Message[] }) {
+function SMSThread({ messages, contactName, contactPhone }: { messages: Message[]; contactName: string; contactPhone?: string }) {
+  const cPhone = contactPhone ?? '—';
   return (
     <>
       {messages.map((msg) => (
         <div key={msg.id} className={`flex flex-col ${msg.direction === 'inbound' ? 'items-start' : 'items-end'}`}>
           <span className="text-[10px] text-zinc-400 mb-0.5">
-            {msg.direction === 'inbound' ? `From: ${msg.meta?.from ?? 'Contact'}` : `To: ${msg.meta?.to ?? 'Contact'}`}
+            {msg.direction === 'inbound'
+              ? `From: ${contactName} (${msg.meta?.from ?? cPhone}) → To: ${TENANT_DISPLAY} (${TENANT_PHONE})`
+              : `From: ${TENANT_DISPLAY} (${TENANT_PHONE}) → To: ${contactName} (${msg.meta?.to ?? cPhone})`}
           </span>
           <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
             msg.direction === 'inbound'
@@ -298,14 +307,17 @@ function SMSThread({ messages }: { messages: Message[] }) {
 }
 
 /* ─── Email Thread ─── */
-function EmailThread({ messages }: { messages: Message[] }) {
+function EmailThread({ messages, contactName, contactEmail }: { messages: Message[]; contactName: string; contactEmail?: string }) {
+  const cEmail = contactEmail ?? '—';
+  const contactFull = `${contactName} <${cEmail}>`;
+  const tenantFull = `${TENANT_DISPLAY} <${TENANT_EMAIL}>`;
   return (
     <>
       {messages.map((msg) => (
         <div key={msg.id} className="bg-white border border-blue-100 rounded-lg p-3 mb-2">
           <div className="text-[10px] text-zinc-500 leading-relaxed space-y-0.5">
-            <p>From: {msg.meta?.from ?? (msg.direction === 'inbound' ? 'Contact' : 'You')}</p>
-            <p>To: {msg.meta?.to ?? (msg.direction === 'outbound' ? 'Contact' : 'You')}</p>
+            <p>From: {msg.direction === 'inbound' ? (msg.meta?.from ?? contactFull) : (msg.meta?.from ?? tenantFull)}</p>
+            <p>To: {msg.direction === 'outbound' ? (msg.meta?.to ?? contactFull) : (msg.meta?.to ?? tenantFull)}</p>
             {msg.meta?.subject && <p>Subject: {msg.meta.subject}</p>}
             <p>{new Date(msg.dateAdded).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
           </div>
@@ -318,13 +330,16 @@ function EmailThread({ messages }: { messages: Message[] }) {
 }
 
 /* ─── WhatsApp Thread ─── */
-function WhatsAppThread({ messages }: { messages: Message[] }) {
+function WhatsAppThread({ messages, contactName, contactPhone }: { messages: Message[]; contactName: string; contactPhone?: string }) {
+  const cPhone = contactPhone ?? '—';
   return (
     <>
       {messages.map((msg) => (
         <div key={msg.id} className={`flex flex-col ${msg.direction === 'inbound' ? 'items-start' : 'items-end'}`}>
           <span className="text-[10px] text-zinc-400 mb-0.5">
-            {msg.direction === 'inbound' ? `From: ${msg.meta?.from ?? 'Contact'}` : `To: ${msg.meta?.to ?? 'Contact'}`}
+            {msg.direction === 'inbound'
+              ? `From: ${contactName} (${msg.meta?.from ?? cPhone}) → To: ${TENANT_DISPLAY} (${TENANT_PHONE})`
+              : `From: ${TENANT_DISPLAY} (${TENANT_PHONE}) → To: ${contactName} (${msg.meta?.to ?? cPhone})`}
           </span>
           <div className={`max-w-[78%] px-3 py-2 text-[13px] ${
             msg.direction === 'inbound'

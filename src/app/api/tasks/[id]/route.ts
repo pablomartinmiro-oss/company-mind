@@ -32,6 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (body.due_date !== undefined) allowed.due_date = body.due_date;
   if (body.task_type !== undefined) allowed.task_type = body.task_type;
   if (body.completed !== undefined) allowed.completed = body.completed;
+  if (body.assigned_to !== undefined) allowed.assigned_to = body.assigned_to;
 
   const { data, error } = await supabaseAdmin
     .from('tasks')

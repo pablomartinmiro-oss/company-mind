@@ -37,6 +37,17 @@ const TASK_TYPE_FILTER_OPTIONS = [
 
 const TASK_TYPE_OPTIONS = ['admin', 'follow_up', 'new_lead', 'scheduling'];
 
+function timeStatusPill(dueDate: string | null): { text: string; className: string } {
+  if (!dueDate) return { text: 'No due date', className: 'bg-zinc-100 text-zinc-400 border border-zinc-200' };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate + 'T00:00:00');
+  const diff = Math.floor((due.getTime() - today.getTime()) / 86400000);
+  if (diff < 0) return { text: `${Math.abs(diff)}d overdue`, className: 'bg-red-50 text-red-700 border border-red-200' };
+  if (diff === 0) return { text: 'Due today', className: 'bg-amber-50 text-amber-700 border border-amber-200' };
+  return { text: `Due in ${diff}d`, className: 'bg-zinc-100 text-zinc-500 border border-zinc-200' };
+}
+
 function dueDateColor(dueDate: string | null): string {
   if (!dueDate) return 'text-zinc-400';
   const today = new Date();
@@ -55,7 +66,7 @@ export function TaskList({ initialTasks }: Props) {
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '', due_date: '', task_type: '' });
+  const [editForm, setEditForm] = useState({ title: '', description: '', due_date: '', task_type: '', assigned_to: '' });
   const [pipelineStages, setPipelineStages] = useState<Record<string, PipelineInfo[]>>({});
 
   const filtered = tasks
@@ -110,7 +121,7 @@ export function TaskList({ initialTasks }: Props) {
   }
 
   function toggleExpand(id: string) {
-    if (editingId === id) return; // don't collapse while editing
+    if (editingId === id) return;
     setExpandedId(expandedId === id ? null : id);
     setEditingId(null);
   }
@@ -122,6 +133,7 @@ export function TaskList({ initialTasks }: Props) {
       description: task.description ?? '',
       due_date: task.due_date ?? '',
       task_type: task.task_type ?? 'follow_up',
+      assigned_to: task.assigned_to ?? '',
     });
   }
 
@@ -141,7 +153,7 @@ export function TaskList({ initialTasks }: Props) {
         setTasks((prev) =>
           prev.map((t) =>
             t.id === id
-              ? { ...t, title: updated.title, description: updated.description, due_date: updated.due_date, task_type: updated.task_type }
+              ? { ...t, title: updated.title, description: updated.description, due_date: updated.due_date, task_type: updated.task_type, assigned_to: updated.assigned_to }
               : t
           )
         );
@@ -183,17 +195,29 @@ export function TaskList({ initialTasks }: Props) {
           const isEditing = editingId === task.id;
           const dateColor = dueDateColor(task.due_date);
           const stages = task.contact_id ? pipelineStages[task.contact_id] : undefined;
+          const timePill = timeStatusPill(task.due_date);
 
           return (
             <div key={task.id} className={isCompleted ? 'opacity-35' : ''}>
-              {/* Main row */}
+              {/* Main row — B4 layout: [type pill] [time pill] [circle] [content] */}
               <div
                 onClick={() => toggleExpand(task.id)}
-                className="flex items-center gap-3 px-3.5 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60 cursor-pointer transition-colors duration-100"
+                className="flex items-center gap-1.5 px-3.5 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60 cursor-pointer transition-colors duration-100"
               >
+                {/* Task type pill */}
+                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${typeClass}`}>
+                  {typeLabel}
+                </span>
+
+                {/* Time status pill */}
+                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${timePill.className}`}>
+                  {timePill.text}
+                </span>
+
+                {/* Complete circle */}
                 <button
                   onClick={(e) => { e.stopPropagation(); completeTask(task.id); }}
-                  className={`h-[18px] w-[18px] rounded-full border-[1.5px] flex items-center justify-center text-[9px] cursor-pointer flex-shrink-0 transition-all ${
+                  className={`h-[18px] w-[18px] rounded-full border-[1.5px] flex items-center justify-center text-[9px] cursor-pointer flex-shrink-0 transition-all ml-1 ${
                     isCompleted
                       ? 'bg-zinc-900 border-zinc-900 text-white'
                       : 'border-zinc-200 text-transparent hover:border-zinc-900'
@@ -202,11 +226,8 @@ export function TaskList({ initialTasks }: Props) {
                   {isCompleted ? <Check className="h-2.5 w-2.5" /> : '✓'}
                 </button>
 
-                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${typeClass}`}>
-                  {typeLabel}
-                </span>
-
-                <div className="flex-1 min-w-0">
+                {/* Task body */}
+                <div className="flex-1 min-w-0 ml-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[13px] font-medium text-zinc-900">{task.contact_name || task.title}</span>
                     {task.assigned_to && (
@@ -218,13 +239,7 @@ export function TaskList({ initialTasks }: Props) {
                   )}
                 </div>
 
-                {/* Exact due date */}
-                {task.due_date && (
-                  <span className={`text-[11px] font-mono min-w-[90px] text-right ${dateColor}`}>
-                    {formatExactDate(task.due_date)}
-                  </span>
-                )}
-
+                {/* Chevron */}
                 <div className="flex-shrink-0">
                   {isExpanded
                     ? <ChevronDown className="h-3.5 w-3.5 text-zinc-300" />
@@ -252,7 +267,7 @@ export function TaskList({ initialTasks }: Props) {
                         rows={3}
                         className="w-full text-[12px] text-zinc-700 border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400 resize-none"
                       />
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-zinc-400 block mb-1">Due Date</label>
                           <input
@@ -271,6 +286,19 @@ export function TaskList({ initialTasks }: Props) {
                           >
                             {TASK_TYPE_OPTIONS.map((t) => (
                               <option key={t} value={t}>{TASK_TYPE_LABELS[t] ?? t}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-zinc-400 block mb-1">Assigned To</label>
+                          <select
+                            value={editForm.assigned_to}
+                            onChange={(e) => setEditForm({ ...editForm, assigned_to: e.target.value })}
+                            className="text-[12px] border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400"
+                          >
+                            <option value="">Unassigned</option>
+                            {TEAM_MEMBERS.map((m) => (
+                              <option key={m.name} value={m.name}>{m.name}</option>
                             ))}
                           </select>
                         </div>
@@ -299,7 +327,7 @@ export function TaskList({ initialTasks }: Props) {
                         <p className="text-[13px] text-zinc-500 leading-relaxed mb-3">{task.description}</p>
                       )}
 
-                      {/* Meta row */}
+                      {/* Meta row — exact date stays in modal */}
                       <div className="flex items-center gap-3 mb-3">
                         {task.due_date && (
                           <span className={`text-[11px] font-mono ${dateColor}`}>
@@ -309,9 +337,12 @@ export function TaskList({ initialTasks }: Props) {
                         <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typeClass}`}>
                           {typeLabel}
                         </span>
+                        {task.assigned_to && (
+                          <span className="text-[11px] text-blue-600">@{task.assigned_to}</span>
+                        )}
                       </div>
 
-                      {/* Pipeline stages — actual stages only (A4) */}
+                      {/* Pipeline stages — actual stages only */}
                       <div className="mb-3">
                         <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-1.5">Pipeline Stages</p>
                         {stages === undefined ? (
