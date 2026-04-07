@@ -23,18 +23,21 @@ interface PipelineData {
   stageLog: StageLogEntry[];
 }
 
-interface CompanyContact {
-  contact_id: string;
-  contact_name: string;
-  company_name: string | null;
+interface CompanyRow {
+  company_id: string;
+  company_name: string;
+  industry?: string | null;
   enrollments: { pipeline_name: string; stage: string }[];
   deal_value: string | null;
   days_in_stage: number;
+  contact_count?: number;
+  primary_contact_name?: string | null;
+  primary_contact_role?: string | null;
 }
 
 interface Props {
   pipelines: PipelineData[];
-  contacts: CompanyContact[];
+  contacts: CompanyRow[];
   totalValue: string;
   activeDeals: number;
   avgDaysInStage: number;
