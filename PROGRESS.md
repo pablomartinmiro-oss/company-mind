@@ -248,8 +248,17 @@ Full Payoneer-inspired dark theme applied across the entire app. Brand kit scaff
 
 **Decisions logged:** 5 entries in /docs/DECISIONS.md
 
+### Phase 8 — Brand Kit Integration (2026-04-07)
+
+- Brand CSS tokens wired into `@theme inline` in globals.css (`bg-brand-*`, `text-brand-*`, `border-brand-*`)
+- Button component (`src/components/ui/button.tsx`) gains `brand` and `brand-ghost` variants using brand tokens
+- `/brand` showcase route built — renders logos, color palette, typography scale, radii, shadows, component examples (buttons, pills, inputs, score circles, stat cards), voice/tone table
+- SVG favicon from brand mark gradient (`src/app/icon.svg`)
+- Logo SVGs copied to `public/brand/` for static serving
+- `brand/EXPORT.md` documents how to port the kit to other projects
+
 ## Next Session
-1. Verify dark theme on live site — all pages should be dark
+1. Verify dark theme + brand showcase on live site
 2. Call detail page (/calls/[id]) needs separate dark treatment (currently locked)
 3. Score circles 90+ gradient (gradient use #2) — needs implementation
 4. Batch 5: Gmail inbox connector, Google Meet call import
@@ -257,4 +266,3 @@ Full Payoneer-inspired dark theme applied across the entire app. Brand kit scaff
 6. Build settings page (team management, GHL connection status, password reset)
 7. Build rubric editor UI (currently disabled)
 8. Add second tenant to verify multi-tenancy isolation
-9. Brand showcase route (/brand) for demo screenshots
