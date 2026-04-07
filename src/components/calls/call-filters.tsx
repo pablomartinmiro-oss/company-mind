@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { SelectPill } from '@/components/ui/select-pill';
 
 const TIME_OPTIONS = [
   { label: 'Last 7 days', value: '7' },
@@ -27,8 +28,6 @@ const OUTCOME_OPTIONS = [
   { label: 'Voicemail', value: 'voicemail' },
 ];
 
-const selectClass = 'text-[12px] px-2.5 py-1.5 rounded-lg bg-white/50 border border-white/60 text-zinc-500 focus:outline-none focus:border-zinc-400';
-
 export function CallFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,33 +44,23 @@ export function CallFilters() {
 
   return (
     <div className="flex items-center gap-2 mt-4">
-      <select
-        className={selectClass}
+      <SelectPill
         value={searchParams.get('time') ?? '7'}
-        onChange={(e) => updateParam('time', e.target.value)}
-      >
-        {TIME_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-      <select
-        className={selectClass}
+        onChange={(v) => updateParam('time', v)}
+        options={TIME_OPTIONS}
+      />
+      <SelectPill
         value={searchParams.get('type') ?? ''}
-        onChange={(e) => updateParam('type', e.target.value)}
-      >
-        {TYPE_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-      <select
-        className={selectClass}
+        onChange={(v) => updateParam('type', v)}
+        options={TYPE_OPTIONS}
+        placeholder="All types"
+      />
+      <SelectPill
         value={searchParams.get('outcome') ?? ''}
-        onChange={(e) => updateParam('outcome', e.target.value)}
-      >
-        {OUTCOME_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+        onChange={(v) => updateParam('outcome', v)}
+        options={OUTCOME_OPTIONS}
+        placeholder="All outcomes"
+      />
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Check, ExternalLink, Pencil } from 'lucide-react';
 import { formatExactDate } from '@/lib/format';
-import { STAGE_PILL_CLASSES, TEAM_MEMBERS, TASK_TYPE_LABELS, TASK_TYPE_PILL, getTeamMember } from '@/lib/pipeline-config';
+import { TEAM_MEMBERS, TASK_TYPE_LABELS, TASK_TYPE_PILL, getTeamMember } from '@/lib/pipeline-config';
+import { SelectPill } from '@/components/ui/select-pill';
 
 interface Task {
   id: string;
@@ -176,21 +177,24 @@ export function TaskList({ initialTasks }: Props) {
     setEditingId(null);
   }
 
-  const selectClass = 'text-[12px] px-2 py-1 rounded-md border border-white/60 bg-white/50 text-zinc-500 focus:outline-none';
-
   return (
     <div className="relative glass-card rounded-3xl overflow-hidden">
       <div className="glass-card-inner" />
       {/* Header */}
       <div className="relative flex items-center justify-between px-3.5 py-2.5 border-b border-white/40">
         <div className="flex items-center gap-2">
-          <select className={selectClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            {TASK_TYPE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <select className={selectClass} value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
-            <option value="">All team</option>
-            {TEAM_MEMBERS.map((m) => <option key={m.name} value={m.name}>{m.name}</option>)}
-          </select>
+          <SelectPill
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={TASK_TYPE_FILTER_OPTIONS}
+            placeholder="All types"
+          />
+          <SelectPill
+            value={teamFilter}
+            onChange={setTeamFilter}
+            options={TEAM_MEMBERS.map(m => ({ value: m.name, label: m.name }))}
+            placeholder="All team"
+          />
         </div>
         <span className="text-[12px] text-zinc-500">{filtered.length} tasks</span>
       </div>

@@ -90,9 +90,8 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative z-10 w-[640px] h-[560px] glass-card rounded-3xl overflow-hidden flex flex-col">
-        <div className="glass-card-inner" />
+      <div className="fixed inset-0 bg-zinc-900/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative z-10 w-[640px] h-[560px] bg-white/95 backdrop-blur-2xl border border-white/80 rounded-3xl overflow-hidden flex flex-col shadow-[0_24px_64px_-12px_rgba(28,25,22,0.25),0_8px_24px_-4px_rgba(28,25,22,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">
         {/* Header */}
         <div className="relative h-12 px-5 border-b border-white/40 flex items-center justify-between shrink-0">
           <span className="text-[13px] font-semibold text-[#1a1a1a]">

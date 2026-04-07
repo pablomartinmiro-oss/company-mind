@@ -53,10 +53,12 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
     .eq('tenant_id', tenantId)
     .order('called_at', { ascending: false });
 
-  if (tab === 'needs_review') {
+  if (tab === 'all') {
+    query = query.gte('duration_seconds', 60).neq('processing_status', 'error');
+  } else if (tab === 'needs_review') {
     query = query.eq('processing_status', 'error');
   } else if (tab === 'skipped') {
-    query = query.lt('duration_seconds', 45);
+    query = query.lt('duration_seconds', 60);
   } else if (tab === 'archived') {
     query = query.eq('archived', true);
   }
@@ -77,9 +79,9 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   const weekStart = new Date(Date.now() - 7 * 86400000).toISOString();
 
   const [allCount, reviewCount, skippedCount, archivedCount, todayCount, weekCount, scoredCalls] = await Promise.all([
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('duration_seconds', 60).neq('processing_status', 'error'),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('processing_status', 'error'),
-    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).lt('duration_seconds', 45),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).lt('duration_seconds', 60),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('archived', true),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('called_at', todayStart.toISOString()),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('called_at', weekStart),
