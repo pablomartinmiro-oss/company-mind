@@ -1,12 +1,34 @@
 # PROGRESS.md — Company Mind Build Tracker
 
 ## Current Status
-- **Phase**: R3 — Live Call Processing Pipeline (just committed, pending deploy)
+- **Phase**: Post-R3 bug backlog complete
 - **App state**: tsc clean, build passes, all routes auth-protected
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Phase R3 — Live Call Processing Pipeline (2026-04-07)
+## Latest: Post-R3 Bug Backlog Batch (2026-04-07)
+
+9 of 10 backlog bugs resolved in 3 commits. Bug #8 was already done (call_jobs dropped).
+
+**Commit 1 — Native dialogs → frosted glass modals (bugs #1, #7):**
+- `src/components/ui/confirm-modal.tsx` — ConfirmProvider + useConfirm() hook with portal-rendered frosted glass modal. Supports confirm (two buttons) and alert (cancelLabel: null) patterns.
+- `src/components/layout/app-shell.tsx` — ConfirmProvider wraps entire app
+- `src/components/company/re-enrich-button.tsx` — destructive confirm + success/error alerts
+- `src/components/company/stage-popover.tsx` — error alert + destructive remove confirm
+- `src/components/layout/sidebar.tsx` — sign out confirm
+
+**Commit 2 — Display + formatting fixes (bugs #2-6):**
+- Bug #2: `src/lib/company-labels.ts` — color-coded industry pills (SaaS, Medical, Construction, etc.) applied to company list rows
+- Bug #3: `src/components/pipeline/pipeline-funnel.tsx` — fixed-height h-7 label container for vertical alignment
+- Bug #4: `src/components/company/contacts-panel.tsx` — role dropdown portaled to document.body via createPortal
+- Bug #5: `src/lib/format-phone.ts` — formatPhone() formats +14155550201 → (415) 555-0201
+- Bug #6: `src/components/contact/contact-detail-client.tsx` — pb-[10px] on tab buttons for descender clearance
+
+**Commit 3 — Observability + audio playback (bugs #9, #10):**
+- Bug #9: `src/lib/log.ts` — structured JSON logger; instrumented webhook (ghl_webhook_received/rejected) and cron worker (cron_tick_start/end, call_processing_start, transcription_complete, analysis_complete, call_processing_error)
+- Bug #10: `src/app/(app)/calls/[id]/call-detail-tabs.tsx` — native `<audio>` player wired to ghl_recording_url, graceful error states, mock waveform removed
+
+## Phase R3 — Live Call Processing Pipeline (2026-04-07)
 
 End-to-end: GHL records a call → webhook fires → queue processes → AssemblyAI transcribes with diarization → R2 call analysis runs → call appears scored and analyzed in the app.
 
