@@ -7,6 +7,7 @@ import { formatDuration, scoreGrade, scoreColor, scoreBg } from '@/lib/format';
 import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
 import { ArrowLeft, User, Clock, MapPin, Star } from 'lucide-react';
 import { CallDetailTabs } from './call-detail-tabs';
+import { ProcessingStatusBanner } from '@/components/calls/processing-status';
 import { getTenantForUser } from '@/lib/get-tenant';
 
 export default async function CallDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -55,6 +56,17 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
+      {/* ══ PROCESSING STATUS BANNER ══ */}
+      {call.processing_status && call.processing_status !== 'complete' && (
+        <div className="mx-6 mt-4">
+          <ProcessingStatusBanner
+            callId={call.id}
+            initialStatus={call.processing_status}
+            initialError={call.processing_error}
+          />
+        </div>
+      )}
+
       {/* ══ HEADER — frosted glass ══ */}
       <div className="relative glass-card rounded-3xl overflow-hidden mb-4 mx-6 mt-4 shrink-0">
         <div className="glass-card-inner" />
