@@ -192,7 +192,15 @@ export function InboxPanel() {
                   {selected.contactName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium text-zinc-800">{selected.contactName}</span>
+                  <a
+                    href={`/contacts/${selected.contactId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[13px] font-medium text-zinc-800 hover:text-[#ff6a3d] hover:underline decoration-[#ff6a3d]/40 underline-offset-2 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {selected.contactName}
+                  </a>
                   <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${CHANNEL_ICONS[activeChannel]?.bg ?? 'bg-white/30'} ${CHANNEL_ICONS[activeChannel]?.text ?? 'text-zinc-500'}`}>
                     {activeChannel}
                   </span>
@@ -377,7 +385,15 @@ function ConvoRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-[12px] font-medium text-[#1a1a1a] truncate">{convo.contactName}</span>
+          <a
+            href={`/contacts/${convo.contactId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] font-medium text-[#1a1a1a] truncate hover:text-[#ff6a3d] hover:underline decoration-[#ff6a3d]/40 underline-offset-2 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {convo.contactName}
+          </a>
           <span className="text-[10px] text-zinc-500 font-mono flex-shrink-0">
             {formatExactTime(convo.lastMessageDate)}
           </span>
