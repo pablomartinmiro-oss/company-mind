@@ -2,7 +2,8 @@
 
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
@@ -47,6 +48,9 @@ function getContextLabel(pathname: string): string {
 }
 
 export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const pathname = usePathname();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -123,7 +127,9 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
 
   const contextLabel = getContextLabel(pathname);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       {isOpen && (
@@ -218,7 +224,8 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
           </div>
         </form>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 

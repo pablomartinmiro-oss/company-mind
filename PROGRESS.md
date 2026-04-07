@@ -203,8 +203,25 @@ Daily HQ audit round 2 complete.
 - `src/components/dashboard/task-list.tsx` — B4 row layout + B5 assignee in edit mode
 - `src/app/api/tasks/[id]/route.ts` — B5 accepts assigned_to in PATCH
 
+### Daily HQ Audit Round 3 (2026-04-06)
+
+Daily HQ audit round 3 complete.
+
+**Bugs resolved:**
+- C1: Stat detail modal, chat drawer portaled to `document.body` via `createPortal` to escape `animate-fade-in` transform ancestor that was breaking `position: fixed` viewport centering. Added SSR-safe `mounted` guard (`useState(false)` + `useEffect`). Task list accordion is inline (not fixed), so no portal needed.
+- C2: All datetime helpers now render in `America/Chicago` timezone with TZ suffix. `formatExactDateTime` → "Apr 4, 2:15 PM CDT". New `formatExactTime` → "2:15 PM CDT". Inbox message times, appointment row times, email card dates, call row timestamps, and stat modal timestamps all updated. `formatExactDate` unchanged (dates don't need TZ).
+
+**Root cause note for future reference:** Any ancestor with `transform`, `filter`, or `will-change` creates a new containing block for `position: fixed` descendants, causing them to be positioned relative to that ancestor instead of the viewport. The `animate-fade-in` CSS animation uses `transform: translateY()` with `animation-fill-mode: both`, which persists the transform after the animation ends. Always use `createPortal(jsx, document.body)` for modals and drawers to escape the component tree entirely.
+
+**Modified files:**
+- `src/components/dashboard/stat-detail-modal.tsx` — createPortal to document.body + mounted guard
+- `src/components/chat/chat-drawer.tsx` — createPortal to document.body + mounted guard
+- `src/lib/format.ts` — DEFAULT_TIMEZONE constant, Intl-based formatExactDateTime with TZ, new formatExactTime
+- `src/components/dashboard/inbox-panel.tsx` — uses formatExactTime/formatExactDateTime for all timestamps
+- `src/components/dashboard/appointments-panel.tsx` — uses formatExactTime for row times and expanded detail
+
 ## Next Session
-1. Verify all Daily HQ audit round 2 fixes on live site
+1. Verify round 3 fixes on live site (modal centering, TZ suffixes)
 2. Verify Batch 4 AI drawer on live site
 3. Test full login flow on production with real credentials
 4. Batch 5: Gmail inbox connector, Google Meet call import

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Search } from 'lucide-react';
 import { formatExactDateTime, formatExactDate, scoreBg } from '@/lib/format';
 import { STAGE_PILL_CLASSES, TASK_TYPE_LABELS, TASK_TYPE_PILL, CALL_TYPE_LABELS, CALL_TYPE_PILL } from '@/lib/pipeline-config';
@@ -44,6 +45,9 @@ interface StatDetailModalProps {
 
 export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks }: StatDetailModalProps) {
   const [search, setSearch] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     setSearch('');
@@ -51,12 +55,13 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
 
   // Esc to close
   useEffect(() => {
+    if (!type) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [type, onClose]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -66,7 +71,7 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
     return () => { document.body.style.overflow = prev; };
   }, [type]);
 
-  if (!type) return null;
+  if (!mounted || !type) return null;
 
   const q = search.toLowerCase();
 
@@ -83,7 +88,7 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
 
   const { title, count, placeholder } = config[type];
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-zinc-900/40" onClick={onClose} />
       <div className="relative z-10 w-[640px] h-[560px] bg-white rounded-xl shadow-2xl border border-zinc-200/60 overflow-hidden flex flex-col">
@@ -119,7 +124,8 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
           {type === 'tasks' && <TasksList tasks={tasks} search={q} />}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

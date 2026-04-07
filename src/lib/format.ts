@@ -1,3 +1,5 @@
+export const DEFAULT_TIMEZONE = 'America/Chicago';
+
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -21,15 +23,33 @@ export function timeAgo(date: string | Date): string {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function formatExactDateTime(date: string | Date): string {
+export function formatExactDateTime(date: string | Date, timezone: string = DEFAULT_TIMEZONE): string {
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    + ', ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: timezone,
+    timeZoneName: 'short',
+  }).format(d);
 }
 
 export function formatExactDate(date: string | Date): string {
   const d = new Date(date);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+export function formatExactTime(date: string | Date, timezone: string = DEFAULT_TIMEZONE): string {
+  const d = new Date(date);
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: timezone,
+    timeZoneName: 'short',
+  }).format(d);
 }
 
 export function scoreColor(score: number): string {

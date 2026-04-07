@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
+import { formatExactTime } from '@/lib/format';
 
 interface Appointment {
   id: string;
@@ -114,7 +115,7 @@ export function AppointmentsPanel() {
         ) : (
           appointments.map((appt) => {
             const time = new Date(appt.startTime);
-            const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            const timeStr = formatExactTime(appt.startTime);
             const isConfirmed = appt.status === 'confirmed';
             const isExpanded = expandedId === appt.id;
 
@@ -124,7 +125,7 @@ export function AppointmentsPanel() {
                   onClick={() => toggleExpand(appt.id)}
                   className="flex items-start gap-2 px-3 py-2 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60 cursor-pointer transition-colors"
                 >
-                  <span className="text-[10px] font-mono text-zinc-400 w-[44px] shrink-0 pt-0.5 leading-tight">
+                  <span className="text-[10px] font-mono text-zinc-400 w-[80px] shrink-0 pt-0.5 leading-tight">
                     {timeStr}
                   </span>
                   <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-zinc-900' : 'bg-zinc-200'}`} />
@@ -149,7 +150,7 @@ export function AppointmentsPanel() {
                       {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                       {' '}
                       {timeStr}
-                      {appt.endTime && ` — ${new Date(appt.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
+                      {appt.endTime && ` — ${formatExactTime(appt.endTime)}`}
                     </p>
                     {appt.attendees && appt.attendees.length > 0 && (
                       <div>

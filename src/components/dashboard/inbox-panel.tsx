@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Mail, RefreshCw, Send, Link as LinkIcon, AlertCircle } from 'lucide-react';
+import { formatExactTime, formatExactDateTime } from '@/lib/format';
 
 interface Message {
   id: string;
@@ -298,7 +299,7 @@ function SMSThread({ messages, contactName, contactPhone }: { messages: Message[
             {msg.body}
           </div>
           <span className="text-[10px] text-zinc-400 mt-0.5">
-            {new Date(msg.dateAdded).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+            {formatExactTime(msg.dateAdded)}
           </span>
         </div>
       ))}
@@ -319,7 +320,7 @@ function EmailThread({ messages, contactName, contactEmail }: { messages: Messag
             <p>From: {msg.direction === 'inbound' ? (msg.meta?.from ?? contactFull) : (msg.meta?.from ?? tenantFull)}</p>
             <p>To: {msg.direction === 'outbound' ? (msg.meta?.to ?? contactFull) : (msg.meta?.to ?? tenantFull)}</p>
             {msg.meta?.subject && <p>Subject: {msg.meta.subject}</p>}
-            <p>{new Date(msg.dateAdded).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+            <p>{formatExactDateTime(msg.dateAdded)}</p>
           </div>
           <div className="border-t border-zinc-100 my-2" />
           <div className="text-[12px] text-zinc-800 whitespace-pre-wrap">{msg.body}</div>
@@ -353,7 +354,7 @@ function WhatsAppThread({ messages, contactName, contactPhone }: { messages: Mes
               <span className="text-teal-300 text-[10px]">✓✓</span>
             )}
             <span className="text-[10px] text-zinc-400">
-              {new Date(msg.dateAdded).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              {formatExactTime(msg.dateAdded)}
             </span>
           </div>
         </div>
@@ -387,7 +388,7 @@ function ConvoRow({
         <div className="flex items-center gap-1.5">
           <span className="text-[12px] font-medium text-zinc-900 truncate">{convo.contactName}</span>
           <span className="text-[10px] text-zinc-400 font-mono flex-shrink-0">
-            {new Date(convo.lastMessageDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+            {formatExactTime(convo.lastMessageDate)}
           </span>
         </div>
         <p className="text-[11px] text-zinc-400 truncate">{convo.lastMessageBody}</p>
