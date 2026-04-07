@@ -6,6 +6,7 @@ import { LayoutDashboard, Phone, Building2, Settings, Brain, LogOut } from 'luci
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import { CURRENT_USER } from '@/lib/tenant-context';
 import { getTeamMember } from '@/lib/pipeline-config';
+import { useConfirm } from '@/components/ui/confirm-modal';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Daily HQ' },
@@ -18,6 +19,7 @@ function UserAvatarMenu() {
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const member = getTeamMember(CURRENT_USER.name);
+  const confirmDialog = useConfirm();
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -28,7 +30,11 @@ function UserAvatarMenu() {
   }, [open]);
 
   const handleSignOut = async () => {
-    if (!confirm('Sign out?')) return;
+    const confirmed = await confirmDialog({
+      title: 'Sign out?',
+      confirmLabel: 'Sign out',
+    });
+    if (!confirmed) return;
     const sb = getSupabaseBrowser();
     if (sb) await sb.auth.signOut();
     router.push('/login');

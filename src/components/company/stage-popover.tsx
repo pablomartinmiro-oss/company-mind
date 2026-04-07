@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Trash2, Check } from 'lucide-react';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
+import { useConfirm } from '@/components/ui/confirm-modal';
 
 interface StagePopoverProps {
   pipelineName: string;
@@ -16,6 +17,7 @@ interface StagePopoverProps {
 export function StagePopover({ pipelineName, pipelineId, stages, currentStage, companyId, onUpdate }: StagePopoverProps) {
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const confirm = useConfirm();
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -36,7 +38,12 @@ export function StagePopover({ pipelineName, pipelineId, stages, currentStage, c
     });
     if (res.status === 422) {
       const { error } = await res.json();
-      alert(error);
+      await confirm({
+        title: 'Cannot move stage',
+        description: error,
+        confirmLabel: 'OK',
+        cancelLabel: null,
+      });
       return;
     }
     setOpen(false);
@@ -44,7 +51,13 @@ export function StagePopover({ pipelineName, pipelineId, stages, currentStage, c
   };
 
   const removeFromPipeline = async () => {
-    if (!confirm(`Remove this company from ${pipelineName}?`)) return;
+    const confirmed = await confirm({
+      title: `Remove from ${pipelineName}?`,
+      description: 'This company will be removed from this pipeline. You can re-add it later.',
+      confirmLabel: 'Remove',
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
     await fetch('/api/pipeline/remove', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

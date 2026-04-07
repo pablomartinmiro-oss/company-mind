@@ -2,21 +2,41 @@
 
 import { useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
+import { useConfirm } from '@/components/ui/confirm-modal';
 
 export function ReEnrichButton({ companyId }: { companyId: string }) {
   const [running, setRunning] = useState(false);
+  const confirm = useConfirm();
 
   const handleClick = async () => {
-    if (!confirm('Re-enrich this company? This will use Claude to research the company and may take 30-60 seconds.')) return;
+    const confirmed = await confirm({
+      title: 'Re-enrich contact data?',
+      description: 'Claude will research this company using web search and AI inference. API and AI-sourced fields will be overwritten with fresh data. Manually entered fields are preserved.',
+      confirmLabel: 'Re-enrich',
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
+
     setRunning(true);
     try {
       const res = await fetch(`/api/companies/${companyId}/enrich`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        alert(`Updated ${data.company_fields_updated + data.contact_fields_updated} fields`);
+        await confirm({
+          title: 'Enrichment complete',
+          description: `Updated ${data.company_fields_updated + data.contact_fields_updated} fields.`,
+          confirmLabel: 'OK',
+          cancelLabel: null,
+        });
         window.location.reload();
       } else {
-        alert(`Failed: ${data.error}`);
+        await confirm({
+          title: 'Enrichment failed',
+          description: data.error ?? 'An unknown error occurred.',
+          confirmLabel: 'OK',
+          cancelLabel: null,
+          variant: 'destructive',
+        });
       }
     } finally {
       setRunning(false);

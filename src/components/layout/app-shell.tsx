@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { ChatDrawer } from '@/components/chat/chat-drawer';
 import { AiBar } from '@/components/ai/ai-bar';
 import { AiFloatingButton } from '@/components/ai/ai-floating-button';
+import { ConfirmProvider } from '@/components/ui/confirm-modal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
@@ -31,23 +32,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen">
-      <Sidebar />
+    <ConfirmProvider>
+      <div className="relative flex min-h-screen">
+        <Sidebar />
 
-      <main className="flex-1 flex flex-col pl-[72px]">
-        {/* Content header — transparent */}
-        <div className="h-16 shrink-0 flex items-center justify-end px-8 border-b border-black/[0.04]">
-          <AiBar />
-        </div>
+        <main className="flex-1 flex flex-col pl-[72px]">
+          {/* Content header — transparent */}
+          <div className="h-16 shrink-0 flex items-center justify-end px-8 border-b border-black/[0.04]">
+            <AiBar />
+          </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
-          {children}
-        </div>
-      </main>
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-8 py-6">
+            {children}
+          </div>
+        </main>
 
-      <AiFloatingButton />
-      <ChatDrawer isOpen={chatOpen} onClose={closeChat} />
-    </div>
+        <AiFloatingButton />
+        <ChatDrawer isOpen={chatOpen} onClose={closeChat} />
+      </div>
+    </ConfirmProvider>
   );
 }
