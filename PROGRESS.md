@@ -109,6 +109,18 @@
 - New file: `src/app/api/calls/[id]/next-steps/push/route.ts`
 - Modified: call-detail-tabs.tsx, page.tsx (calls list + detail), format.ts, pipeline-config.ts, call-analysis.ts
 
+### Bug Fix Batch 3 — Pipeline → Companies Rename
+- Bug 19: Removed inline stage logs from pipeline funnel (circles are display/filter only now)
+- Bug 20: Renamed Pipeline → Companies: new route `/companies`, nav tab, page title, `/pipeline` redirects
+- Bug 21: Multi-pipeline stage pills per company row (companies can be in multiple pipelines)
+- Bug 22: Removed score pill column from company list
+- Bug 23: Company rows open contact detail in new browser tab (`target="_blank"`)
+- Bug 24: Contact detail header cleanup — "Pipeline Name · Stage" pills + compact metadata row
+- Renamed `contact-list.tsx` → `company-list.tsx`, `ContactList` → `CompanyList`
+- Deleted old `/pipeline` loading.tsx and error.tsx (moved to `/companies`)
+- Modified: app-shell.tsx, pipeline-page-client.tsx, pipeline-funnel.tsx, contact-detail-client.tsx, pipeline/page.tsx (redirect)
+- New files: `src/app/(app)/companies/page.tsx`, `src/components/pipeline/company-list.tsx`
+
 ## Next Session
 1. Test full login flow on production with real credentials
 2. Reset temporary passwords (currently CompanyMind2026!) to user-chosen ones
