@@ -200,51 +200,64 @@ export function TaskList({ initialTasks }: Props) {
 
           return (
             <div key={task.id} className={isCompleted ? 'opacity-35' : ''}>
-              {/* Main row — B4 layout: [type pill] [time pill] [circle] [content] */}
+              {/* Main row: [checkbox] [stage pill] [assignee pill] [content] [due date] [chevron] */}
               <div
                 onClick={() => toggleExpand(task.id)}
-                className="relative flex items-center gap-1.5 px-3.5 py-3 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer transition-colors duration-100"
+                className="relative flex items-center gap-3 px-3.5 py-3 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer transition-colors duration-100"
               >
-                {/* Task type pill */}
-                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${typeClass}`}>
-                  {typeLabel}
-                </span>
-
-                {/* Time status pill */}
-                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${timePill.className}`}>
-                  {timePill.text}
-                </span>
-
-                {/* Complete circle */}
+                {/* 1. Checkbox — FIRST */}
                 <button
                   onClick={(e) => { e.stopPropagation(); completeTask(task.id); }}
-                  className={`h-[18px] w-[18px] rounded-full border-[1.5px] flex items-center justify-center text-[9px] cursor-pointer flex-shrink-0 transition-all ml-1 ${
+                  className={`w-[18px] h-[18px] rounded-full border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all ${
                     isCompleted
-                      ? 'bg-[#ff6a3d] border-[#ff6a3d] text-white'
-                      : 'border-zinc-300 text-transparent hover:border-[#ff6a3d]'
+                      ? 'bg-zinc-900 border-zinc-900 text-white'
+                      : 'border-zinc-300 hover:border-zinc-600'
                   }`}
+                  aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
                 >
-                  {isCompleted ? <Check className="h-2.5 w-2.5" /> : '✓'}
+                  {isCompleted && <Check className="w-2.5 h-2.5" />}
                 </button>
 
-                {/* Task body */}
-                <div className="flex-1 min-w-0 ml-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-medium text-[#1a1a1a]">{task.contact_name || task.title}</span>
-                    {task.assigned_to && (
-                      <span className="text-[11px] text-blue-600">@{task.assigned_to}</span>
-                    )}
+                {/* 2. Stage pill (pipeline_stage or task type fallback) */}
+                {(task.pipeline_stage || taskType) && (
+                  <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${
+                    task.pipeline_stage
+                      ? (STAGE_PILL_CLASSES[task.pipeline_stage] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200')
+                      : typeClass
+                  }`}>
+                    {task.pipeline_stage ?? typeLabel}
+                  </span>
+                )}
+
+                {/* 3. Assignee pill */}
+                {task.assigned_to && (
+                  <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 bg-blue-100/60 text-blue-700 border border-blue-200/40">
+                    {task.assigned_to}
+                  </span>
+                )}
+
+                {/* 4. Contact name + task description */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-[#1a1a1a] truncate">
+                    {task.contact_name || task.title}
                   </div>
                   {task.description && (
                     <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{task.description}</p>
                   )}
                 </div>
 
-                {/* Chevron */}
+                {/* 5. Due date */}
+                {task.due_date && (
+                  <span className={`text-[11px] font-mono min-w-[70px] text-right flex-shrink-0 ${dateColor}`}>
+                    {timePill.text}
+                  </span>
+                )}
+
+                {/* 6. Chevron */}
                 <div className="flex-shrink-0">
                   {isExpanded
-                    ? <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
-                    : <ChevronRight className="h-3.5 w-3.5 text-zinc-400" />
+                    ? <ChevronDown className="h-3.5 w-3.5 text-zinc-300" />
+                    : <ChevronRight className="h-3.5 w-3.5 text-zinc-300" />
                   }
                 </div>
               </div>
