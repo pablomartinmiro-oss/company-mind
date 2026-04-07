@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { StatCard } from '@/components/ui/stat-card';
 import { PipelineFunnel } from './pipeline-funnel';
 import { CompanyList } from './company-list';
 
@@ -35,17 +36,26 @@ interface Props {
   pipelines: PipelineData[];
   contacts: CompanyContact[];
   totalValue: string;
+  activeDeals: number;
+  avgDaysInStage: number;
+  closingSoon: number;
 }
 
-export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
+export function PipelinePageClient({ pipelines, contacts, totalValue, activeDeals, avgDaysInStage, closingSoon }: Props) {
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
 
   return (
     <div className="p-5 animate-fade-in">
-      <h1 className="text-[28px] font-semibold tracking-tight text-[#1a1a1a]">Companies</h1>
-      <p className="mt-1 text-[13px] text-zinc-400">
-        {contacts.length} companies · {totalValue} total pipeline value
-      </p>
+      <div className="grid grid-cols-4 gap-2.5">
+        <StatCard label="Total Value" value={totalValue} />
+        <StatCard label="Active Deals" value={activeDeals} />
+        <StatCard label="Avg Days in Stage" value={avgDaysInStage} />
+        <StatCard
+          label="Closing Soon"
+          value={closingSoon}
+          footnote={closingSoon > 0 ? <p className="text-emerald-600 text-[11px] mt-0.5">in final stage</p> : undefined}
+        />
+      </div>
 
       <div className="mt-5">
         <PipelineFunnel

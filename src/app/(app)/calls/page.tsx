@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
 import { scoreGrade, scoreBg, scoreColor, formatDuration, formatExactDateTime } from '@/lib/format';
 import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '@/lib/pipeline-config';
+import { StatCard } from '@/components/ui/stat-card';
 import { CallFilters } from '@/components/calls/call-filters';
 import { getTenantForUser } from '@/lib/get-tenant';
 
@@ -71,12 +72,31 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
 
   const { data: calls, error } = await query;
 
-  const [allCount, reviewCount, skippedCount, archivedCount] = await Promise.all([
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const weekStart = new Date(Date.now() - 7 * 86400000).toISOString();
+
+  const [allCount, reviewCount, skippedCount, archivedCount, todayCount, weekCount, scoredCalls] = await Promise.all([
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('processing_status', 'error'),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).lt('duration_seconds', 45),
     supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('archived', true),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('called_at', todayStart.toISOString()),
+    supabaseAdmin.from('calls').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).gte('called_at', weekStart),
+    supabaseAdmin.from('calls').select('score').eq('tenant_id', tenantId).eq('status', 'complete'),
   ]);
+
+  const callsToday = todayCount.count ?? 0;
+  const callsThisWeek = weekCount.count ?? 0;
+  const needsReview = reviewCount.count ?? 0;
+
+  const scored = scoredCalls.data ?? [];
+  const avgScore = scored.length > 0
+    ? Math.round(scored.reduce((sum, c) => {
+        const s = typeof c.score === 'object' && c.score !== null ? parseInt(String((c.score as Record<string, unknown>).overall ?? '0'), 10) : 0;
+        return sum + s;
+      }, 0) / scored.length) : 0;
+  const avgGrade = scoreGrade(avgScore);
 
   const counts: Record<Tab, number> = {
     all: allCount.count ?? 0,
@@ -105,16 +125,27 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   if (error) {
     return (
       <div className="p-5">
-        <h1 className="text-[28px] font-semibold">Calls</h1>
-        <p className="mt-4 text-[13px] text-red-500">Failed to load calls.</p>
+        <p className="text-[13px] text-red-500">Failed to load calls.</p>
       </div>
     );
   }
 
   return (
     <div className="p-5 animate-fade-in">
-      <h1 className="text-[28px] font-semibold tracking-tight text-[#1a1a1a]">Calls</h1>
-      <p className="mt-1 text-[13px] text-zinc-400">All recorded calls and scores.</p>
+      <div className="grid grid-cols-4 gap-2.5">
+        <StatCard label="Today" value={callsToday} />
+        <StatCard label="This Week" value={callsThisWeek} />
+        <StatCard
+          label="Avg Score"
+          value={avgScore}
+          suffix={<span className={`text-[13px] font-semibold ${avgGrade.color}`}>{avgGrade.letter}</span>}
+        />
+        <StatCard
+          label="Needs Review"
+          value={needsReview}
+          footnote={needsReview > 0 ? <p className="text-red-600 text-[11px] mt-0.5">action required</p> : undefined}
+        />
+      </div>
 
       <div className="flex items-center gap-1 mt-5">
         {TABS.map((t) => {

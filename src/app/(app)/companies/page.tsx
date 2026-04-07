@@ -150,11 +150,28 @@ export default async function CompaniesPage() {
     ? `$${(totalValue / 1000).toFixed(0)}k`
     : `$${totalValue}`;
 
+  // Compute stats for hero row
+  const activeDeals = contacts.length;
+  const allDays = contacts.map(c => c.days_in_stage);
+  const avgDaysInStage = allDays.length > 0 ? Math.round(allDays.reduce((a, b) => a + b, 0) / allDays.length) : 0;
+
+  // "Closing soon" = contacts in the last stage of any pipeline
+  const lastStages = new Set(
+    (pipelinesRaw ?? []).map((p: { stages: unknown }) => {
+      const stages = Array.isArray(p.stages) ? p.stages as string[] : JSON.parse(String(p.stages)) as string[];
+      return stages[stages.length - 1];
+    }).filter(Boolean)
+  );
+  const closingSoon = contacts.filter(c => c.enrollments.some(e => lastStages.has(e.stage))).length;
+
   return (
     <PipelinePageClient
       pipelines={pipelines}
       contacts={contacts}
       totalValue={formattedValue}
+      activeDeals={activeDeals}
+      avgDaysInStage={avgDaysInStage}
+      closingSoon={closingSoon}
     />
   );
 }
