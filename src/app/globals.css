@@ -46,6 +46,23 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Brand tokens */
+  --color-brand-bg: #0a0a0b;
+  --color-brand-surface: #111113;
+  --color-brand-surface-elevated: #17171a;
+  --color-brand-surface-hover: rgb(255 255 255 / 0.03);
+  --color-brand-surface-active: rgb(255 255 255 / 0.06);
+  --color-brand-border: rgb(255 255 255 / 0.06);
+  --color-brand-border-strong: rgb(255 255 255 / 0.1);
+  --color-brand-primary: #f4f4f5;
+  --color-brand-secondary: #a1a1aa;
+  --color-brand-tertiary: #71717a;
+  --color-brand-inverse: #0a0a0b;
+  --color-brand-success: #34d399;
+  --color-brand-warning: #fbbf24;
+  --color-brand-danger: #f87171;
+  --color-brand-info: #60a5fa;
 }
 
 /* ── Dark-first root variables ── */
