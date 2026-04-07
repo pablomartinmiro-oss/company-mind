@@ -232,26 +232,24 @@ export function TaskList({ initialTasks }: Props) {
                   {isCompleted && <Check className="w-2.5 h-2.5" />}
                 </button>
 
-                {/* 2. Stage pill (pipeline_stage or task type fallback) */}
-                {(task.pipeline_stage || taskType) && (
-                  <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${
-                    task.pipeline_stage
-                      ? (STAGE_PILL_CLASSES[task.pipeline_stage] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200')
-                      : typeClass
-                  }`}>
-                    {task.pipeline_stage ?? typeLabel}
+                {/* 2. Task type pill in fixed-width slot */}
+                <div className="w-[90px] flex-shrink-0">
+                  <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${typeClass}`}>
+                    {typeLabel}
                   </span>
-                )}
+                </div>
 
-                {/* 3. Assignee pill (color-coded per person) */}
-                {task.assigned_to && (() => {
-                  const member = getTeamMember(task.assigned_to);
-                  return (
-                    <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${member.pillClass}`}>
-                      {member.name}
-                    </span>
-                  );
-                })()}
+                {/* 3. Assignee pill in fixed-width slot */}
+                <div className="w-[120px] flex-shrink-0">
+                  {task.assigned_to && (() => {
+                    const member = getTeamMember(task.assigned_to);
+                    return (
+                      <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${member.pillClass}`}>
+                        {member.name}
+                      </span>
+                    );
+                  })()}
+                </div>
 
                 {/* 4. Contact name + task description */}
                 <div className="flex-1 min-w-0">
