@@ -87,32 +87,28 @@ export function ContactDetailClient(props: Props) {
   return (
     <div className="p-5 animate-fade-in">
       {/* Back link */}
-      <Link href="/pipeline" className="text-[12px] text-zinc-400 hover:text-zinc-700 py-3 inline-flex items-center gap-1">
-        <ArrowLeft className="h-3 w-3" /> Back to pipeline
+      <Link href="/companies" className="text-[12px] text-zinc-400 hover:text-zinc-700 py-3 inline-flex items-center gap-1">
+        <ArrowLeft className="h-3 w-3" /> Back to companies
       </Link>
 
       {/* Header */}
       <div className="flex items-start justify-between mt-2">
         <div>
-          {/* Badge row — show all pipeline enrollments */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-2">
+          {/* Pipeline enrollment pills */}
+          <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
             {props.enrollments.map((e) => (
               <span
                 key={e.pipelineId}
                 className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
               >
-                {e.currentStage} — {e.pipelineName}
+                {e.pipelineName} · {e.currentStage}
               </span>
             ))}
-            <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500">
-              {props.daysInStage}d in stage
-            </span>
-            {props.callType && (
-              <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
-                {props.callType}
-              </span>
-            )}
           </div>
+          {/* Compact metadata row */}
+          <p className="text-[11px] text-zinc-400 mb-2">
+            {props.daysInStage}d in current stage{props.callType ? ` · ${props.callType}` : ''}{props.research && Object.keys(props.research).length > 0 ? ' · AI enriched' : ''}
+          </p>
 
           <h1 className="text-[24px] font-medium text-zinc-900 leading-tight">{props.contactName}</h1>
           {(props.companyName || props.location) && (

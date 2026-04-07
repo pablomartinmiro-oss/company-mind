@@ -11,12 +11,12 @@ import { supabaseBrowser } from '@/lib/supabase-browser';
 const navItems = [
   { href: '/dashboard', label: 'Daily HQ' },
   { href: '/calls', label: 'Calls' },
-  { href: '/pipeline', label: 'Pipeline' },
+  { href: '/companies', label: 'Companies' },
 ];
 
 const pageNames: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/pipeline': 'Pipeline',
+  '/companies': 'Companies',
   '/calls': 'Calls',
   '/settings': 'Settings',
 };

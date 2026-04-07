@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PipelineFunnel } from './pipeline-funnel';
-import { ContactList } from './contact-list';
+import { CompanyList } from './company-list';
 
 interface StageLogEntry {
   id: string;
@@ -22,19 +22,18 @@ interface PipelineData {
   stageLog: StageLogEntry[];
 }
 
-interface PipelineContact {
+interface CompanyContact {
   contact_id: string;
   contact_name: string;
   company_name: string | null;
-  stage: string;
-  score: number | null;
+  enrollments: { pipeline_name: string; stage: string }[];
   deal_value: string | null;
   days_in_stage: number;
 }
 
 interface Props {
   pipelines: PipelineData[];
-  contacts: PipelineContact[];
+  contacts: CompanyContact[];
   totalValue: string;
 }
 
@@ -43,9 +42,9 @@ export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
 
   return (
     <div className="p-5 animate-fade-in">
-      <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">Pipeline</h1>
+      <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">Companies</h1>
       <p className="mt-1 text-[13px] text-zinc-400">
-        {contacts.length} companies · {totalValue} total value
+        {contacts.length} companies · {totalValue} total pipeline value
       </p>
 
       <div className="mt-5">
@@ -56,7 +55,7 @@ export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
         />
 
         <div className="border border-zinc-200/60 rounded-xl overflow-hidden">
-          <ContactList
+          <CompanyList
             contacts={contacts}
             selectedStage={selectedStage}
             onClearStage={() => setSelectedStage(null)}
