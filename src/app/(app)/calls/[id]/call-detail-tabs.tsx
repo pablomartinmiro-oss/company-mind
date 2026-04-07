@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { approveAction, rejectAction, approveDataPoint, rejectDataPoint } from '@/app/actions';
 import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
 import { Sparkles, Play, Pause, SkipBack, SkipForward, Volume2, Heart, AlertTriangle, Info, Pencil, X } from 'lucide-react';
+import { NextStepsTab } from '@/components/calls/next-steps-tab';
 
 interface ScoreData {
   overall: number;
@@ -57,6 +58,14 @@ interface KeyMoment {
   type: 'positive' | 'negative' | 'neutral';
 }
 
+interface NextStepItem {
+  id: string;
+  action_type: string;
+  title: string;
+  description: string | null;
+  status: string;
+}
+
 interface Props {
   transcript: string;
   score: ScoreData | null;
@@ -66,6 +75,9 @@ interface Props {
   dataPoints: DataPoint[];
   duration: number;
   contactGhlId: string;
+  nextSteps?: NextStepItem[];
+  pendingDataPoints?: number;
+  callId?: string;
 }
 
 const TABS = ['Coaching', 'Criteria', 'Transcript', 'Next Steps', 'Data Points'] as const;
@@ -75,7 +87,7 @@ function formatType(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, dataPoints, duration, contactGhlId }: Props) {
+export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, dataPoints, duration, contactGhlId, nextSteps, pendingDataPoints, callId }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('Coaching');
   const pendingActions = actions.filter((a) => a.status === 'suggested');
 
@@ -94,9 +106,14 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
             }`}
           >
             {tab}
-            {tab === 'Next Steps' && pendingActions.length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-100 text-zinc-500 ml-1">
-                {pendingActions.length}
+            {tab === 'Next Steps' && (nextSteps ?? []).filter(s => s.status === 'pending').length > 0 && (
+              <span className="ml-1.5 text-[9px] font-semibold bg-[#ff6a3d] text-white rounded-full px-1.5 py-0.5 min-w-[18px] inline-flex items-center justify-center">
+                {(nextSteps ?? []).filter(s => s.status === 'pending').length}
+              </span>
+            )}
+            {tab === 'Data Points' && (pendingDataPoints ?? 0) > 0 && (
+              <span className="ml-1.5 text-[9px] font-semibold bg-[#ff6a3d] text-white rounded-full px-1.5 py-0.5 min-w-[18px] inline-flex items-center justify-center">
+                {pendingDataPoints}
               </span>
             )}
           </button>
@@ -108,7 +125,11 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
         {activeTab === 'Coaching' && <CoachingView coaching={coaching} callSummary={callSummary} />}
         {activeTab === 'Criteria' && <CriteriaView score={score} />}
         {activeTab === 'Transcript' && <TranscriptView text={transcript} duration={duration} />}
-        {activeTab === 'Next Steps' && <NextStepsView actions={actions} />}
+        {activeTab === 'Next Steps' && (
+          nextSteps && nextSteps.length > 0
+            ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
+            : <NextStepsView actions={actions} />
+        )}
         {activeTab === 'Data Points' && <DataPointsView dataPoints={dataPoints} contactGhlId={contactGhlId} />}
       </div>
     </div>

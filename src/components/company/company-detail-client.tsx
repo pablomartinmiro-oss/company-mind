@@ -112,13 +112,23 @@ function EditableLabel({ value, field, companyId, color = 'zinc' }: { value: str
     );
   }
 
+  if (!saved) {
+    return (
+      <button
+        onClick={() => { setVal(''); setEditing(true); }}
+        className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/30 text-zinc-400 border border-white/40 hover:bg-white/50 hover:text-zinc-600 transition-colors"
+      >
+        {field}
+      </button>
+    );
+  }
+
   return (
     <button
-      onClick={() => { setVal(saved ?? ''); setEditing(true); }}
-      className={`text-[10px] font-medium px-2.5 py-1 rounded-full border cursor-pointer hover:opacity-80 transition-opacity ${colorMap[color] ?? colorMap.zinc}`}
-      title={`Click to edit ${field}`}
+      onClick={() => { setVal(saved); setEditing(true); }}
+      className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/60 text-zinc-700 border border-white/70 hover:bg-white/80 transition-colors"
     >
-      {saved || `+ ${field}`}
+      {saved}
     </button>
   );
 }

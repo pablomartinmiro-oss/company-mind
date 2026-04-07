@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Check, ExternalLink, Pencil } from 'lucide-react';
 import { formatExactDate } from '@/lib/format';
-import { STAGE_PILL_CLASSES, TEAM_MEMBERS, TASK_TYPE_LABELS, TASK_TYPE_PILL } from '@/lib/pipeline-config';
+import { STAGE_PILL_CLASSES, TEAM_MEMBERS, TASK_TYPE_LABELS, TASK_TYPE_PILL, getTeamMember } from '@/lib/pipeline-config';
 
 interface Task {
   id: string;
@@ -243,12 +243,15 @@ export function TaskList({ initialTasks }: Props) {
                   </span>
                 )}
 
-                {/* 3. Assignee pill */}
-                {task.assigned_to && (
-                  <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 bg-blue-100/60 text-blue-700 border border-blue-200/40">
-                    {task.assigned_to}
-                  </span>
-                )}
+                {/* 3. Assignee pill (color-coded per person) */}
+                {task.assigned_to && (() => {
+                  const member = getTeamMember(task.assigned_to);
+                  return (
+                    <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${member.pillClass}`}>
+                      {member.name}
+                    </span>
+                  );
+                })()}
 
                 {/* 4. Contact name + task description */}
                 <div className="flex-1 min-w-0">

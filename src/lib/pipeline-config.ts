@@ -31,9 +31,20 @@ export const STAGE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const TEAM_MEMBERS = [
-  { name: 'Pablo Martin',   initials: 'PM', avatarClass: 'bg-[#1c1916]' },
-  { name: 'Corey Lavinder', initials: 'CL', avatarClass: 'bg-zinc-600' },
+  { name: 'Pablo Martin',   initials: 'PM', pillClass: 'bg-violet-100/60 text-violet-700 border border-violet-200/40', avatarClass: 'bg-gradient-to-br from-violet-400 to-violet-600' },
+  { name: 'Corey Lavinder', initials: 'CL', pillClass: 'bg-emerald-100/60 text-emerald-700 border border-emerald-200/40', avatarClass: 'bg-gradient-to-br from-emerald-400 to-emerald-600' },
 ] as const;
+
+export function getTeamMember(name: string) {
+  const found = TEAM_MEMBERS.find(m => m.name === name);
+  if (found) return found;
+  return {
+    name,
+    initials: name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase(),
+    pillClass: 'bg-zinc-100/60 text-zinc-500 border border-zinc-200/40',
+    avatarClass: 'bg-gradient-to-br from-zinc-400 to-zinc-600',
+  };
+}
 
 export const PIPELINES = [
   { name: 'Sales Pipeline', stages: ['New Lead','Qualification','Closing','Closed'] },
@@ -118,6 +129,15 @@ export const NEXT_STEP_TYPE_PILL: Record<string, string> = {
   scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
   admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
   new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
+};
+
+export const ACTION_TYPE_CONFIG: Record<string, { label: string; pillClass: string; icon: string }> = {
+  task:         { label: 'Task',          pillClass: 'bg-blue-100/60 text-blue-700 border border-blue-200/40',     icon: 'CheckSquare' },
+  appointment:  { label: 'Appointment',   pillClass: 'bg-violet-100/60 text-violet-700 border border-violet-200/40', icon: 'Calendar' },
+  email:        { label: 'Email',         pillClass: 'bg-amber-100/60 text-amber-700 border border-amber-200/40',   icon: 'Mail' },
+  note:         { label: 'Note',          pillClass: 'bg-zinc-100/60 text-zinc-600 border border-zinc-200/40',      icon: 'StickyNote' },
+  stage_change: { label: 'Stage Change',  pillClass: 'bg-emerald-100/60 text-emerald-700 border border-emerald-200/40', icon: 'ArrowRight' },
+  research:     { label: 'Research',      pillClass: 'bg-teal-100/60 text-teal-700 border border-teal-200/40',      icon: 'Search' },
 };
 
 export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
