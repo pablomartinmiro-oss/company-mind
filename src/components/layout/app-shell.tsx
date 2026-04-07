@@ -1,13 +1,27 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { ChatDrawer } from '@/components/chat/chat-drawer';
-import { Sparkles } from 'lucide-react';
+import { AiBar } from '@/components/ai/ai-bar';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
   const closeChat = useCallback(() => setChatOpen(false), []);
+  const pendingQueryRef = useRef<string | null>(null);
+
+  // Listen for ai-query events from the AiBar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const query = (e as CustomEvent<{ query: string }>).detail.query;
+      if (query) {
+        pendingQueryRef.current = query;
+        setChatOpen(true);
+      }
+    };
+    window.addEventListener('ai-query', handler);
+    return () => window.removeEventListener('ai-query', handler);
+  }, []);
 
   return (
     <div className="relative flex min-h-screen">
@@ -15,18 +29,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 flex flex-col pl-[72px]">
         {/* Content header — transparent */}
-        <div className="h-16 shrink-0 flex items-center justify-between px-8 border-b border-black/[0.04]">
-          <div />
-          <div className="flex items-center gap-3">
-            {/* Ask AI — small 40x40 coral circle */}
-            <button
-              onClick={() => setChatOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white shadow-[0_4px_12px_rgba(255,106,61,0.3),inset_0_1px_0_rgba(255,255,255,0.3)] hover:shadow-[0_6px_16px_rgba(255,106,61,0.4)] transition-all"
-              title="Ask AI"
-            >
-              <Sparkles className="h-[18px] w-[18px]" />
-            </button>
-          </div>
+        <div className="h-16 shrink-0 flex items-center justify-end px-8 border-b border-black/[0.04]">
+          <AiBar />
         </div>
 
         {/* Scrollable content */}
