@@ -52,7 +52,10 @@ CREATE TABLE IF NOT EXISTS webhook_events (
 CREATE INDEX IF NOT EXISTS idx_webhook_external_id
   ON webhook_events(source, external_id);
 
--- 3. Ensure tenants table has ghl_location_id (may already exist)
+-- 3. Drop deprecated call_jobs table (replaced by processing_status state machine on calls)
+DROP TABLE IF EXISTS call_jobs;
+
+-- 4. Ensure tenants table has ghl_location_id (may already exist)
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS ghl_location_id text;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_ghl_location
   ON tenants(ghl_location_id)
