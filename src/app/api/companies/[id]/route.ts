@@ -12,7 +12,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     const { id: companyId } = await ctx.params;
     const body = await req.json();
 
-    const allowedFields = ['name', 'industry', 'lead_source', 'website', 'location'];
+    const allowedFields = ['name', 'industry', 'lead_source', 'website', 'location', 'mrr', 'setup_fee'];
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const field of allowedFields) {
       if (field in body) updates[field] = body[field];

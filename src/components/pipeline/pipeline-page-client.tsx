@@ -51,7 +51,7 @@ export function PipelinePageClient({ pipelines, contacts, totalValue, activeDeal
   return (
     <div className="p-5 animate-fade-in">
       <div className="grid grid-cols-4 gap-2.5">
-        <StatCard label="Total Value" value={totalValue} />
+        <StatCard label="Total MRR" value={totalValue} />
         <StatCard label="Active Deals" value={activeDeals} />
         <StatCard label="Avg Days in Stage" value={avgDaysInStage} />
         <StatCard

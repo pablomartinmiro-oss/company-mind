@@ -97,15 +97,15 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     };
   }).filter((x): x is NonNullable<typeof x> => x !== null);
 
-  // Enriched contacts
-  const enrichedContacts = contacts.map((c: { id: string; contact_id: string; is_primary: boolean; role: string | null }) => ({
+  // Enriched contacts — prefer contact_name from company_contacts, then calls, then ID
+  const enrichedContacts = contacts.map((c: { id: string; contact_id: string; is_primary: boolean; role: string | null; contact_name: string | null; contact_email: string | null; contact_phone: string | null }) => ({
     id: c.id,
     contact_id: c.contact_id,
     is_primary: c.is_primary,
     role: c.role,
-    contact_name: nameMap[c.contact_id] ?? c.contact_id,
-    contact_email: dpMap[c.contact_id]?.email ?? null,
-    contact_phone: dpMap[c.contact_id]?.phone ?? null,
+    contact_name: c.contact_name ?? nameMap[c.contact_id] ?? c.contact_id,
+    contact_email: c.contact_email ?? dpMap[c.contact_id]?.email ?? null,
+    contact_phone: c.contact_phone ?? dpMap[c.contact_id]?.phone ?? null,
   }));
 
   // Company research grouped by section — merge from research table AND contact_data_points
@@ -182,6 +182,9 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       industry={company.industry ?? primaryDPs.industry ?? null}
       leadSource={company.lead_source ?? null}
       location={company.location ?? primaryDPs.location ?? null}
+      website={company.website ?? primaryDPs.website ?? null}
+      mrr={company.mrr ?? 0}
+      setupFee={company.setup_fee ?? 0}
       enrollments={enrollments}
       contacts={enrichedContacts}
       calls={calls}

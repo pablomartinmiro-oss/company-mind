@@ -63,6 +63,9 @@ interface Props {
   industry: string | null;
   leadSource: string | null;
   location: string | null;
+  website: string | null;
+  mrr: number;
+  setupFee: number;
   enrollments: Enrollment[];
   contacts: ContactInfo[];
   calls: CallInfo[];
@@ -174,20 +177,28 @@ export function CompanyDetailClient(props: Props) {
               {props.companyName}
             </h1>
 
-            {/* Contact names under company name */}
-            <p className="text-[12px] text-zinc-500 mt-1">
-              {props.contacts.map(c => c.contact_name).join(', ')}
+            {/* Primary contact under company name */}
+            <p className="text-[13px] text-zinc-500 mt-1">
+              {contactsState.find(c => c.is_primary)?.contact_name ?? contactsState[0]?.contact_name ?? ''}
             </p>
 
-            {/* Label pills row */}
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <EditableLabel value={props.industry} field="industry" companyId={props.companyId} color="violet" />
-              <EditableLabel value={props.leadSource} field="lead_source" companyId={props.companyId} color="blue" />
-              {props.location && (
-                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-zinc-100/60 text-zinc-600 border border-zinc-200/40">
-                  {props.location}
+            {/* Row 1: Meta pills */}
+            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+              <EditableLabel value={props.industry} field="industry" companyId={props.companyId} />
+              <EditableLabel value={props.leadSource} field="lead_source" companyId={props.companyId} />
+              <EditableLabel value={props.location} field="location" companyId={props.companyId} />
+              <EditableLabel value={props.website} field="website" companyId={props.companyId} />
+              <EditableLabel value={props.mrr ? `$${props.mrr}/mo` : null} field="mrr" companyId={props.companyId} />
+              <EditableLabel value={props.setupFee ? `$${props.setupFee}` : null} field="setup_fee" companyId={props.companyId} />
+              {(props.mrr > 0 || props.setupFee > 0) && (
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  ACV: ${(props.mrr * 12 + props.setupFee).toLocaleString()}
                 </span>
               )}
+            </div>
+
+            {/* Row 2: Pipeline status */}
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               {props.enrollments.map(e => (
                 <span key={e.pipelineId} className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}>
                   {e.pipelineName} · {e.currentStage}
@@ -196,9 +207,6 @@ export function CompanyDetailClient(props: Props) {
               <span className="text-[11px] text-zinc-400 font-mono">
                 {props.enrollments[0]?.daysInStage ?? 0}d in stage
               </span>
-              {props.enrollments[0]?.dealValue && (
-                <span className="text-[11px] font-mono text-zinc-600">{props.enrollments[0].dealValue}</span>
-              )}
             </div>
 
             {/* Action buttons */}

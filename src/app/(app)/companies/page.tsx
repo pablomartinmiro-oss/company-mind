@@ -11,7 +11,7 @@ export default async function CompaniesPage() {
   const { data: companiesRaw } = await supabaseAdmin
     .from('companies')
     .select(`
-      id, name, industry, location, lead_source,
+      id, name, industry, location, lead_source, mrr, setup_fee,
       pipeline_companies(id, pipeline_id, stage, deal_value, stage_entered_at),
       company_contacts(contact_id, is_primary, role)
     `)
@@ -139,16 +139,15 @@ export default async function CompaniesPage() {
     };
   });
 
-  // Stats
-  const totalValue = companies.reduce((sum, c) => {
-    if (!c.deal_value) return sum;
-    const num = parseFloat(c.deal_value.replace(/[^0-9.]/g, ''));
-    return sum + (isNaN(num) ? 0 : num);
+  // Stats — use MRR from companies table
+  const totalMRR = (companiesRaw ?? []).reduce((sum, c) => {
+    const typed = c as { mrr?: number };
+    return sum + (typed.mrr ?? 0);
   }, 0);
 
-  const formattedValue = totalValue >= 1000
-    ? `$${(totalValue / 1000).toFixed(0)}k`
-    : `$${totalValue}`;
+  const formattedValue = totalMRR >= 1000
+    ? `$${(totalMRR / 1000).toFixed(0)}k/mo`
+    : `$${Math.round(totalMRR)}/mo`;
 
   const activeDeals = companies.length;
   const allDays = companies.map(c => c.days_in_stage);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Plus, ChevronDown } from 'lucide-react';
+import { Star, Plus, ChevronDown, Mail, Phone } from 'lucide-react';
 
 interface ContactInfo {
   id: string;
@@ -97,7 +97,18 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                         <ChevronDown className="w-2.5 h-2.5" />
                       </button>
                     </div>
-                    {contact.contact_email && <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{contact.contact_email}</p>}
+                    <div className="mt-1.5 space-y-0.5">
+                      {contact.contact_email && (
+                        <a href={`mailto:${contact.contact_email}`} className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-[#ff6a3d] transition-colors" onClick={(e) => e.stopPropagation()}>
+                          <Mail className="w-2.5 h-2.5" /> {contact.contact_email}
+                        </a>
+                      )}
+                      {contact.contact_phone && (
+                        <a href={`tel:${contact.contact_phone}`} className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-[#ff6a3d] transition-colors font-mono" onClick={(e) => e.stopPropagation()}>
+                          <Phone className="w-2.5 h-2.5" /> {contact.contact_phone}
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </button>
 
