@@ -6,7 +6,17 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: UI Fixes + Stage Gate + Full Demo Seed
+## Latest: Batch 1 — 18 UI/Logic Fixes
+- Chunk 1: Task type pills replace stage pills, fixed-width aligned columns
+- Chunk 2: Calls under 60s only in Skipped tab, all selects use frosted SelectPill, solid stat modals
+- Chunk 3: MRR/setup fee replace ARR, unified meta pills, real contact names with email/phone from company_contacts
+- Chunk 4: Stage popover with move/remove, pipeline remove API
+- Chunk 5: Floating AI button (bottom-right), @mention autocomplete, sidebar avatar menu (CL)
+- Chunk 6: Unscored calls show "Not scored" instead of F 0%
+- New tables: data_points, next_steps
+- New components: SelectPill, MentionInput, AiFloatingButton, StagePopover, NextStepsTab
+
+## UI Fixes + Stage Gate + Full Demo Seed
 - Phase 1: Per-person assignee pill colors, company meta pills (greyed when empty), call header frosted glass, data points badge, next steps tab with Push/Edit/Skip actions
 - Phase 2: Stage gate — Onboarding/Upsell blocked unless company is Closed in Sales Pipeline
 - Phase 3+4: Wiped old demo data and seeded fresh: 10 companies, 18 contacts, 15 calls, 14 tasks, 47 research fields, 11 next steps, 8 data points, 15 stage log entries
