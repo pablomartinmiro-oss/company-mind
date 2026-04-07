@@ -220,12 +220,41 @@ Daily HQ audit round 3 complete.
 - `src/components/dashboard/inbox-panel.tsx` — uses formatExactTime/formatExactDateTime for all timestamps
 - `src/components/dashboard/appointments-panel.tsx` — uses formatExactTime for row times and expanded detail
 
+### Dark Theme + Brand Kit (2026-04-07)
+
+Full Payoneer-inspired dark theme applied across the entire app. Brand kit scaffolded.
+
+**What changed:**
+- Layout: Inter + JetBrains Mono fonts via next/font (replacing Geist), body bg #0a0a0b
+- CSS: globals.css rewritten with dark-first root variables, fixed animate-fade-in (opacity-only, no transform), gradient utility classes
+- Navigation: dark surface (#111113), gradient brand mark, white active tabs, gradient Ask AI button
+- Dashboard: all 6 components reskinned (stat cards, inbox, appointments, tasks, stat modal, stat cards wrapper)
+- Calls page: dark tabs, filters, call rows, score displays
+- Companies page: dark pipeline funnels, company list, search
+- Contact detail: dark header, tabs, pipeline tracker, activity feed, research tab
+- Chat drawer: dark surface, dark bubbles (user=white/dark, assistant=subtle)
+- Login page: dark card on dark background
+- Loading/error states: dark skeletons and error cards
+- Pipeline config: all pill classes converted to dark (bg-{color}-500/10 text-{color}-300)
+- Stat card values use gradient text (text-gradient-accent)
+
+**New scaffolding:**
+- `/docs/` — DESIGN_DECISIONS.md (locked design direction), DECISIONS.md (judgment log), GOLDEN.md (checklist), README.md
+- `/brand/` — tokens (colors, typography, spacing, radii, shadows), logo SVGs (6 variants), voice-and-tone.md, README.md
+
+**Locked files NOT touched:** src/lib/ghl.ts, src/lib/supabase.ts, src/mastra/**, src/app/(app)/calls/[id]/*, src/components/chat/chat-panel.tsx, src/lib/format.ts (score helpers)
+
+**Gradient budget:** 3 of 4 used (brand mark, stat values, Ask AI CTA). Score circles 90+ pending.
+
+**Decisions logged:** 5 entries in /docs/DECISIONS.md
+
 ## Next Session
-1. Verify round 3 fixes on live site (modal centering, TZ suffixes)
-2. Verify Batch 4 AI drawer on live site
-3. Test full login flow on production with real credentials
+1. Verify dark theme on live site — all pages should be dark
+2. Call detail page (/calls/[id]) needs separate dark treatment (currently locked)
+3. Score circles 90+ gradient (gradient use #2) — needs implementation
 4. Batch 5: Gmail inbox connector, Google Meet call import
 5. Button audit + AI assistant function check across the entire app
 6. Build settings page (team management, GHL connection status, password reset)
 7. Build rubric editor UI (currently disabled)
 8. Add second tenant to verify multi-tenancy isolation
+9. Brand showcase route (/brand) for demo screenshots

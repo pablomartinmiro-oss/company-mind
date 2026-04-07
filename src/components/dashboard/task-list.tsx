@@ -38,25 +38,25 @@ const TASK_TYPE_FILTER_OPTIONS = [
 const TASK_TYPE_OPTIONS = ['admin', 'follow_up', 'new_lead', 'scheduling'];
 
 function timeStatusPill(dueDate: string | null): { text: string; className: string } {
-  if (!dueDate) return { text: 'No due date', className: 'bg-zinc-100 text-zinc-400 border border-zinc-200' };
+  if (!dueDate) return { text: 'No due date', className: 'bg-white/[0.06] text-zinc-500 border border-white/[0.08]' };
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(dueDate + 'T00:00:00');
   const diff = Math.floor((due.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return { text: `${Math.abs(diff)}d overdue`, className: 'bg-red-50 text-red-700 border border-red-200' };
-  if (diff === 0) return { text: 'Due today', className: 'bg-amber-50 text-amber-700 border border-amber-200' };
-  return { text: `Due in ${diff}d`, className: 'bg-zinc-100 text-zinc-500 border border-zinc-200' };
+  if (diff < 0) return { text: `${Math.abs(diff)}d overdue`, className: 'bg-red-500/10 text-red-300 border border-red-500/20' };
+  if (diff === 0) return { text: 'Due today', className: 'bg-amber-500/10 text-amber-300 border border-amber-500/20' };
+  return { text: `Due in ${diff}d`, className: 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]' };
 }
 
 function dueDateColor(dueDate: string | null): string {
-  if (!dueDate) return 'text-zinc-400';
+  if (!dueDate) return 'text-zinc-500';
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(dueDate + 'T00:00:00');
   const diff = Math.floor((due.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return 'text-red-600';
-  if (diff === 0) return 'text-amber-600';
-  return 'text-zinc-400';
+  if (diff < 0) return 'text-red-400';
+  if (diff === 0) return 'text-amber-300';
+  return 'text-zinc-500';
 }
 
 export function TaskList({ initialTasks }: Props) {
@@ -162,12 +162,12 @@ export function TaskList({ initialTasks }: Props) {
     setEditingId(null);
   }
 
-  const selectClass = 'text-[12px] px-2 py-1 rounded-md border border-zinc-200 bg-white text-zinc-500 focus:outline-none';
+  const selectClass = 'text-[12px] px-2 py-1 rounded-md border border-white/[0.08] bg-white/[0.03] text-zinc-400 focus:outline-none';
 
   return (
-    <div className="border border-zinc-200/60 rounded-xl overflow-hidden bg-white">
+    <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-[#111113]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-200/60">
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <select className={selectClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             {TASK_TYPE_FILTER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -177,19 +177,19 @@ export function TaskList({ initialTasks }: Props) {
             {TEAM_MEMBERS.map((m) => <option key={m.name} value={m.name}>{m.name}</option>)}
           </select>
         </div>
-        <span className="text-[12px] text-zinc-400">{filtered.length} tasks</span>
+        <span className="text-[12px] text-zinc-500">{filtered.length} tasks</span>
       </div>
 
       {/* Task rows */}
       {filtered.length === 0 ? (
         <div className="py-8 text-center">
-          <p className="text-[13px] text-zinc-300">No tasks.</p>
+          <p className="text-[13px] text-zinc-600">No tasks.</p>
         </div>
       ) : (
         filtered.map((task) => {
           const isCompleted = completedIds.has(task.id);
           const taskType = task.task_type ?? 'follow_up';
-          const typeClass = TASK_TYPE_PILL[taskType] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
+          const typeClass = TASK_TYPE_PILL[taskType] ?? 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]';
           const typeLabel = TASK_TYPE_LABELS[taskType] ?? taskType;
           const isExpanded = expandedId === task.id;
           const isEditing = editingId === task.id;
@@ -202,7 +202,7 @@ export function TaskList({ initialTasks }: Props) {
               {/* Main row — B4 layout: [type pill] [time pill] [circle] [content] */}
               <div
                 onClick={() => toggleExpand(task.id)}
-                className="flex items-center gap-1.5 px-3.5 py-3 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60 cursor-pointer transition-colors duration-100"
+                className="flex items-center gap-1.5 px-3.5 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] cursor-pointer transition-colors duration-100"
               >
                 {/* Task type pill */}
                 <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${typeClass}`}>
@@ -219,8 +219,8 @@ export function TaskList({ initialTasks }: Props) {
                   onClick={(e) => { e.stopPropagation(); completeTask(task.id); }}
                   className={`h-[18px] w-[18px] rounded-full border-[1.5px] flex items-center justify-center text-[9px] cursor-pointer flex-shrink-0 transition-all ml-1 ${
                     isCompleted
-                      ? 'bg-zinc-900 border-zinc-900 text-white'
-                      : 'border-zinc-200 text-transparent hover:border-zinc-900'
+                      ? 'bg-white border-white text-zinc-900'
+                      : 'border-white/[0.08] text-transparent hover:border-white'
                   }`}
                 >
                   {isCompleted ? <Check className="h-2.5 w-2.5" /> : '✓'}
@@ -229,28 +229,28 @@ export function TaskList({ initialTasks }: Props) {
                 {/* Task body */}
                 <div className="flex-1 min-w-0 ml-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-medium text-zinc-900">{task.contact_name || task.title}</span>
+                    <span className="text-[13px] font-medium text-zinc-100">{task.contact_name || task.title}</span>
                     {task.assigned_to && (
-                      <span className="text-[11px] text-blue-600">@{task.assigned_to}</span>
+                      <span className="text-[11px] text-blue-400">@{task.assigned_to}</span>
                     )}
                   </div>
                   {task.description && (
-                    <p className="text-[11px] text-zinc-400 mt-0.5 truncate">{task.description}</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{task.description}</p>
                   )}
                 </div>
 
                 {/* Chevron */}
                 <div className="flex-shrink-0">
                   {isExpanded
-                    ? <ChevronDown className="h-3.5 w-3.5 text-zinc-300" />
-                    : <ChevronRight className="h-3.5 w-3.5 text-zinc-300" />
+                    ? <ChevronDown className="h-3.5 w-3.5 text-zinc-600" />
+                    : <ChevronRight className="h-3.5 w-3.5 text-zinc-600" />
                   }
                 </div>
               </div>
 
               {/* Expanded detail panel */}
               {isExpanded && (
-                <div className="px-4 pb-4 border-b border-zinc-100 bg-zinc-50/40 transition-all duration-200 pt-3">
+                <div className="px-4 pb-4 border-b border-white/[0.04] bg-white/[0.02] transition-all duration-200 pt-3">
                   {isEditing ? (
                     /* ─── Edit Mode ─── */
                     <div className="space-y-3">
@@ -258,31 +258,31 @@ export function TaskList({ initialTasks }: Props) {
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="w-full text-[15px] font-medium text-zinc-900 border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400"
+                        className="w-full text-[15px] font-medium text-zinc-100 border border-white/[0.08] rounded-lg px-3 py-1.5 bg-white/[0.03] focus:outline-none focus:border-zinc-400"
                       />
                       <textarea
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                         placeholder="Description..."
                         rows={3}
-                        className="w-full text-[12px] text-zinc-700 border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400 resize-none"
+                        className="w-full text-[12px] text-zinc-300 border border-white/[0.08] rounded-lg px-3 py-1.5 bg-white/[0.03] focus:outline-none focus:border-zinc-400 resize-none"
                       />
                       <div className="flex items-center gap-3 flex-wrap">
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-zinc-400 block mb-1">Due Date</label>
+                          <label className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Due Date</label>
                           <input
                             type="date"
                             value={editForm.due_date}
                             onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
-                            className="text-[12px] border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400"
+                            className="text-[12px] border border-white/[0.08] rounded-lg px-3 py-1.5 bg-white/[0.03] text-zinc-300 focus:outline-none focus:border-zinc-400"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-zinc-400 block mb-1">Type</label>
+                          <label className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Type</label>
                           <select
                             value={editForm.task_type}
                             onChange={(e) => setEditForm({ ...editForm, task_type: e.target.value })}
-                            className="text-[12px] border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400"
+                            className="text-[12px] border border-white/[0.08] rounded-lg px-3 py-1.5 bg-white/[0.03] text-zinc-300 focus:outline-none focus:border-zinc-400"
                           >
                             {TASK_TYPE_OPTIONS.map((t) => (
                               <option key={t} value={t}>{TASK_TYPE_LABELS[t] ?? t}</option>
@@ -290,11 +290,11 @@ export function TaskList({ initialTasks }: Props) {
                           </select>
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-zinc-400 block mb-1">Assigned To</label>
+                          <label className="text-[10px] uppercase tracking-widest text-zinc-500 block mb-1">Assigned To</label>
                           <select
                             value={editForm.assigned_to}
                             onChange={(e) => setEditForm({ ...editForm, assigned_to: e.target.value })}
-                            className="text-[12px] border border-zinc-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-400"
+                            className="text-[12px] border border-white/[0.08] rounded-lg px-3 py-1.5 bg-white/[0.03] text-zinc-300 focus:outline-none focus:border-zinc-400"
                           >
                             <option value="">Unassigned</option>
                             {TEAM_MEMBERS.map((m) => (
@@ -306,13 +306,13 @@ export function TaskList({ initialTasks }: Props) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => saveEdit(task.id)}
-                          className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-700"
+                          className="bg-white text-zinc-900 text-[12px] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-200"
                         >
                           Save
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="border border-zinc-200 text-[12px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50"
+                          className="border border-white/[0.08] text-[12px] text-zinc-400 px-3 py-1.5 rounded-lg hover:bg-white/[0.03]"
                         >
                           Cancel
                         </button>
@@ -321,10 +321,10 @@ export function TaskList({ initialTasks }: Props) {
                   ) : (
                     /* ─── View Mode ─── */
                     <>
-                      <p className="text-[14px] font-semibold text-zinc-900 mb-1">{task.title}</p>
+                      <p className="text-[14px] font-semibold text-zinc-100 mb-1">{task.title}</p>
 
                       {task.description && (
-                        <p className="text-[13px] text-zinc-500 leading-relaxed mb-3">{task.description}</p>
+                        <p className="text-[13px] text-zinc-400 leading-relaxed mb-3">{task.description}</p>
                       )}
 
                       {/* Meta row — exact date stays in modal */}
@@ -338,25 +338,25 @@ export function TaskList({ initialTasks }: Props) {
                           {typeLabel}
                         </span>
                         {task.assigned_to && (
-                          <span className="text-[11px] text-blue-600">@{task.assigned_to}</span>
+                          <span className="text-[11px] text-blue-400">@{task.assigned_to}</span>
                         )}
                       </div>
 
                       {/* Pipeline stages — actual stages only */}
                       <div className="mb-3">
-                        <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-400 mb-1.5">Pipeline Stages</p>
+                        <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1.5">Pipeline Stages</p>
                         {stages === undefined ? (
-                          <p className="text-[11px] text-zinc-300">Loading...</p>
+                          <p className="text-[11px] text-zinc-600">Loading...</p>
                         ) : stages.length === 0 ? (
-                          <p className="text-[11px] text-zinc-400">Not in any pipeline</p>
+                          <p className="text-[11px] text-zinc-500">Not in any pipeline</p>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {stages.map((s, i) => (
                               <span
                                 key={i}
-                                className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STAGE_PILL_CLASSES[s.current_stage] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200'}`}
+                                className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STAGE_PILL_CLASSES[s.current_stage] ?? 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'}`}
                               >
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-400">{s.pipeline_name}</span>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500">{s.pipeline_name}</span>
                                 {' · '}
                                 {s.current_stage}
                               </span>
@@ -372,14 +372,14 @@ export function TaskList({ initialTasks }: Props) {
                             href={`/contacts/${task.contact_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-zinc-700"
+                            className="bg-white text-zinc-900 text-[12px] font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-zinc-200"
                           >
                             <ExternalLink className="h-3 w-3" /> Go to company
                           </a>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); startEdit(task); }}
-                          className="border border-zinc-200 text-[12px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50 flex items-center gap-1.5"
+                          className="border border-white/[0.08] text-[12px] text-zinc-400 px-3 py-1.5 rounded-lg hover:bg-white/[0.03] flex items-center gap-1.5"
                         >
                           <Pencil className="h-3 w-3" /> Edit task
                         </button>

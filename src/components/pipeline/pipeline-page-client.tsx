@@ -42,8 +42,8 @@ export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
 
   return (
     <div className="p-5 animate-fade-in">
-      <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">Companies</h1>
-      <p className="mt-1 text-[13px] text-zinc-400">
+      <h1 className="text-[28px] font-semibold tracking-tight text-zinc-100">Companies</h1>
+      <p className="mt-1 text-[13px] text-zinc-500">
         {contacts.length} companies · {totalValue} total pipeline value
       </p>
 
@@ -54,7 +54,7 @@ export function PipelinePageClient({ pipelines, contacts, totalValue }: Props) {
           onStageSelect={setSelectedStage}
         />
 
-        <div className="border border-zinc-200/60 rounded-xl overflow-hidden">
+        <div className="border border-white/[0.06] rounded-xl overflow-hidden">
           <CompanyList
             contacts={contacts}
             selectedStage={selectedStage}

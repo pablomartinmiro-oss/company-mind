@@ -134,7 +134,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-zinc-900/20"
+          className="fixed inset-0 z-40 bg-black/40"
           onClick={onClose}
         />
       )}
@@ -142,17 +142,17 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
       {/* Drawer */}
       <div
         className={cn(
-          'fixed right-0 top-0 z-50 flex h-screen w-full flex-col border-l border-zinc-200/60 bg-white shadow-2xl transition-transform duration-200 ease-out sm:w-[420px]',
+          'fixed right-0 top-0 z-50 flex h-screen w-full flex-col border-l border-white/[0.06] bg-[#111113] shadow-2xl transition-transform duration-200 ease-out sm:w-[420px]',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
         {/* Header */}
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200/60 px-4">
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-zinc-900" />
-            <span className="text-[13px] font-semibold text-zinc-900">Ask AI</span>
+            <Sparkles className="h-4 w-4 text-zinc-100" />
+            <span className="text-[13px] font-semibold text-zinc-100">Ask AI</span>
             {isStreaming && (
-              <span className="flex items-center gap-1 text-[11px] text-zinc-400">
+              <span className="flex items-center gap-1 text-[11px] text-zinc-500">
                 <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
                 typing
               </span>
@@ -160,28 +160,28 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
           </div>
           <button
             onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 transition-colors hover:text-zinc-700"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-500 transition-colors hover:text-zinc-200"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Context indicator */}
-        <div className="shrink-0 border-b border-zinc-100 bg-zinc-50/50 px-4 py-2">
-          <div className="text-[10px] uppercase tracking-widest text-zinc-400">Context</div>
-          <div className="mt-0.5 text-[11px] text-zinc-600">{contextLabel}</div>
+        <div className="shrink-0 border-b border-white/[0.04] bg-white/[0.02] px-4 py-2">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-500">Context</div>
+          <div className="mt-0.5 text-[11px] text-zinc-300">{contextLabel}</div>
         </div>
 
         {/* Messages area */}
         <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
           {messages.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100">
-                <Sparkles className="h-5 w-5 text-zinc-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06]">
+                <Sparkles className="h-5 w-5 text-zinc-500" />
               </div>
               <div>
-                <p className="text-[13px] font-medium text-zinc-700">Ask me anything</p>
-                <p className="mt-0.5 text-[12px] text-zinc-400">
+                <p className="text-[13px] font-medium text-zinc-300">Ask me anything</p>
+                <p className="mt-0.5 text-[12px] text-zinc-500">
                   Calls, companies, tasks, pipelines, or CRM actions.
                 </p>
               </div>
@@ -193,14 +193,14 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
           ))}
 
           {error && (
-            <div className="rounded-lg bg-red-50 px-3 py-2 text-[12px] text-red-600">
+            <div className="rounded-lg bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
               {error.message || 'Something went wrong.'}
             </div>
           )}
         </div>
 
         {/* Input area */}
-        <form onSubmit={handleSubmit} className="shrink-0 border-t border-zinc-200/60 px-3 py-2.5">
+        <form onSubmit={handleSubmit} className="shrink-0 border-t border-white/[0.06] px-3 py-2.5">
           <div className="flex items-end gap-2">
             <textarea
               ref={inputRef}
@@ -208,12 +208,12 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
               disabled={isStreaming}
               rows={1}
               onKeyDown={handleKeyDown}
-              className="max-h-[96px] min-h-[36px] flex-1 resize-none rounded-lg border border-zinc-200 px-3 py-2 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none disabled:opacity-50"
+              className="max-h-[96px] min-h-[36px] flex-1 resize-none rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-400 focus:outline-none disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={isStreaming}
-              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-30"
+              className="rounded-lg bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-30"
             >
               {isStreaming ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -238,8 +238,8 @@ function MessageBubble({ message }: { message: UIMessage }) {
         className={cn(
           'max-w-[85%] px-3 py-2 text-[12px] leading-relaxed',
           isUser
-            ? 'rounded-tl-xl rounded-b-xl bg-zinc-900 text-white'
-            : 'rounded-tr-xl rounded-b-xl border border-zinc-200/60 bg-zinc-50 text-zinc-800'
+            ? 'rounded-tl-xl rounded-b-xl bg-white text-zinc-900'
+            : 'rounded-tr-xl rounded-b-xl border border-white/[0.06] bg-white/[0.03] text-zinc-200'
         )}
       >
         {message.parts.map((part, i) => {

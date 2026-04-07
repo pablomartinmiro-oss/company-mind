@@ -55,25 +55,25 @@ export function StatCards({
   return (
     <>
       <div className="grid grid-cols-4 gap-2.5">
-        <button onClick={() => setModal('calls')} className="bg-zinc-50 rounded-lg px-4 py-3.5 text-left hover:bg-zinc-100 transition-colors cursor-pointer">
-          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">Calls</p>
-          <p className="text-[22px] font-medium font-mono text-zinc-900 leading-none">{totalCalls}</p>
+        <button onClick={() => setModal('calls')} className="bg-white/[0.03] rounded-lg px-4 py-3.5 text-left hover:bg-white/[0.06] transition-colors cursor-pointer">
+          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-1">Calls</p>
+          <p className="text-[22px] font-medium font-mono text-gradient-accent leading-none">{totalCalls}</p>
         </button>
-        <button onClick={() => setModal('score')} className="bg-zinc-50 rounded-lg px-4 py-3.5 text-left hover:bg-zinc-100 transition-colors cursor-pointer">
-          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">Avg Score</p>
+        <button onClick={() => setModal('score')} className="bg-white/[0.03] rounded-lg px-4 py-3.5 text-left hover:bg-white/[0.06] transition-colors cursor-pointer">
+          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-1">Avg Score</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-[22px] font-medium font-mono text-zinc-900 leading-none">{avgScore}</p>
+            <p className="text-[22px] font-medium font-mono text-gradient-accent leading-none">{avgScore}</p>
             <span className={`text-[13px] font-semibold ${avgGrade.color}`}>{avgGrade.letter}</span>
           </div>
         </button>
-        <button onClick={() => setModal('pipeline')} className="bg-zinc-50 rounded-lg px-4 py-3.5 text-left hover:bg-zinc-100 transition-colors cursor-pointer">
-          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">Pipeline</p>
-          <p className="text-[22px] font-medium font-mono text-zinc-900 leading-none">{formattedPipeline}</p>
+        <button onClick={() => setModal('pipeline')} className="bg-white/[0.03] rounded-lg px-4 py-3.5 text-left hover:bg-white/[0.06] transition-colors cursor-pointer">
+          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-1">Pipeline</p>
+          <p className="text-[22px] font-medium font-mono text-gradient-accent leading-none">{formattedPipeline}</p>
         </button>
-        <button onClick={() => setModal('tasks')} className="bg-zinc-50 rounded-lg px-4 py-3.5 text-left hover:bg-zinc-100 transition-colors cursor-pointer">
-          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">Open Tasks</p>
-          <p className="text-[22px] font-medium font-mono text-zinc-900 leading-none">{openTasks}</p>
-          {dueToday > 0 && <p className="text-red-500 text-[11px] mt-0.5">{dueToday} due today</p>}
+        <button onClick={() => setModal('tasks')} className="bg-white/[0.03] rounded-lg px-4 py-3.5 text-left hover:bg-white/[0.06] transition-colors cursor-pointer">
+          <p className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-1">Open Tasks</p>
+          <p className="text-[22px] font-medium font-mono text-gradient-accent leading-none">{openTasks}</p>
+          {dueToday > 0 && <p className="text-red-400 text-[11px] mt-0.5">{dueToday} due today</p>}
         </button>
       </div>
 

@@ -1,9 +1,10 @@
 // src/lib/pipeline-config.ts
 // Tenant: Company Mind (Pablo Martin + Corey Lavinder)
+// Dark theme pill classes — bg-{color}-500/10 text-{color}-300 border border-{color}-500/20
 
 export const TEAM_MEMBERS = [
-  { name: 'Pablo Martin',   initials: 'PM', avatarClass: 'bg-zinc-900' },
-  { name: 'Corey Lavinder', initials: 'CL', avatarClass: 'bg-zinc-700' },
+  { name: 'Pablo Martin',   initials: 'PM', avatarClass: 'bg-white' },
+  { name: 'Corey Lavinder', initials: 'CL', avatarClass: 'bg-zinc-600' },
 ] as const;
 
 export const PIPELINES = [
@@ -14,19 +15,19 @@ export const PIPELINES = [
 ] as const;
 
 export const STAGE_PILL_CLASSES: Record<string, string> = {
-  'New Lead':      'bg-amber-50 text-amber-700 border border-amber-200',
-  'Qualification': 'bg-blue-50 text-blue-700 border border-blue-200',
-  'Closing':       'bg-violet-50 text-violet-700 border border-violet-200',
-  'Closed':        'bg-green-50 text-green-700 border border-green-200',
-  'New Client':    'bg-amber-50 text-amber-700 border border-amber-200',
-  'Building':      'bg-blue-50 text-blue-700 border border-blue-200',
-  'Built':         'bg-violet-50 text-violet-700 border border-violet-200',
-  'Operating':     'bg-green-50 text-green-700 border border-green-200',
-  'Tier 1':        'bg-teal-50 text-teal-700 border border-teal-200',
-  'Tier 2':        'bg-blue-50 text-blue-700 border border-blue-200',
-  'Tier 3':        'bg-violet-50 text-violet-700 border border-violet-200',
-  'Nurture':       'bg-zinc-100 text-zinc-500 border border-zinc-200',
-  'Dead':          'bg-red-50 text-red-400 border border-red-100',
+  'New Lead':      'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+  'Qualification': 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  'Closing':       'bg-violet-500/10 text-violet-300 border border-violet-500/20',
+  'Closed':        'bg-green-500/10 text-green-300 border border-green-500/20',
+  'New Client':    'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+  'Building':      'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  'Built':         'bg-violet-500/10 text-violet-300 border border-violet-500/20',
+  'Operating':     'bg-green-500/10 text-green-300 border border-green-500/20',
+  'Tier 1':        'bg-teal-500/10 text-teal-300 border border-teal-500/20',
+  'Tier 2':        'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  'Tier 3':        'bg-violet-500/10 text-violet-300 border border-violet-500/20',
+  'Nurture':       'bg-white/[0.06] text-zinc-400 border border-white/[0.06]',
+  'Dead':          'bg-red-500/10 text-red-400 border border-red-500/20',
 };
 
 export const CALL_TYPE_LABELS: Record<string, string> = {
@@ -39,12 +40,12 @@ export const CALL_TYPE_LABELS: Record<string, string> = {
 };
 
 export const CALL_TYPE_PILL: Record<string, string> = {
-  cold_call:     'bg-zinc-100 text-zinc-500',
-  qualification: 'bg-blue-50 text-blue-700 border border-blue-200',
-  closing:       'bg-violet-50 text-violet-700 border border-violet-200',
-  follow_up:     'bg-amber-50 text-amber-700 border border-amber-200',
-  onboarding:    'bg-teal-50 text-teal-700 border border-teal-200',
-  admin:         'bg-zinc-100 text-zinc-400',
+  cold_call:     'bg-white/[0.06] text-zinc-400',
+  qualification: 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  closing:       'bg-violet-500/10 text-violet-300 border border-violet-500/20',
+  follow_up:     'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+  onboarding:    'bg-teal-500/10 text-teal-300 border border-teal-500/20',
+  admin:         'bg-white/[0.06] text-zinc-500',
 };
 
 export const OUTCOME_LABELS: Record<string, string> = {
@@ -56,11 +57,11 @@ export const OUTCOME_LABELS: Record<string, string> = {
 };
 
 export const OUTCOME_PILL: Record<string, string> = {
-  follow_up_scheduled: 'bg-teal-50 text-teal-700',
-  not_interested:      'bg-red-50 text-red-600',
-  closed_won:          'bg-green-50 text-green-700',
-  no_answer:           'bg-zinc-100 text-zinc-400',
-  voicemail:           'bg-zinc-100 text-zinc-400',
+  follow_up_scheduled: 'bg-teal-500/10 text-teal-300',
+  not_interested:      'bg-red-500/10 text-red-400',
+  closed_won:          'bg-green-500/10 text-green-300',
+  no_answer:           'bg-white/[0.06] text-zinc-500',
+  voicemail:           'bg-white/[0.06] text-zinc-500',
 };
 
 export const TASK_TYPE_LABELS: Record<string, string> = {
@@ -71,10 +72,10 @@ export const TASK_TYPE_LABELS: Record<string, string> = {
 };
 
 export const TASK_TYPE_PILL: Record<string, string> = {
-  admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
-  follow_up:  'bg-amber-50 text-amber-700 border border-amber-200',
-  new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
+  admin:      'bg-white/[0.06] text-zinc-400 border border-white/[0.06]',
+  follow_up:  'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+  new_lead:   'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20',
+  scheduling: 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
 };
 
 export const NEXT_STEP_TYPE_LABELS: Record<string, string> = {
@@ -85,10 +86,10 @@ export const NEXT_STEP_TYPE_LABELS: Record<string, string> = {
 };
 
 export const NEXT_STEP_TYPE_PILL: Record<string, string> = {
-  follow_up:  'bg-amber-50 text-amber-700 border border-amber-200',
-  scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
-  admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
-  new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  follow_up:  'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+  scheduling: 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  admin:      'bg-white/[0.06] text-zinc-400 border border-white/[0.06]',
+  new_lead:   'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20',
 };
 
 export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
@@ -99,10 +100,10 @@ export const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export const APPOINTMENT_TYPE_PILL: Record<string, string> = {
-  qualification_call: 'bg-blue-50 text-blue-700',
-  closing_call:       'bg-violet-50 text-violet-700',
-  onboarding_setup:   'bg-teal-50 text-teal-700',
-  onboarding_demo:    'bg-teal-50 text-teal-700',
+  qualification_call: 'bg-blue-500/10 text-blue-300',
+  closing_call:       'bg-violet-500/10 text-violet-300',
+  onboarding_setup:   'bg-teal-500/10 text-teal-300',
+  onboarding_demo:    'bg-teal-500/10 text-teal-300',
 };
 
 export const SALES_RESEARCH_SECTIONS: Record<string, string[]> = {

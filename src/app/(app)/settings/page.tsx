@@ -23,8 +23,8 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-3xl px-8 py-8 animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Settings</h1>
-        <p className="mt-1 text-[13px] text-zinc-400">
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Settings</h1>
+        <p className="mt-1 text-[13px] text-zinc-500">
           Configure your Company Mind instance, scoring rubrics, and
           integrations.
         </p>
@@ -86,7 +86,7 @@ export default async function SettingsPage() {
                   </span>
                 </div>
                 {/* Weight bar */}
-                <div className="h-2 w-full rounded-full bg-zinc-100">
+                <div className="h-2 w-full rounded-full bg-white/[0.06]">
                   <div
                     className={`h-full rounded-full ${criterion.color} transition-all`}
                     style={{ width: `${criterion.weight}%` }}
@@ -96,9 +96,9 @@ export default async function SettingsPage() {
             ))}
 
             <div className="pt-3">
-              <Button variant="outline" disabled className="text-zinc-400 cursor-not-allowed">
+              <Button variant="outline" disabled className="text-zinc-500 cursor-not-allowed">
                 Edit Rubric
-                <span className="ml-1.5 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400">Soon</span>
+                <span className="ml-1.5 rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">Soon</span>
               </Button>
             </div>
           </CardContent>
@@ -113,35 +113,35 @@ export default async function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-white/[0.04]">
               <div className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50">
-                    <span className="text-[11px] font-bold text-orange-600">GHL</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10">
+                    <span className="text-[11px] font-bold text-orange-400">GHL</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-900">Go High Level</p>
-                    <p className="text-[11px] text-zinc-400">CRM &amp; pipeline sync</p>
+                    <p className="text-sm font-medium text-zinc-100">Go High Level</p>
+                    <p className="text-[11px] text-zinc-500">CRM &amp; pipeline sync</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-[11px] font-medium text-emerald-600">Connected</span>
+                  <span className="text-[11px] font-medium text-emerald-400">Connected</span>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-                    <span className="text-[11px] font-bold text-blue-600">AI</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                    <span className="text-[11px] font-bold text-blue-400">AI</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-900">AssemblyAI</p>
-                    <p className="text-[11px] text-zinc-400">Call transcription &amp; analysis</p>
+                    <p className="text-sm font-medium text-zinc-100">AssemblyAI</p>
+                    <p className="text-[11px] text-zinc-500">Call transcription &amp; analysis</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-[11px] font-medium text-emerald-600">Connected</span>
+                  <span className="text-[11px] font-medium text-emerald-400">Connected</span>
                 </div>
               </div>
             </div>

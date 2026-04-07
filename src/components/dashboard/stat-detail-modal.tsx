@@ -90,28 +90,28 @@ export function StatDetailModal({ type, onClose, calls, pipelineContacts, tasks 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-zinc-900/40" onClick={onClose} />
-      <div className="relative z-10 w-[640px] h-[560px] bg-white rounded-xl shadow-2xl border border-zinc-200/60 overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative z-10 w-[640px] h-[560px] bg-[#17171a] rounded-xl shadow-2xl border border-white/[0.06] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="h-12 px-5 border-b border-zinc-200/60 flex items-center justify-between shrink-0">
-          <span className="text-[13px] font-semibold text-zinc-900">
+        <div className="h-12 px-5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+          <span className="text-[13px] font-semibold text-zinc-100">
             {title} ({count})
           </span>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-200">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-5 py-2.5 border-b border-zinc-100 shrink-0">
+        <div className="px-5 py-2.5 border-b border-white/[0.04] shrink-0">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={placeholder}
-              className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-zinc-200 rounded-lg focus:outline-none focus:border-zinc-400"
+              className="w-full text-[12px] pl-8 pr-3 py-1.5 border border-white/[0.08] bg-white/[0.03] text-zinc-100 rounded-lg focus:outline-none focus:border-zinc-400 placeholder:text-zinc-500"
             />
           </div>
         </div>
@@ -147,22 +147,22 @@ function CallsList({ calls, search }: { calls: CallRow[]; search: string }) {
             href={`/calls/${c.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-zinc-100 hover:bg-zinc-50/60 cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-zinc-900 truncate">{c.contact_name ?? 'Unknown'}</p>
-              {c.company_name && <p className="text-[11px] text-zinc-400 truncate">{c.company_name}</p>}
+              <p className="text-[12px] font-medium text-zinc-100 truncate">{c.contact_name ?? 'Unknown'}</p>
+              {c.company_name && <p className="text-[11px] text-zinc-500 truncate">{c.company_name}</p>}
             </div>
             {score != null && (
               <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${scoreBg(score)}`}>
                 {score}
               </span>
             )}
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[typeKey] ?? 'bg-zinc-100 text-zinc-500'}`}>
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[typeKey] ?? 'bg-white/[0.06] text-zinc-400'}`}>
               {CALL_TYPE_LABELS[typeKey] ?? typeKey}
             </span>
             {c.called_at && (
-              <span className="text-[10px] text-zinc-400 font-mono min-w-[90px] text-right">
+              <span className="text-[10px] text-zinc-500 font-mono min-w-[90px] text-right">
                 {formatExactDateTime(c.called_at)}
               </span>
             )}
@@ -189,19 +189,19 @@ function ScoreList({ calls, search }: { calls: CallRow[]; search: string }) {
             href={`/calls/${c.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-zinc-100 hover:bg-zinc-50/60 cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer"
           >
             <span className={`text-[18px] font-semibold font-mono min-w-[40px] ${score >= 80 ? 'text-emerald-600' : score >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
               {score}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-zinc-900 truncate">{c.contact_name ?? 'Unknown'}</p>
+              <p className="text-[12px] font-medium text-zinc-100 truncate">{c.contact_name ?? 'Unknown'}</p>
             </div>
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[typeKey] ?? 'bg-zinc-100 text-zinc-500'}`}>
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${CALL_TYPE_PILL[typeKey] ?? 'bg-white/[0.06] text-zinc-400'}`}>
               {CALL_TYPE_LABELS[typeKey] ?? typeKey}
             </span>
             {c.called_at && (
-              <span className="text-[10px] text-zinc-400 font-mono min-w-[90px] text-right">
+              <span className="text-[10px] text-zinc-500 font-mono min-w-[90px] text-right">
                 {formatExactDateTime(c.called_at)}
               </span>
             )}
@@ -237,17 +237,17 @@ function PipelineList({ contacts, search }: { contacts: PipelineRow[]; search: s
             href={`/contacts/${ghlId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-zinc-100 hover:bg-zinc-50/60 cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-zinc-900 truncate">
+              <p className="text-[12px] font-medium text-zinc-100 truncate">
                 {first.company_name ?? first.contact_name ?? 'Unknown'}
               </p>
               <div className="flex flex-wrap gap-1 mt-1">
                 {rows.map((r, i) => (
                   <span
                     key={i}
-                    className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${STAGE_PILL_CLASSES[r.current_stage ?? ''] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200'}`}
+                    className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${STAGE_PILL_CLASSES[r.current_stage ?? ''] ?? 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'}`}
                   >
                     {r.pipeline_name} &middot; {r.current_stage}
                   </span>
@@ -255,7 +255,7 @@ function PipelineList({ contacts, search }: { contacts: PipelineRow[]; search: s
               </div>
             </div>
             {totalValue > 0 && (
-              <span className="text-[12px] font-semibold text-zinc-900 font-mono">
+              <span className="text-[12px] font-semibold text-zinc-100 font-mono">
                 ${totalValue >= 1000 ? `${(totalValue / 1000).toFixed(0)}k` : totalValue}
               </span>
             )}
@@ -284,13 +284,13 @@ function TasksList({ tasks, search }: { tasks: TaskRow[]; search: string }) {
             href={t.contact_id ? `/contacts/${t.contact_id}` : '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-2.5 border-b border-zinc-100 hover:bg-zinc-50/60 cursor-pointer"
+            className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-zinc-900 truncate">{t.title}</p>
-              {t.contact_name && <p className="text-[11px] text-zinc-400 truncate">{t.contact_name}</p>}
+              <p className="text-[12px] font-medium text-zinc-100 truncate">{t.title}</p>
+              {t.contact_name && <p className="text-[11px] text-zinc-500 truncate">{t.contact_name}</p>}
             </div>
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TASK_TYPE_PILL[typeKey] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200'}`}>
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TASK_TYPE_PILL[typeKey] ?? 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'}`}>
               {TASK_TYPE_LABELS[typeKey] ?? typeKey}
             </span>
             {t.due_date && (
@@ -306,20 +306,20 @@ function TasksList({ tasks, search }: { tasks: TaskRow[]; search: string }) {
 }
 
 function getDueDateColor(dueDate: string | null): string {
-  if (!dueDate) return 'text-zinc-400';
+  if (!dueDate) return 'text-zinc-500';
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(dueDate + 'T00:00:00');
   const diff = Math.floor((due.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return 'text-red-600';
+  if (diff < 0) return 'text-red-400';
   if (diff === 0) return 'text-amber-600';
-  return 'text-zinc-400';
+  return 'text-zinc-500';
 }
 
 function EmptyState() {
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="text-[12px] text-zinc-300">No results</p>
+      <p className="text-[12px] text-zinc-600">No results</p>
     </div>
   );
 }

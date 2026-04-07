@@ -41,15 +41,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-white">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#0a0a0b]">
       {/* Top bar */}
-      <header className="h-[52px] shrink-0 border-b border-zinc-200/60 bg-white flex items-center px-5 gap-6 z-10">
+      <header className="h-[52px] shrink-0 border-b border-white/[0.06] bg-[#111113] flex items-center px-5 gap-6 z-10">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-zinc-900">
+          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-gradient-accent">
             <Brain className="h-3.5 w-3.5 text-white" />
           </div>
-          <span className="text-[13px] font-semibold text-zinc-900">Company Mind</span>
+          <span className="text-[13px] font-semibold text-zinc-100">Company Mind</span>
         </Link>
 
         {/* Nav tabs */}
@@ -63,8 +63,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   'rounded-md px-3 py-1.5 text-[13px] font-medium transition-all duration-150',
                   isActive
-                    ? 'bg-zinc-900 text-white'
-                    : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
+                    ? 'bg-white text-zinc-900'
+                    : 'text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100'
                 )}
               >
                 {item.label}
@@ -78,27 +78,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Ask AI button */}
           <button
             onClick={() => setChatOpen(true)}
-            className="flex h-7 items-center gap-1.5 rounded-md bg-zinc-900 px-2.5 text-[12px] font-medium text-white transition-colors hover:bg-zinc-700"
+            className="flex h-7 items-center gap-1.5 rounded-md bg-gradient-accent px-2.5 text-[12px] font-medium text-white transition-colors"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Ask AI
           </button>
 
           <Link href="/settings">
-            <Settings className="h-4 w-4 text-zinc-400 hover:text-zinc-600 transition-colors" />
+            <Settings className="h-4 w-4 text-zinc-500 hover:text-zinc-300 transition-colors" />
           </Link>
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="h-7 w-7 rounded-full bg-zinc-900 text-white text-[11px] font-semibold flex items-center justify-center hover:bg-zinc-700 transition-colors"
+              className="h-7 w-7 rounded-full bg-white text-zinc-900 text-[11px] font-semibold flex items-center justify-center hover:bg-zinc-200 transition-colors"
             >
               PM
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-36 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 top-full mt-1.5 w-36 rounded-lg border border-white/[0.08] bg-[#17171a] py-1 shadow-lg">
                 <button
                   onClick={handleSignOut}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-zinc-400 hover:bg-white/[0.03] hover:text-zinc-100 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   Sign out
@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-white">
+      <main className="flex-1 overflow-y-auto bg-[#0a0a0b]">
         {children}
       </main>
 
