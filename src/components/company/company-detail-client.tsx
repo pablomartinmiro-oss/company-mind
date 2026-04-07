@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-react';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
+import { StagePopover } from './stage-popover';
 import { scoreGrade, scoreBg, scoreColor } from '@/lib/format';
 import { ContactsPanel } from './contacts-panel';
 import { CompanyResearchTab } from './research-tab';
@@ -197,12 +198,18 @@ export function CompanyDetailClient(props: Props) {
               )}
             </div>
 
-            {/* Row 2: Pipeline status */}
+            {/* Row 2: Pipeline status — clickable popovers */}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               {props.enrollments.map(e => (
-                <span key={e.pipelineId} className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}>
-                  {e.pipelineName} · {e.currentStage}
-                </span>
+                <StagePopover
+                  key={e.pipelineId}
+                  pipelineName={e.pipelineName}
+                  pipelineId={e.pipelineId}
+                  stages={e.stages}
+                  currentStage={e.currentStage}
+                  companyId={props.companyId}
+                  onUpdate={() => window.location.reload()}
+                />
               ))}
               <span className="text-[11px] text-zinc-400 font-mono">
                 {props.enrollments[0]?.daysInStage ?? 0}d in stage
