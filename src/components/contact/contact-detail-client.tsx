@@ -86,66 +86,72 @@ export function ContactDetailClient(props: Props) {
 
   return (
     <div className="p-5 animate-fade-in">
-      {/* Back link */}
-      <Link href="/companies" className="text-[12px] text-zinc-500 hover:text-zinc-800 py-3 inline-flex items-center gap-1">
-        <ArrowLeft className="h-3 w-3" /> Back to companies
-      </Link>
+      {/* Unified frosted glass header card */}
+      <div className="relative glass-card rounded-3xl overflow-hidden mb-5">
+        <div className="glass-card-inner" />
+        <div className="relative">
+          {/* Top section: back + name + meta + actions */}
+          <div className="px-6 py-5 border-b border-white/40">
+            <Link href="/companies" className="text-[12px] text-zinc-500 hover:text-zinc-800 mb-3 inline-flex items-center gap-1.5">
+              <ArrowLeft className="h-3 w-3" /> Back to companies
+            </Link>
 
-      {/* Header */}
-      <div className="flex items-start justify-between mt-2">
-        <div>
-          {/* Pipeline enrollment pills */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-            {props.enrollments.map((e) => (
-              <span
-                key={e.pipelineId}
-                className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
+            <div className="flex items-start justify-between gap-4 mt-2">
+              <div>
+                <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900 leading-tight">{props.contactName}</h1>
+                {(props.companyName || props.location) && (
+                  <p className="text-[14px] text-zinc-500 mt-1">
+                    {props.companyName}{props.companyName && props.location ? ' · ' : ''}{props.location}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {props.enrollments.map((e) => (
+                    <span
+                      key={e.pipelineId}
+                      className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
+                    >
+                      {e.pipelineName} · {e.currentStage}
+                    </span>
+                  ))}
+                  <span className="text-[11px] text-zinc-400 font-mono">
+                    {props.daysInStage}d in stage
+                  </span>
+                  {props.callType && (
+                    <span className="text-[11px] text-zinc-500">· {props.callType}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button className="text-[12px] font-medium px-4 py-2 rounded-full bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/80 flex items-center gap-1.5">
+                  GHL <ExternalLink className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Pipeline tracker inside the card */}
+          <div className="px-6 py-4 border-b border-white/40">
+            <PipelineTracker enrollments={props.enrollments} />
+          </div>
+
+          {/* Tabs inside the card */}
+          <div className="flex px-6">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-3 text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
+                  activeTab === tab
+                    ? 'text-zinc-900 border-[#ff6a3d]'
+                    : 'text-zinc-500 border-transparent hover:text-zinc-700'
+                }`}
               >
-                {e.pipelineName} · {e.currentStage}
-              </span>
+                {tab}
+              </button>
             ))}
           </div>
-          {/* Compact metadata row */}
-          <p className="text-[11px] text-zinc-500 mb-2">
-            {props.daysInStage}d in current stage{props.callType ? ` · ${props.callType}` : ''}{props.research && Object.keys(props.research).length > 0 ? ' · AI enriched' : ''}
-          </p>
-
-          <h1 className="text-[24px] font-medium text-[#1a1a1a] leading-tight">{props.contactName}</h1>
-          {(props.companyName || props.location) && (
-            <p className="text-[14px] text-zinc-500 mt-1">
-              {props.companyName}{props.companyName && props.location ? ' · ' : ''}{props.location}
-            </p>
-          )}
         </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          <button className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/30 flex items-center gap-1.5">
-            GHL <ExternalLink className="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-
-      {/* Pipeline tracker */}
-      <div className="mt-5">
-        <PipelineTracker enrollments={props.enrollments} />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-white/40 mb-5">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
-              activeTab === tab
-                ? 'text-[#1a1a1a] border-[#ff6a3d]'
-                : 'text-zinc-500 border-transparent hover:text-zinc-700'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
       </div>
 
       {/* Tab content */}
