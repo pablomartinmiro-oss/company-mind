@@ -22,6 +22,8 @@ interface Conversation {
   id: string;
   contactId: string;
   contactName: string;
+  companyName?: string;
+  companyId?: string;
   contactEmail?: string;
   contactPhone?: string;
   lastMessageBody: string;
@@ -200,21 +202,23 @@ export function InboxPanel() {
                 <div className="h-7 w-7 rounded-full bg-zinc-700 text-white text-[10px] font-semibold flex items-center justify-center">
                   {selected.contactName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`/contacts/${selected.contactId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[13px] font-medium text-zinc-800 hover:text-[#ff6a3d] hover:underline decoration-[#ff6a3d]/40 underline-offset-2 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {selected.contactName}
-                  </a>
-                  <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${CHANNEL_ICONS[activeChannel]?.bg ?? 'bg-white/30'} ${CHANNEL_ICONS[activeChannel]?.text ?? 'text-zinc-500'}`}>
-                    {activeChannel}
-                  </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-[#1a1a1a] truncate">{selected.contactName}</span>
+                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${CHANNEL_ICONS[activeChannel]?.bg ?? 'bg-white/30'} ${CHANNEL_ICONS[activeChannel]?.text ?? 'text-zinc-500'}`}>
+                      {activeChannel}
+                    </span>
+                  </div>
+                  {selected.companyName && selected.companyId && (
+                    <a
+                      href={`/companies/${selected.companyId}`}
+                      className="text-[10px] text-[#71717a] hover:text-[#ff6a3d] transition-colors truncate block"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {selected.companyName}
+                    </a>
+                  )}
                 </div>
-                <LinkIcon className="ml-auto h-3.5 w-3.5 text-zinc-500 hover:text-zinc-800 cursor-pointer" />
               </div>
 
               {/* Messages — channel-specific layout */}
@@ -396,21 +400,16 @@ function ConvoRow({
         {icon.letter}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <a
-            href={`/contacts/${convo.contactId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[12px] font-medium text-[#1a1a1a] truncate hover:text-[#ff6a3d] hover:underline decoration-[#ff6a3d]/40 underline-offset-2 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {convo.contactName}
-          </a>
+        <div className="flex items-center justify-between gap-1.5">
+          <span className="text-[12px] font-medium text-[#1a1a1a] truncate">{convo.contactName}</span>
           <span className="text-[10px] text-zinc-500 font-mono flex-shrink-0">
             {formatExactTime(convo.lastMessageDate)}
           </span>
         </div>
-        <p className="text-[11px] text-zinc-500 truncate">{convo.lastMessageBody}</p>
+        {convo.companyName && (
+          <p className="text-[10px] text-[#71717a] truncate">{convo.companyName}</p>
+        )}
+        <p className="text-[11px] text-zinc-500 truncate mt-0.5">{convo.lastMessageBody}</p>
       </div>
       {convo.unreadCount > 0 && (
         <span className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a] flex-shrink-0 mt-2" />

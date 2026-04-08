@@ -78,10 +78,20 @@ export async function GET() {
           dateAdded: m.sent_at ?? new Date().toISOString(),
         }));
 
+        // Look up contact name from company_contacts
+        const { data: contactRow } = await supabaseAdmin
+          .from('company_contacts')
+          .select('contact_name')
+          .eq('tenant_id', tenantId)
+          .eq('contact_id', conv.contact_ghl_id)
+          .maybeSingle();
+
         return {
           id: conv.id,
           contactId: conv.contact_ghl_id,
-          contactName: (conv.company as { name: string } | null)?.name ?? 'Unknown',
+          contactName: contactRow?.contact_name ?? (conv.company as { name: string } | null)?.name ?? 'Unknown',
+          companyName: (conv.company as { name: string } | null)?.name ?? null,
+          companyId: conv.company_id ?? null,
           lastMessageBody: conv.last_message_snippet ?? '',
           lastMessageType: (conv.channel ?? 'sms').toUpperCase(),
           lastMessageDate: conv.last_message_at ?? new Date().toISOString(),

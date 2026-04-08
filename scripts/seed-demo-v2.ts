@@ -1503,7 +1503,7 @@ async function seedCallActions(callIds: string[]) {
           dueDate.setDate(dueDate.getDate() + randomInt(1, 5));
           suggested_payload = {
             title: `Follow up on ${companyName} proposal`,
-            assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+            assigned_to: randomChoice(['Pablo Martin', 'Corey Lavinder']),
             due_date: dueDate.toISOString().split('T')[0],
           };
           break;
@@ -1623,15 +1623,24 @@ async function seedTasks(companiesData: any[]) {
       const dueDate = new Date(now);
       dueDate.setDate(dueDate.getDate() + daysOut);
 
+      const contactName = contactsData.find(c => c.companyIndex === compIdx && c.isPrimary)?.name ?? 'contact';
+      const closedTitles: Record<string, string[]> = {
+        follow_up: [`Check in with ${contactName} on onboarding progress`, `Schedule QBR with ${contactName}`, `Follow up on feature request from ${company.name}`],
+        admin: [`Update CRM notes for ${company.name}`, `Send invoice to ${company.name}`, `File contract for ${company.name}`],
+        implementation: [`Configure scoring rubric for ${company.name}`, `Import historical data for ${company.name}`, `Set up custom pipeline for ${company.name}`],
+        onboarding: [`Train ${contactName} on call scoring`, `Demo AI assistant to ${company.name} team`, `Verify GHL integration for ${company.name}`],
+      };
+      const titleOptions = closedTitles[taskType] ?? [`Task for ${company.name}`];
+
       taskRecords.push({
         id: crypto.randomUUID(),
         tenant_id: TENANT_ID,
         contact_id: `demo-${generateSlug(company.name)}-1`,
         pipeline_stage: 'Closed',
-        task_type: taskType,
-        title: `${taskType.charAt(0).toUpperCase() + taskType.slice(1)} - ${company.name}`,
-        description: `${taskType} task for ${company.name} implementation`,
-        assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+        task_type: taskType === 'implementation' || taskType === 'onboarding' ? 'admin' : taskType,
+        title: titleOptions[i % titleOptions.length],
+        description: `${company.name} — ${taskType} phase`,
+        assigned_to: randomChoice(['Pablo Martin', 'Corey Lavinder']),
         due_date: dueDate.toISOString().split('T')[0],
         completed: false,
       });
@@ -1668,15 +1677,23 @@ async function seedTasks(companiesData: any[]) {
       const company = companiesData[companyIndex];
       const contact = contactsData.find((c) => c.companyIndex === companyIndex && c.isPrimary);
 
+      const cName = contact?.name ?? 'contact';
+      const openTitles: Record<string, string[]> = {
+        follow_up: [`Call ${cName} to discuss proposal`, `Send case study to ${cName}`, `Follow up on demo with ${company.name}`, `Re-engage ${cName} after no response`, `Check in with ${cName}`],
+        admin: [`Log meeting notes for ${company.name}`, `Update pipeline stage for ${company.name}`, `Prepare pricing for ${company.name}`, `Review ${company.name} call recordings`, `Send NDA to ${company.name}`],
+        new_lead: [`Research ${company.name} before outreach`, `Send intro email to ${cName}`, `Qualify ${company.name} lead`, `Schedule discovery call with ${cName}`, `Add ${company.name} to nurture sequence`],
+      };
+      const tOptions = openTitles[taskType] ?? [`Task for ${company.name}`];
+
       taskRecords.push({
         id: crypto.randomUUID(),
         tenant_id: TENANT_ID,
         contact_id: `demo-${generateSlug(company.name)}-1`,
         pipeline_stage: randomChoice(['New Lead', 'Qualification', 'Closing']),
         task_type: taskType,
-        title: `${taskType.charAt(0).toUpperCase() + taskType.slice(1)} - ${company.name}`,
-        description: `Task for ${company.name}`,
-        assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+        title: tOptions[i % tOptions.length],
+        description: `${company.name} — ${company.industry}`,
+        assigned_to: randomChoice(['Pablo Martin', 'Corey Lavinder']),
         due_date: dueDate.toISOString().split('T')[0],
         completed: i >= 13, // Last 2 are completed
       });
@@ -1720,18 +1737,19 @@ async function seedActivityFeed(companiesData: any[], callIds: string[]) {
     15: 'Dead',
   };
 
-  const authors = ['pablo.martin.miro@gmail.com', 'corey@getgunner.ai'];
+  const authors = ['Pablo Martin', 'Corey Lavinder'];
 
   for (let compIdx = 0; compIdx < companiesData.length; compIdx++) {
     const company = companiesData[compIdx];
     const contact = contactsData.find((c) => c.companyIndex === compIdx && c.isPrimary);
     const currentStage = stageMap[compIdx] || 'New Lead';
 
-    // Entry count based on stage
+    // Entry count based on stage — target 90-110 total
     let entryCount = 2;
-    if (['Qualification', 'Closing'].includes(currentStage)) entryCount = randomInt(3, 4);
-    if (['Closed', 'Operating'].includes(currentStage)) entryCount = randomInt(5, 8);
-    if (['Nurture', 'Dead'].includes(currentStage)) entryCount = randomInt(4, 5);
+    if (['Qualification'].includes(currentStage)) entryCount = randomInt(4, 5);
+    if (['Closing'].includes(currentStage)) entryCount = randomInt(5, 7);
+    if (['Closed', 'Operating'].includes(currentStage)) entryCount = randomInt(8, 10);
+    if (['Nurture', 'Dead'].includes(currentStage)) entryCount = randomInt(4, 6);
 
     for (let i = 0; i < entryCount; i++) {
       const activityType = randomChoice(['note', 'call_logged', 'stage_moved', 'email_sent', 'sms_sent']);
@@ -1848,7 +1866,9 @@ async function seedInbox(companiesData: any[]) {
       company_id: company.id,
       channel,
       last_message_at: lastMessageDate.toISOString(),
-      last_message_snippet: 'Last message snippet...',
+      last_message_snippet: lastDirection === 'inbound'
+        ? randomChoice([`Hey, wanted to follow up on our last conversation`, `Can we schedule a call this week?`, `Got the proposal, have a few questions`, `Thanks for sending that over`, `Quick question about the setup process`])
+        : randomChoice([`Sounds good, I will send that over today`, `Let me check on that and get back to you`, `Great, talk soon!`, `Confirmed for Thursday at 2pm`, `Here is the link to the proposal`]),
       last_message_direction: lastDirection,
       unread_count: unreadCount,
     });
@@ -1936,7 +1956,7 @@ async function seedAppointments(companiesData: any[]) {
       starts_at: apptDate.toISOString(),
       ends_at: endDate.toISOString(),
       status: 'confirmed',
-      assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+      assigned_to: randomChoice(['Pablo Martin', 'Corey Lavinder']),
       meeting_url: `https://meet.google.com/${randomMeetSlug()}`,
     });
   }
