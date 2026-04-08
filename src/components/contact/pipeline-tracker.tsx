@@ -73,15 +73,15 @@ export function PipelineTracker({ enrollments }: Props) {
                     >
                       <div className={`h-[26px] w-[26px] rounded-full border flex items-center justify-center ${
                         isActive
-                          ? 'bg-white/80 text-[#1a1a1a] border-white/80 text-[10px] font-bold'
+                          ? 'bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white border-[#ff6a3d] text-[10px] font-bold shadow-[0_2px_8px_rgba(255,106,61,0.35)]'
                           : isPast
-                          ? 'border-zinc-300 bg-white/30 text-zinc-500 text-[10px]'
+                          ? 'border-zinc-400 bg-zinc-100 text-zinc-600 text-[10px]'
                           : 'border-zinc-300 bg-white/30 text-zinc-400 text-[10px] font-mono'
                       } ${isOpen ? 'border-[2px] border-zinc-700' : ''}`}>
                         {isPast ? '✓' : sIdx + 1}
                       </div>
                       <span className={`text-[8px] text-center max-w-[48px] leading-tight ${
-                        isActive ? 'font-medium text-[#1a1a1a]' : 'text-zinc-500'
+                        isActive ? 'font-semibold text-[#ff6a3d]' : isPast ? 'text-zinc-600' : 'text-zinc-500'
                       }`}>
                         {stage}
                       </span>

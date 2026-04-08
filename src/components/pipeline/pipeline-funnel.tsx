@@ -83,10 +83,10 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
                     <div key={stage} className="flex items-center justify-center relative">
                       {/* Connector lines */}
                       {sIdx > 0 && (
-                        <div className="absolute left-0 right-1/2 top-[18px] border-t-[1.5px] border-dashed border-zinc-300/50 -z-10" />
+                        <div className="absolute left-0 right-1/2 top-[18px] border-t-2 border-dashed border-zinc-400 -z-10" />
                       )}
                       {sIdx < pipeline.stages.length - 1 && (
-                        <div className="absolute right-0 left-1/2 top-[18px] border-t-[1.5px] border-dashed border-zinc-300/50 -z-10" />
+                        <div className="absolute right-0 left-1/2 top-[18px] border-t-2 border-dashed border-zinc-400 -z-10" />
                       )}
                       <button
                         onClick={() => handleStageClick(stage)}
