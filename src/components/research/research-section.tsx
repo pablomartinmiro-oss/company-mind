@@ -38,7 +38,7 @@ export function ResearchSection({ section, data, onSave }: ResearchSectionProps)
         <div className="flex items-center gap-3">
           <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${collapsed ? '-rotate-90' : ''}`} />
           <div className="text-left">
-            <h3 className="text-[13px] font-semibold text-zinc-900">{section.label}</h3>
+            <h3 className="text-[13px] font-semibold text-[#1a1a1a]">{section.label}</h3>
             {section.description && <p className="text-[10px] text-zinc-500 mt-0.5">{section.description}</p>}
           </div>
         </div>

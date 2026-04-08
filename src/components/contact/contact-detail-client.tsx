@@ -98,7 +98,7 @@ export function ContactDetailClient(props: Props) {
 
             <div className="flex items-start justify-between gap-4 mt-2">
               <div>
-                <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900 leading-tight">{props.contactName}</h1>
+                <h1 className="text-[24px] font-semibold tracking-tight text-[#1a1a1a] leading-tight">{props.contactName}</h1>
                 {(props.companyName || props.location) && (
                   <p className="text-[14px] text-zinc-500 mt-1">
                     {props.companyName}{props.companyName && props.location ? ' · ' : ''}{props.location}
@@ -143,7 +143,7 @@ export function ContactDetailClient(props: Props) {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 pt-3 pb-[10px] text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
                   activeTab === tab
-                    ? 'text-zinc-900 border-[#ff6a3d]'
+                    ? 'text-[#1a1a1a] border-[#ff6a3d]'
                     : 'text-zinc-500 border-transparent hover:text-zinc-700'
                 }`}
               >

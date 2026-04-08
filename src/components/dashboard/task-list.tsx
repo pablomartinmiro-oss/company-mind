@@ -361,12 +361,12 @@ export function TaskList({ initialTasks }: Props) {
                             href={`/contacts/${task.contact_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[16px] font-semibold text-zinc-900 hover:text-[#ff6a3d] transition-colors"
+                            className="text-[16px] font-semibold text-[#1a1a1a] hover:text-[#ff6a3d] transition-colors"
                           >
                             {task.contact_name || task.title}
                           </a>
                         ) : (
-                          <span className="text-[16px] font-semibold text-zinc-900">
+                          <span className="text-[16px] font-semibold text-[#1a1a1a]">
                             {task.contact_name || task.title}
                           </span>
                         )}
@@ -378,7 +378,7 @@ export function TaskList({ initialTasks }: Props) {
                       </div>
 
                       {/* Task title */}
-                      <h3 className="text-[14px] font-medium text-zinc-900 mb-1">{task.title}</h3>
+                      <h3 className="text-[14px] font-medium text-[#1a1a1a] mb-1">{task.title}</h3>
 
                       {task.description && (
                         <p className="text-[12px] text-zinc-600 leading-relaxed mb-4">{task.description}</p>

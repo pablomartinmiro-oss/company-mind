@@ -152,7 +152,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
               key={t.key}
               href={`/calls?tab=${t.key}`}
               className={`rounded-md px-3 py-1.5 text-[13px] font-medium flex items-center gap-1.5 transition-all duration-150 ${
-                isActive ? 'bg-white/80 backdrop-blur border border-white/80 text-zinc-900 shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]' : 'text-zinc-500 hover:bg-white/40'
+                isActive ? 'bg-white/80 backdrop-blur border border-white/80 text-[#1a1a1a] shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]' : 'text-zinc-500 hover:bg-white/40'
               }`}
             >
               {t.label}

@@ -117,7 +117,7 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-medium text-zinc-900 truncate">{contact.contact_name}</span>
+                      <span className="text-[13px] font-medium text-[#1a1a1a] truncate">{contact.contact_name}</span>
                       {contact.is_primary && <Star className="w-3 h-3 text-[#ff6a3d] fill-[#ff6a3d] flex-shrink-0" />}
                     </div>
                     {/* Editable role pill */}
@@ -157,7 +157,7 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                       <button
                         key={r.value}
                         onClick={() => updateRole(contact.contact_id, r.value)}
-                        className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-zinc-50 flex items-center gap-2 ${contact.role === r.value ? 'font-medium text-zinc-900' : 'text-zinc-600'}`}
+                        className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-zinc-50 flex items-center gap-2 ${contact.role === r.value ? 'font-medium text-[#1a1a1a]' : 'text-zinc-600'}`}
                       >
                         <span className={`w-2 h-2 rounded-full ${r.classes.split(' ')[0]}`} />
                         {r.label}

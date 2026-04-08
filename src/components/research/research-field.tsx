@@ -56,7 +56,7 @@ export function ResearchField({ field, value, source, sourceDetail, onSave }: Re
             onChange={(e) => setDraft(e.target.value)}
             onBlur={handleSave}
             onKeyDown={(e) => { if (e.key === 'Escape') { setDraft(value ?? ''); setEditing(false); } }}
-            className="w-full mt-1 text-[12px] text-zinc-900 bg-white/80 border border-white/80 rounded-lg p-2 focus:outline-none focus:border-[#ff6a3d]/40 resize-none min-h-[60px]"
+            className="w-full mt-1 text-[12px] text-[#1a1a1a] bg-white/80 border border-white/80 rounded-lg p-2 focus:outline-none focus:border-[#ff6a3d]/40 resize-none min-h-[60px]"
             onClick={(e) => e.stopPropagation()}
           />
         ) : field.type === 'select' ? (
@@ -65,7 +65,7 @@ export function ResearchField({ field, value, source, sourceDetail, onSave }: Re
             value={draft}
             onChange={(e) => { setDraft(e.target.value); }}
             onBlur={handleSave}
-            className="w-full mt-1 text-[12px] text-zinc-900 bg-white/80 border border-white/80 rounded-lg p-1.5 focus:outline-none focus:border-[#ff6a3d]/40"
+            className="w-full mt-1 text-[12px] text-[#1a1a1a] bg-white/80 border border-white/80 rounded-lg p-1.5 focus:outline-none focus:border-[#ff6a3d]/40"
             onClick={(e) => e.stopPropagation()}
           >
             <option value="">—</option>
@@ -82,12 +82,12 @@ export function ResearchField({ field, value, source, sourceDetail, onSave }: Re
               if (e.key === 'Enter') handleSave();
               if (e.key === 'Escape') { setDraft(value ?? ''); setEditing(false); }
             }}
-            className="w-full mt-1 text-[12px] text-zinc-900 bg-white/80 border border-white/80 rounded-lg px-2 py-1 focus:outline-none focus:border-[#ff6a3d]/40"
+            className="w-full mt-1 text-[12px] text-[#1a1a1a] bg-white/80 border border-white/80 rounded-lg px-2 py-1 focus:outline-none focus:border-[#ff6a3d]/40"
             onClick={(e) => e.stopPropagation()}
           />
         )
       ) : hasValue ? (
-        <div className="text-[12px] text-zinc-900 font-medium leading-snug break-words">{value}</div>
+        <div className="text-[12px] text-[#1a1a1a] font-medium leading-snug break-words">{value}</div>
       ) : (
         <div className="text-[12px] text-zinc-300 italic">—</div>
       )}

@@ -73,7 +73,7 @@ export function PipelineTracker({ enrollments }: Props) {
                     >
                       <div className={`h-[26px] w-[26px] rounded-full border flex items-center justify-center ${
                         isActive
-                          ? 'bg-white/80 text-zinc-900 border-white/80 text-[10px] font-bold'
+                          ? 'bg-white/80 text-[#1a1a1a] border-white/80 text-[10px] font-bold'
                           : isPast
                           ? 'border-zinc-300 bg-white/30 text-zinc-500 text-[10px]'
                           : 'border-zinc-300 bg-white/30 text-zinc-400 text-[10px] font-mono'

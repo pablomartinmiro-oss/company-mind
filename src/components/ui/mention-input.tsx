@@ -70,7 +70,7 @@ export function MentionInput({ value, onChange, placeholder, className }: Mentio
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white ${m.avatarClass}`}>
                   {m.initials}
                 </div>
-                <span className="text-[12px] text-zinc-900">{member.name}</span>
+                <span className="text-[12px] text-[#1a1a1a]">{member.name}</span>
               </button>
             );
           })}

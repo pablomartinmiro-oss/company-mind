@@ -1,10 +1,10 @@
 # Company Mind Audit — 2026-04-07
 
 ## Summary
-- **3 P0 issues** (blockers)
-- **5 P1 issues** (must fix before launch)
-- **8 P2 issues** (polish)
-- **4 P3 issues** (nice-to-have)
+- **3 P0 issues** — ALL RESOLVED (commit f581bc1)
+- **5 P1 issues** — ALL RESOLVED (commit below)
+- **8 P2 issues** (polish) — deferred
+- **4 P3 issues** (nice-to-have) — deferred
 
 ---
 

@@ -68,7 +68,7 @@ export function NextStepsTab({ steps, callId }: Props) {
                     </span>
                   )}
                 </div>
-                <h4 className="text-[13px] font-medium text-zinc-900">{step.title}</h4>
+                <h4 className="text-[13px] font-medium text-[#1a1a1a]">{step.title}</h4>
                 {step.description && (
                   <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{step.description}</p>
                 )}

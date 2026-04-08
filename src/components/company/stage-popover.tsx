@@ -86,7 +86,7 @@ export function StagePopover({ pipelineName, pipelineId, stages, currentStage, c
               <button
                 key={stage}
                 onClick={() => moveToStage(stage)}
-                className={`w-full text-left px-3 py-1.5 text-[12px] flex items-center justify-between gap-2 hover:bg-zinc-100/60 transition-colors ${stage === currentStage ? 'font-semibold text-zinc-900' : 'text-zinc-600'}`}
+                className={`w-full text-left px-3 py-1.5 text-[12px] flex items-center justify-between gap-2 hover:bg-zinc-100/60 transition-colors ${stage === currentStage ? 'font-semibold text-[#1a1a1a]' : 'text-zinc-600'}`}
               >
                 <span>{stage}</span>
                 {stage === currentStage && <Check className="w-3 h-3 text-[#ff6a3d]" />}

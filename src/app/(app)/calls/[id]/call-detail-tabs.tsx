@@ -97,7 +97,7 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
             onClick={() => setActiveTab(tab)}
             className={`text-[14px] font-medium border-b-2 pb-3 -mb-px px-4 transition-all ${
               activeTab === tab
-                ? 'text-zinc-900 border-zinc-900'
+                ? 'text-[#1a1a1a] border-zinc-900'
                 : 'text-zinc-400 border-transparent hover:text-zinc-600'
             }`}
           >
@@ -238,8 +238,8 @@ function CriteriaView({ score }: { score: ScoreData | null }) {
         return (
           <div key={c.name} className="border border-zinc-100 rounded-xl p-4">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[14px] font-medium text-zinc-900">{c.name}</span>
-              <span className="text-[14px] font-medium text-zinc-900 font-mono">{c.score}/{maxScore}</span>
+              <span className="text-[14px] font-medium text-[#1a1a1a]">{c.name}</span>
+              <span className="text-[14px] font-medium text-[#1a1a1a] font-mono">{c.score}/{maxScore}</span>
             </div>
             <div className="h-1.5 bg-zinc-100 rounded-full mb-3">
               <div className={`h-full rounded-full ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
@@ -362,7 +362,7 @@ function NextStepsView({ actions }: { actions: Action[] }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <span className="text-[14px] font-medium text-zinc-900">{pending.length} pending</span>
+        <span className="text-[14px] font-medium text-[#1a1a1a]">{pending.length} pending</span>
         <button className="border border-zinc-200 rounded-lg px-3 py-1.5 text-[13px] text-zinc-600 hover:bg-zinc-50">
           Add Action
         </button>

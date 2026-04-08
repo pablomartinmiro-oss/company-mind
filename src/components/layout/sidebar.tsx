@@ -52,7 +52,7 @@ function UserAvatarMenu() {
       {open && (
         <div className="absolute bottom-full left-full ml-2 mb-0 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/80 rounded-2xl shadow-[0_12px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-2">
           <div className="px-3 pb-2 border-b border-zinc-100">
-            <div className="text-[12px] font-semibold text-zinc-900">{CURRENT_USER.name}</div>
+            <div className="text-[12px] font-semibold text-[#1a1a1a]">{CURRENT_USER.name}</div>
             <div className="text-[10px] text-zinc-500 mt-0.5">{CURRENT_USER.email}</div>
           </div>
           <button

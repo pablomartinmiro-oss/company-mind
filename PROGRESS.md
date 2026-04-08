@@ -6,7 +6,29 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Data Points Approval Flow (2026-04-07)
+## Latest: Audit Cleanup Batch (2026-04-07)
+
+### Commit 1: P0 security fixes
+- Deleted /api/test-ghl (unauthenticated GHL access)
+- Added tenant filter + ownership verification to approveAction/rejectAction
+- Created src/lib/lookups.ts with getContactInfo/getContactInfoBatch helpers
+- Migrated 6 stale contact_data_points reads to JOIN companies + company_contacts
+- Skipped: 5 sites in locked files (calls/[id]/page.tsx ×2, mastra/** ×3)
+
+### Commit 2: P1 launch prep
+- Updated CLAUDE.md DB tables list (removed call_jobs, added 10 missing tables)
+- Created baseline migration for 6 legacy tables (not yet run against prod)
+- Created .env.example with all 12 required vars
+- Removed demo-data fallback in /api/inbox and /api/appointments (now return proper errors)
+- Replaced text-zinc-900 → text-[#1a1a1a] across 16 files (2 locked files skipped)
+
+### Audit Status
+- 3 P0 resolved
+- 5 P1 resolved
+- 8 P2 deferred to post-launch
+- 4 P3 deferred to post-launch
+
+## Data Points Approval Flow (2026-04-07)
 
 - Rewrote `approveDataPoint`/`rejectDataPoint` to operate on R2 `data_points` table (was reading empty `contact_data_points`)
 - Added tenant check to both actions via `getTenantForUser()` (closed cross-tenant mutation hole)

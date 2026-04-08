@@ -95,8 +95,16 @@ src/app/login/page.tsx        — login page
 
 ## DB Tables
 
-tenants, users, calls, call_actions, contact_data_points, feedback_log, chat_messages, call_jobs,
-pipelines, pipeline_contacts, stage_log, tasks, contact_research, activity_feed
+tenants, users, companies, company_contacts, calls, call_actions, feedback_log, chat_messages,
+pipelines, pipeline_companies, stage_log, tasks, research, activity_feed,
+data_points, next_steps, enrichment_jobs, predictive_scores, webhook_events, appointment_status,
+contact_data_points (LEGACY — 0 rows, reads only in locked mastra tools)
+
+- data_points: R2 pending AI extractions awaiting user approval → promoted to research on approve
+- webhook_events: GHL webhook dedup + audit ledger
+- predictive_scores: R2 AI-calculated contact/company scoring outputs
+- enrichment_jobs: tracks enrichment runs (status, fields_updated, errors)
+- pipeline_companies: company enrollments in pipelines (renamed from pipeline_contacts)
 
 Note: users table has `auth_id` column (not `auth_user_id`) linking to Supabase Auth users.
 

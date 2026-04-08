@@ -145,7 +145,7 @@ export default function BrandPage() {
                 <button className="bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white text-[13px] font-medium px-5 py-2.5 rounded-full">Primary CTA</button>
                 <button className="bg-white/60 backdrop-blur border border-white/60 text-zinc-700 text-[13px] font-medium px-5 py-2.5 rounded-full hover:bg-white/80">Secondary</button>
                 <button className="text-zinc-600 hover:text-[#1a1a1a] hover:bg-white/30 text-[13px] font-medium px-3 py-1.5 rounded-lg">Ghost</button>
-                <button className="bg-white/80 backdrop-blur border border-white/80 text-zinc-900 text-[13px] font-medium px-4 py-2 rounded-full shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">Frosted Pill</button>
+                <button className="bg-white/80 backdrop-blur border border-white/80 text-[#1a1a1a] text-[13px] font-medium px-4 py-2 rounded-full shadow-[0_2px_8px_rgba(28,25,22,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">Frosted Pill</button>
               </div>
             </div>
           </div>

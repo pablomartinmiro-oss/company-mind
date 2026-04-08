@@ -63,7 +63,7 @@ export function AiBar() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={isListening ? 'Listening…' : 'Ask Scout anything…'}
-          className="flex-1 bg-transparent border-none outline-none text-[13px] text-zinc-900 placeholder:text-zinc-400"
+          className="flex-1 bg-transparent border-none outline-none text-[13px] text-[#1a1a1a] placeholder:text-zinc-400"
         />
         {supported && (
           <button

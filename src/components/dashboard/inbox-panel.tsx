@@ -230,7 +230,7 @@ export function InboxPanel() {
                         onClick={() => setReplyChannel(ch)}
                         className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
                           isActive
-                            ? 'bg-white/70 backdrop-blur text-zinc-900 border-white/60'
+                            ? 'bg-white/70 backdrop-blur text-[#1a1a1a] border-white/60'
                             : 'text-zinc-500 border-white/40 hover:bg-white/30'
                         }`}
                       >

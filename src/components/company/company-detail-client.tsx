@@ -112,7 +112,7 @@ function EditableLabel({ value, field, companyId, color = 'zinc' }: { value: str
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
         onBlur={save}
-        className="text-[10px] px-2 py-0.5 rounded-full border border-zinc-300 bg-white/80 text-zinc-900 focus:outline-none w-[120px]"
+        className="text-[10px] px-2 py-0.5 rounded-full border border-zinc-300 bg-white/80 text-[#1a1a1a] focus:outline-none w-[120px]"
       />
     );
   }
@@ -175,7 +175,7 @@ export function CompanyDetailClient(props: Props) {
               <ArrowLeft className="h-3 w-3" /> Back to companies
             </Link>
 
-            <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900 leading-tight mt-2">
+            <h1 className="text-[24px] font-semibold tracking-tight text-[#1a1a1a] leading-tight mt-2">
               {props.companyName}
             </h1>
 
@@ -239,7 +239,7 @@ export function CompanyDetailClient(props: Props) {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-3 text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
                   activeTab === tab
-                    ? 'text-zinc-900 border-[#ff6a3d]'
+                    ? 'text-[#1a1a1a] border-[#ff6a3d]'
                     : 'text-zinc-500 border-transparent hover:text-zinc-700'
                 }`}
               >
