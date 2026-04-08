@@ -11,6 +11,8 @@ import { ContactsPanel } from './contacts-panel';
 import { CompanyResearchTab } from './research-tab';
 import { PipelineTracker } from '@/components/contact/pipeline-tracker';
 import { ActivityFeed } from '@/components/contact/activity-feed';
+import { DealCard } from '@/components/contact/deal-card';
+import { CompanyDetailsCard } from '@/components/contact/company-details-card';
 
 interface StageLogEntry {
   id: string;
@@ -80,64 +82,6 @@ interface Props {
 const TABS = ['Overview', 'Activity', 'Research'] as const;
 type Tab = typeof TABS[number];
 
-function EditableLabel({ value, field, companyId, color = 'zinc' }: { value: string | null; field: string; companyId: string; color?: string }) {
-  const [editing, setEditing] = useState(false);
-  const [val, setVal] = useState(value ?? '');
-  const [saved, setSaved] = useState(value);
-
-  const colorMap: Record<string, string> = {
-    zinc: 'bg-zinc-100/60 text-zinc-600 border-zinc-200/40',
-    blue: 'bg-blue-100/60 text-blue-700 border-blue-200/40',
-    violet: 'bg-violet-100/60 text-violet-700 border-violet-200/40',
-    amber: 'bg-amber-100/60 text-amber-700 border-amber-200/40',
-  };
-
-  async function save() {
-    try {
-      await fetch(`/api/companies/${companyId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: val || null }),
-      });
-      setSaved(val || null);
-    } catch { /* ignore */ }
-    setEditing(false);
-  }
-
-  if (editing) {
-    return (
-      <input
-        autoFocus
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
-        onBlur={save}
-        className="text-[10px] px-2 py-0.5 rounded-full border border-zinc-300 bg-white/80 text-[#1a1a1a] focus:outline-none w-[120px]"
-      />
-    );
-  }
-
-  if (!saved) {
-    return (
-      <button
-        onClick={() => { setVal(''); setEditing(true); }}
-        className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/30 text-zinc-400 border border-white/40 hover:bg-white/50 hover:text-zinc-600 transition-colors"
-      >
-        {field}
-      </button>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => { setVal(saved); setEditing(true); }}
-      className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/60 text-zinc-700 border border-white/70 hover:bg-white/80 transition-colors"
-    >
-      {saved}
-    </button>
-  );
-}
-
 export function CompanyDetailClient(props: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [selectedContactId, setSelectedContactId] = useState(
@@ -165,42 +109,35 @@ export function CompanyDetailClient(props: Props) {
 
   return (
     <div className="p-5 animate-fade-in">
-      {/* Header card */}
+      {/* ══ HEADER — frosted glass ══ */}
       <div className="relative glass-card rounded-3xl overflow-hidden mb-4">
         <div className="glass-card-inner" />
         <div className="relative">
-          {/* Top section */}
           <div className="px-6 py-5 border-b border-white/40">
             <Link href="/companies" className="text-[12px] text-zinc-500 hover:text-zinc-800 mb-3 inline-flex items-center gap-1.5">
               <ArrowLeft className="h-3 w-3" /> Back to companies
             </Link>
 
-            <h1 className="text-[24px] font-semibold tracking-tight text-[#1a1a1a] leading-tight mt-2">
-              {props.companyName}
-            </h1>
-
-            {/* Primary contact under company name */}
-            <p className="text-[13px] text-zinc-500 mt-1">
-              {contactsState.find(c => c.is_primary)?.contact_name ?? contactsState[0]?.contact_name ?? ''}
-            </p>
-
-            {/* Row 1: Meta pills */}
-            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-              <EditableLabel value={props.industry} field="industry" companyId={props.companyId} />
-              <EditableLabel value={props.leadSource} field="lead_source" companyId={props.companyId} />
-              <EditableLabel value={props.location} field="location" companyId={props.companyId} />
-              <EditableLabel value={props.website} field="website" companyId={props.companyId} />
-              <EditableLabel value={props.mrr ? `$${props.mrr}/mo` : null} field="mrr" companyId={props.companyId} />
-              <EditableLabel value={props.setupFee ? `$${props.setupFee}` : null} field="setup_fee" companyId={props.companyId} />
-              {(props.mrr > 0 || props.setupFee > 0) && (
-                <span className="text-[11px] text-zinc-500 font-mono">
-                  ACV: ${(props.mrr * 12 + props.setupFee).toLocaleString()}
-                </span>
-              )}
+            {/* Top row: company name + actions */}
+            <div className="flex items-start justify-between gap-4 mt-2">
+              <div>
+                <h1 className="text-[24px] font-medium text-[#1a1a1a] leading-tight">
+                  {props.companyName}
+                </h1>
+                <p className="text-[14px] text-[#52525b] mt-1">
+                  {contactsState.find(c => c.is_primary)?.contact_name ?? contactsState[0]?.contact_name ?? ''}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <ReEnrichButton companyId={props.companyId} />
+                <button className="text-[12px] font-medium px-4 py-2 rounded-full bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/80 flex items-center gap-1.5">
+                  GHL <ExternalLink className="h-3 w-3" />
+                </button>
+              </div>
             </div>
 
-            {/* Row 2: Pipeline status — clickable popovers */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {/* Pill row: pipeline stages + industry + lead source */}
+            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
               {props.enrollments.map(e => (
                 <StagePopover
                   key={e.pipelineId}
@@ -212,17 +149,16 @@ export function CompanyDetailClient(props: Props) {
                   onUpdate={() => window.location.reload()}
                 />
               ))}
-              <span className="text-[11px] text-zinc-400 font-mono">
-                {props.enrollments[0]?.daysInStage ?? 0}d in stage
-              </span>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 mt-4">
-              <ReEnrichButton companyId={props.companyId} />
-              <button className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 transition-colors inline-flex items-center gap-1.5">
-                <ExternalLink className="w-3 h-3" /> Open in GHL
-              </button>
+              {props.industry && (
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-50/80 text-blue-700 border border-blue-200/60">
+                  {props.industry}
+                </span>
+              )}
+              {props.leadSource && (
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-violet-50/80 text-violet-700 border border-violet-200/60">
+                  {props.leadSource}
+                </span>
+              )}
             </div>
           </div>
 
@@ -237,7 +173,7 @@ export function CompanyDetailClient(props: Props) {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-3 text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
+                className={`px-4 pt-3 pb-[10px] text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
                   activeTab === tab
                     ? 'text-[#1a1a1a] border-[#ff6a3d]'
                     : 'text-zinc-500 border-transparent hover:text-zinc-700'
@@ -248,6 +184,22 @@ export function CompanyDetailClient(props: Props) {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* ══ DEAL + COMPANY CARDS ══ */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <DealCard
+          companyId={props.companyId}
+          mrr={props.mrr}
+          setupFee={props.setupFee}
+        />
+        <CompanyDetailsCard
+          companyId={props.companyId}
+          website={props.website}
+          location={props.location}
+          industry={props.industry}
+          leadSource={props.leadSource}
+        />
       </div>
 
       {/* Two-column body */}

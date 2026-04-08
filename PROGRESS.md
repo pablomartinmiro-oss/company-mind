@@ -6,7 +6,15 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Contact Header Rebuild (2026-04-08)
+## Latest: Company Header Rebuild + Contact Redirect (2026-04-08)
+
+- Rebuilt company detail header to match new layout: company name H1, primary contact below, pipeline stage popovers + industry/lead source pills
+- Added DealCard + CompanyDetailsCard below header (MRR, ARR, setup fee + website, location, industry, lead source — all inline-editable)
+- Removed old EditableLabel pill components from company header
+- `/contacts/[id]` now redirects to `/companies/[companyId]` — contact detail page is deprecated, company page is canonical
+- Company page is now the single detail view: header + deal/company cards + pipeline tracker + tabs (Overview/Activity/Research) + contacts sidebar
+
+## Contact Header Rebuild (2026-04-08)
 
 - New `src/components/contact/deal-card.tsx` — MRR (editable), ARR (calculated), Setup fee (editable)
 - New `src/components/contact/company-details-card.tsx` — Website, Location, Industry (text), Lead Source (select)
