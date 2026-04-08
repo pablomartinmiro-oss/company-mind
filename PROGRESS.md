@@ -6,7 +6,17 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Agent Rewire (2026-04-08)
+## Latest: Agent Identity + Rep Attribution (2026-04-08)
+
+- Added rep_name, rep_email to calls table + seeded (Pablo: 12 calls avg 79, Corey: 14 calls avg 77)
+- New getCallStatsByRep tool: aggregates total calls, avg score, close rate by rep
+- Chat API pulls userName from auth (getTenantForUser) instead of hardcoded 'Pablo'
+- Agent prompt maps "me/I/my" to current user for rep-filtered queries
+- Chat client no longer hardcodes userName/userRole/tenantName
+- Email draft formatting in system prompt
+- Markdown rendering in chat (react-markdown + remark-gfm)
+
+## Agent Rewire (2026-04-08)
 
 - db-companies.ts rewired: getCompanies and getCompanyDetail now read from companies + company_contacts + research (was reading empty contact_data_points)
 - getCompanyDetail returns: company info, contacts, pipeline stages, recent calls with scores, open tasks, research grouped by section, stage history

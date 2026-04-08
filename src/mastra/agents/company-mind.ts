@@ -13,7 +13,7 @@ import { createNote } from '../tools/ghl-notes';
 import { getConversations, sendMessage } from '../tools/ghl-conversations';
 
 // Internal DB tools
-import { searchCalls, getCallDetail, getContactCallHistory } from '../tools/db-calls';
+import { searchCalls, getCallDetail, getContactCallHistory, getCallStatsByRep } from '../tools/db-calls';
 import { getCompanies, getCompanyDetail } from '../tools/db-companies';
 import { getTasks } from '../tools/db-tasks';
 import { getPipelineSummary } from '../tools/db-pipelines';
@@ -27,7 +27,8 @@ export const companyMindAgent = new Agent({
   id: 'companyMind',
   name: 'Company Mind',
   instructions: ({ requestContext }) => {
-    const userName = requestContext?.get('userName') ?? 'there';
+    const userName = (requestContext?.get('userName') as string | undefined) ?? 'there';
+    const userEmail = requestContext?.get('userEmail') ?? null;
     const userRole = requestContext?.get('userRole') ?? 'member';
     const tenantName = requestContext?.get('tenantName') ?? 'this business';
     const industry = requestContext?.get('industry') ?? 'general';
@@ -41,8 +42,11 @@ export const companyMindAgent = new Agent({
 
     return `You are the Company Mind for ${tenantName} — an AI sales coach and CRM assistant that knows everything about this business. You are direct, specific, and always ground answers in real data.
 
+## Identity
+You are talking to **${userName}**${userEmail ? ` (${userEmail})` : ''}, role: ${userRole}.
+When the user says "me", "I", or "my", they mean ${userName}. Filter rep-based queries by this identity when asked about their own performance.
+
 ## Context
-- User: ${userName} (${userRole})
 - Industry: ${industry}
 - Today: ${todayDate}
 - Current page: ${currentPage}
@@ -89,6 +93,8 @@ You have access to these tables via tools:
 - "what am I forgetting" → get_tasks(overdue) + get_conversations(needsReply)
 - "what does Marcus want" → get_company_detail + focus on research pain_opportunity + recent calls
 - "draft a follow-up email" → get_company_detail first for context, then compose
+- "who has better close rates" / "my stats vs Corey" → get_call_stats_by_rep
+- "how many calls have I made" → search_calls(rep: currentUserName)
 - "move Thompson to Closing" → moveOpportunity (confirm first)
 - "schedule" / "appointments" → get_appointments
 - "inbox" / "messages" → get_conversations
@@ -150,6 +156,19 @@ LENGTH TARGETS:
 - Multi-step reasoning: 5-8 sentences, no headers
 - Explicit deep dive: 10-15 lines max, prose only
 
+EMAIL DRAFTS:
+When drafting an email, format with headers on separate lines:
+
+**To:** recipient@example.com
+**Subject:** Line here
+
+Body paragraph here.
+
+Body paragraph two.
+
+Best,
+${userName.split(' ')[0]}
+
 ## Data Sources
 
 You have access to a unified view of customer data. Local database and CRM are both available. You do not need to mention which source you use. Data is synced.
@@ -187,6 +206,7 @@ If a tool errors, try an alternative tool. Only tell the user if all sources fai
     searchCalls,
     getCallDetail,
     getContactCallHistory,
+    getCallStatsByRep,
     analyzeCall,
     getCompanies,
     getCompanyDetail,

@@ -65,10 +65,6 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
         api: '/api/chat',
         body: () => ({
           context: {
-            userName: 'Pablo',
-            userRole: 'owner',
-            tenantName: 'Company Mind',
-            industry: 'saas',
             currentPage: contextRef.current.page,
             currentContactId: contextRef.current.contactId ?? null,
             currentCallId: contextRef.current.callId ?? null,

@@ -16,6 +16,7 @@ export const searchCalls = createTool({
     status: z.enum(['pending', 'transcribing', 'analyzing', 'complete', 'error']).optional(),
     source: z.enum(['ghl', 'zoom', 'google_meet', 'manual']).optional(),
     callType: z.string().optional().describe('Filter by call type (discovery, demo, etc.)'),
+    rep: z.string().optional().describe('Filter by rep name or email (partial match)'),
     daysBack: z.number().optional().default(30).describe('How many days back to search'),
     limit: z.number().optional().default(20),
   }),
@@ -38,7 +39,7 @@ export const searchCalls = createTool({
     const resourceId = getTenantId(executionContext);
     let query = supabaseAdmin
       .from('calls')
-      .select('id, contact_name, contact_ghl_id, source, status, call_type, direction, duration_seconds, score, called_at', { count: 'exact' })
+      .select('id, contact_name, contact_ghl_id, source, status, call_type, direction, duration_seconds, score, called_at, rep_name, rep_email', { count: 'exact' })
       .eq('tenant_id', resourceId)
       .order('called_at', { ascending: false })
       .limit(input.limit || 20);
@@ -57,6 +58,9 @@ export const searchCalls = createTool({
     }
     if (input.callType) {
       query = query.eq('call_type', input.callType);
+    }
+    if (input.rep) {
+      query = query.or(`rep_name.ilike.%${input.rep}%,rep_email.ilike.%${input.rep}%`);
     }
     if (input.daysBack) {
       const since = new Date(Date.now() - input.daysBack * 86400000).toISOString();
@@ -77,6 +81,8 @@ export const searchCalls = createTool({
         duration_seconds: c.duration_seconds,
         overall_score: c.score?.overall || null,
         called_at: c.called_at,
+        rep_name: c.rep_name || null,
+        rep_email: c.rep_email || null,
       })),
       total: count || 0,
     };
@@ -157,5 +163,74 @@ export const getContactCallHistory = createTool({
     const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
     return { calls, avgScore, totalCalls: count || 0 };
+  },
+});
+
+export const getCallStatsByRep = createTool({
+  id: 'get_call_stats_by_rep',
+  description: 'Get call statistics grouped by rep (sales person). Shows total calls, average score, close rate, and breakdown by call type. Use when the user asks about rep performance, close rates, or comparisons between reps.',
+  inputSchema: z.object({
+    daysBack: z.number().optional().default(90).describe('How many days back to include'),
+  }),
+  outputSchema: z.object({
+    reps: z.array(z.object({
+      rep_name: z.string(),
+      rep_email: z.string().nullable(),
+      total_calls: z.number(),
+      graded_calls: z.number(),
+      avg_score: z.number().nullable(),
+      closed_won: z.number(),
+      not_interested: z.number(),
+      close_rate: z.number().nullable(),
+      by_type: z.record(z.number()),
+    })),
+  }),
+  execute: async (input, executionContext) => {
+    const tenantId = getTenantId(executionContext);
+    const since = new Date(Date.now() - (input.daysBack ?? 90) * 86400000).toISOString();
+
+    const { data } = await supabaseAdmin
+      .from('calls')
+      .select('rep_name, rep_email, call_type, outcome, score, status')
+      .eq('tenant_id', tenantId)
+      .gte('called_at', since);
+
+    const rows = data ?? [];
+    const byRep = new Map<string, typeof rows>();
+    for (const r of rows) {
+      const key = r.rep_name ?? 'Unknown';
+      if (!byRep.has(key)) byRep.set(key, []);
+      byRep.get(key)!.push(r);
+    }
+
+    const reps = [...byRep.entries()].map(([name, calls]) => {
+      const graded = calls.filter(c => c.status === 'complete' && c.score?.overall != null);
+      const scores = graded.map(c => c.score?.overall ?? 0);
+      const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+      const closedWon = calls.filter(c => c.outcome === 'closed_won').length;
+      const notInterested = calls.filter(c => c.outcome === 'not_interested').length;
+      const decisive = closedWon + notInterested;
+      const closeRate = decisive > 0 ? Math.round((closedWon / decisive) * 100) : null;
+
+      const byType: Record<string, number> = {};
+      for (const c of calls) {
+        const t = c.call_type ?? 'other';
+        byType[t] = (byType[t] ?? 0) + 1;
+      }
+
+      return {
+        rep_name: name,
+        rep_email: calls[0]?.rep_email ?? null,
+        total_calls: calls.length,
+        graded_calls: graded.length,
+        avg_score: avgScore,
+        closed_won: closedWon,
+        not_interested: notInterested,
+        close_rate: closeRate,
+        by_type: byType,
+      };
+    });
+
+    return { reps };
   },
 });

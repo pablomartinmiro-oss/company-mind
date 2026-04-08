@@ -5,17 +5,19 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { getTenantForUser } from '@/lib/get-tenant';
 
 export async function POST(req: Request) {
-  const { tenantId, userId, email } = await getTenantForUser();
+  const { tenantId, userId, email, userName } = await getTenantForUser();
   const { messages, context = {} } = await req.json();
 
   const agent = mastra.getAgent('companyMind');
 
   const requestContext = new RequestContext();
   requestContext.set('tenantId', tenantId);
-  requestContext.set('userName', context.userName ?? 'User');
+  requestContext.set('userId', userId);
+  requestContext.set('userEmail', email);
+  requestContext.set('userName', userName ?? context.userName ?? 'User');
   requestContext.set('userRole', context.userRole ?? 'member');
-  requestContext.set('tenantName', context.tenantName ?? 'Company');
-  requestContext.set('industry', context.industry ?? 'general');
+  requestContext.set('tenantName', context.tenantName ?? 'Company Mind');
+  requestContext.set('industry', context.industry ?? 'saas');
   requestContext.set('currentPage', context.currentPage ?? 'dashboard');
   requestContext.set('currentContactId', context.currentContactId ?? null);
   requestContext.set('currentContactName', context.currentContactName ?? null);

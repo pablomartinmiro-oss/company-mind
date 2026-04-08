@@ -1,0 +1,2 @@
+ALTER TABLE calls ADD COLUMN IF NOT EXISTS rep_name text;
+ALTER TABLE calls ADD COLUMN IF NOT EXISTS rep_email text;

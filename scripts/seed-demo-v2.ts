@@ -1370,6 +1370,8 @@ async function seedCalls(companiesData: any[]) {
       archived: false,
       outcome: spec.outcome,
       speaker_map: { A: 'rep', B: 'prospect' },
+      rep_name: spec.rep,
+      rep_email: spec.rep === 'Pablo Martin' ? 'pablo.martin.miro@gmail.com' : 'corey@getgunner.ai',
     });
   }
 
