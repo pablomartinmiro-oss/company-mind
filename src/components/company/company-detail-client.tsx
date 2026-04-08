@@ -311,12 +311,11 @@ export function CompanyDetailClient(props: Props) {
 
           {activeTab === 'Research' && (
             <CompanyResearchTab
-              key={selectedContactId ?? '__none__'}
               companyId={props.companyId}
+              contacts={contactsState.map(c => ({ contactId: c.contact_id, contactName: c.contact_name }))}
               selectedContactId={selectedContactId}
-              selectedContactName={selectedContact?.contact_name ?? null}
               companyResearch={props.companyResearch}
-              contactResearch={selectedContactId ? (props.contactResearchMap[selectedContactId] ?? {}) : {}}
+              contactResearchMap={props.contactResearchMap}
             />
           )}
         </div>
