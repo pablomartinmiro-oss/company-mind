@@ -19,8 +19,8 @@ interface ScoreData {
 }
 
 interface CoachingData {
-  strengths: string[];
-  red_flags?: string[];
+  strengths: (string | { title: string; detail: string })[];
+  red_flags?: (string | { title: string; detail: string })[];
   improvements: Array<{
     area: string;
     tip?: string;
@@ -156,13 +156,18 @@ function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null
             <span className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600">✓</span>
             Strengths
           </h3>
-          <div className="space-y-2">
-            {coaching.strengths.map((s, i) => (
-              <div key={i} className="flex gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                <span className="text-[13px] text-zinc-600 leading-relaxed">{s}</span>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {coaching.strengths.map((s, i) => {
+              const isObj = typeof s === 'object' && s !== null;
+              const title = isObj ? (s as { title: string }).title : null;
+              const detail = isObj ? (s as { detail: string }).detail : (s as string);
+              return (
+                <div key={i} className="border border-emerald-100 rounded-xl p-3">
+                  {title && <p className="text-[13px] font-medium text-[#1a1a1a] mb-1">{title}</p>}
+                  <p className="text-[13px] text-zinc-600 leading-relaxed">{detail}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -174,13 +179,18 @@ function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null
             <span className="h-4 w-4 rounded-full bg-red-100 flex items-center justify-center text-[10px] text-red-600">⚠</span>
             Red Flags
           </h3>
-          <div className="space-y-2">
-            {coaching.red_flags.map((flag, i) => (
-              <div key={i} className="flex gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 shrink-0" />
-                <span className="text-[13px] text-zinc-600 leading-relaxed">{flag}</span>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {coaching.red_flags.map((flag, i) => {
+              const isObj = typeof flag === 'object' && flag !== null;
+              const title = isObj ? (flag as { title: string }).title : null;
+              const detail = isObj ? (flag as { detail: string }).detail : (flag as string);
+              return (
+                <div key={i} className="border border-red-100 rounded-xl p-3">
+                  {title && <p className="text-[13px] font-medium text-[#1a1a1a] mb-1">{title}</p>}
+                  <p className="text-[13px] text-zinc-600 leading-relaxed">{detail}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

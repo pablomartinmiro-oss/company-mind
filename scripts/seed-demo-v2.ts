@@ -715,123 +715,68 @@ function generateCallScore(callType: string): object {
 }
 
 function generateCoaching(callType: string): object {
-  const strengthMap: Record<string, string[]> = {
-    closing: [
-      'Clear value summary',
-      'Strong close attempt',
-      'Good timeline management',
-    ],
-    qualification: [
-      'Good discovery questions',
-      'Identified pain points',
-      'Took detailed notes',
-    ],
-    cold_call: [
-      'Built rapport quickly',
-      'Clear hook',
-    ],
-    onboarding: [
-      'Well-paced walkthrough',
-      'Checked for understanding',
-    ],
-  };
-
-  const improvementMap: Record<string, Array<{ area: string; current: string; suggested: string; example_script: string }>> = {
-    closing: [
-      {
-        area: 'Handle pricing objections',
-        current: 'Moved to pricing without confirming value alignment',
-        suggested: 'Confirm value before discussing price',
-        example_script: '"Before we talk pricing, let me make sure we\'re aligned on how this solves your problem..."'
-      },
-      {
-        area: 'Timeline pressure',
-        current: 'Pushed for decision without allowing thinking time',
-        suggested: 'Give time to decide, but set a deadline',
-        example_script: '"Take 24 hours to think it over. Can we connect tomorrow at 3 PM?"'
-      },
-    ],
-    qualification: [
-      {
-        area: 'Budget qualification',
-        current: 'Avoided budget discussion early in the call',
-        suggested: 'Ask earlier in the call',
-        example_script: '"Just so we\'re on the same page — what budget range were you thinking?"'
-      },
-      {
-        area: 'Next steps clarity',
-        current: 'Ended with vague follow-up plan',
-        suggested: 'End with concrete follow-up date',
-        example_script: '"Let\'s schedule a callback for Thursday at 2 PM. Does that work?"'
-      },
-    ],
-    cold_call: [
-      {
-        area: 'Discovery depth',
-        current: 'Pitched solution too early without understanding their situation',
-        suggested: 'Dig deeper into their situation before pitching',
-        example_script: '"Tell me more about that challenge. How long has it been an issue?"'
-      },
-      {
-        area: 'Silence comfort',
-        current: 'Filled silence instead of letting them respond',
-        suggested: 'Pause longer to let them respond',
-        example_script: '[Ask question and pause for 3-5 seconds before speaking again]'
-      },
-    ],
-    onboarding: [
-      {
-        area: 'Expectation setting',
-        current: 'Rushed through process without confirming milestones',
-        suggested: 'Confirm deliverables and timeline',
-        example_script: '"By end of this call, we\'ll have X set up. Next week we\'ll do Y. Sound good?"'
-      },
-    ],
-  };
-
-  const redFlagsMap: Record<string, string[]> = {
-    closing: [
-      'Missed opportunity to address pricing objection',
-      'Did not confirm next steps timeline',
-      'Failed to get decision commitment',
-    ],
-    qualification: [
-      'Did not qualify budget early enough',
-      'Missed key pain point indicators',
-      'No clear next steps established',
-    ],
-    cold_call: [
-      'Pitched too early without discovery',
-      'Did not ask probing follow-up questions',
-      'Prospect disengaged during call',
-    ],
-    onboarding: [
-      'Did not set clear expectations',
-      'Moved too quickly through content',
-      'Did not confirm understanding',
-    ],
-  };
-
-  const strengths = strengthMap[callType as keyof typeof strengthMap] || ['Professional tone', 'Active listening'];
-  const improvements = improvementMap[callType as keyof typeof improvementMap] || [
-    {
-      area: 'Overall',
-      current: 'Call was completed professionally',
-      suggested: 'Continue focusing on strong listening skills',
-      example_script: 'Good effort on this call'
+  const data: Record<string, { summary: string; strengths: { title: string; detail: string }[]; red_flags: { title: string; detail: string }[]; improvements: { area: string; tip: string }[] }> = {
+    closing: {
+      summary: "Strong closing call with clear value articulation and confident timeline management. The rep effectively summarized the prospect's key pain points and tied them directly to product outcomes. However, the transition to pricing felt abrupt — more anchoring on ROI before the price drop would have strengthened the close. Overall, a well-structured call that moved the deal forward decisively.",
+      strengths: [
+        { title: "Clear value summary", detail: "The rep opened the pricing discussion by recapping three specific pain points the prospect had mentioned in previous calls, then mapped each one to a product feature. This created a natural bridge from problem to solution before any numbers were mentioned, which kept the prospect engaged and nodding along." },
+        { title: "Strong close attempt", detail: "When the prospect showed buying signals — asking about implementation timeline and team onboarding — the rep immediately pivoted to next steps rather than continuing to sell. The ask was specific: 'Can we get the agreement over to you by Thursday so we can start onboarding Monday?' This directness is exactly right for a warm close." },
+      ],
+      red_flags: [
+        { title: "Rushed pricing transition", detail: "At the midpoint of the call, the rep jumped from a feature discussion directly into pricing without first quantifying the ROI. The prospect paused and asked 'what does that break down to per user?' — a sign they needed more value anchoring before processing the number. A brief ROI recap would have prevented this friction." },
+      ],
+      improvements: [
+        { area: "Objection handling", tip: "When the prospect raised the setup timeline concern, the rep deflected with 'it is pretty standard' instead of acknowledging the concern directly. A better approach: 'That is a real concern — here is exactly how we mitigate it.' Then walk through the 3-day onboarding timeline with specific milestones for days 1, 2, and 3. Concrete details build confidence." },
+        { area: "Multi-stakeholder close", tip: "The prospect mentioned needing to 'loop in the CFO.' Instead of accepting this as a delay, ask: 'Would it help if I prepared a one-page ROI summary specifically for your CFO? I can have it to you in an hour.' This keeps momentum and arms your champion with the right materials." },
+      ],
     },
-  ];
-  const redFlags = redFlagsMap[callType as keyof typeof redFlagsMap] || [];
+    qualification: {
+      summary: "Solid qualification call that uncovered key pain points and team dynamics. The rep asked good open-ended questions early and let the prospect talk through their current workflow challenges. The main gap was not probing deep enough on budget and timeline — both were mentioned but not pinned down. The call ended with a reasonable next step but could have been more specific on deliverables.",
+      strengths: [
+        { title: "Effective discovery questions", detail: "The rep used a 'tell me about your day' style opening that immediately got the prospect sharing their workflow frustrations. Four open-ended questions in the first five minutes uncovered the core pain: leads falling through the cracks due to manual CRM entry. The rep paraphrased back twice to confirm understanding, which built trust and showed active listening." },
+        { title: "Pain point identification", detail: "When the prospect mentioned 'we lose about half our leads before anyone calls them back,' the rep immediately quantified this: 'So if you are getting 30 leads a week, that is 15 potential customers going cold. At your average deal size, that could be $X in lost revenue per month.' This quantification made the pain tangible and created urgency." },
+      ],
+      red_flags: [
+        { title: "Budget not qualified", detail: "The prospect hinted at budget constraints when they said 'we are looking at a few options and trying to figure out what makes sense financially.' This was a clear opening to discuss budget range, but the rep moved past it to another discovery question. Budget should be surfaced in every qualification call — even a soft range helps prioritize the opportunity." },
+      ],
+      improvements: [
+        { area: "Budget discovery", tip: "When a prospect mentions comparing options or financial considerations, that is the moment to ask: 'Just so I can make sure I am showing you the right plan — what budget range were you working with?' Frame it as helping them, not interrogating. Even a loose range like 'under $1,000/month' or 'we have budget approved for Q2' is extremely valuable for qualification." },
+        { area: "Next steps specificity", tip: "The call ended with 'I will send you some info and we can reconnect next week.' This is too vague. Instead: 'I will email you the case study and pricing by end of day today. Can we block 30 minutes on Thursday at 2 PM to walk through it together?' A specific date, time, and agenda dramatically increases show rates for the follow-up." },
+      ],
+    },
+    cold_call: {
+      summary: "Decent cold call that established initial contact and secured a follow-up. The rep had a clear hook and got through the gatekeeper effectively. However, the call felt rushed — the rep moved to pitching before fully understanding the prospect's situation. The prospect was receptive but not deeply engaged, suggesting more rapport-building would have yielded a warmer follow-up.",
+      strengths: [
+        { title: "Clear value hook", detail: "The opening line was concise and relevant: the rep referenced a specific industry pain point rather than a generic product pitch. This got the prospect's attention in the first 10 seconds, which is critical on cold calls where you have a very narrow window before they decide to stay on the line or hang up." },
+      ],
+      red_flags: [
+        { title: "Premature pitch", detail: "After just one discovery question, the rep launched into a product overview. The prospect had barely described their situation before hearing about features. On cold calls, spend at least 60-90 seconds on the prospect's world before any mention of your solution. People buy when they feel understood, not when they feel sold to." },
+      ],
+      improvements: [
+        { area: "Rapport building", tip: "Before any pitch, spend 60 seconds making the prospect feel heard. Ask two genuine questions about their business. For example: 'I saw your company has been growing — how has that affected your sales team's workload?' Then listen. Only after you understand their context should you position your solution as relevant to what they just told you." },
+        { area: "Follow-up commitment", tip: "Instead of ending with 'can I send you something?' which is easy to ignore, end with a micro-commitment: 'I would love to show you a 5-minute demo tailored to your industry. Could we do 15 minutes tomorrow at 10 AM or 2 PM?' Offering two specific times increases booking rates by 3x compared to open-ended requests." },
+      ],
+    },
+    onboarding: {
+      summary: "Well-structured onboarding call that covered the key setup milestones. The rep was patient and methodical, walking through each integration step clearly. The main opportunity is to check for understanding more frequently — the prospect went quiet for long stretches, which could mean confusion rather than agreement. Setting clearer expectations for next steps would also strengthen the handoff.",
+      strengths: [
+        { title: "Methodical walkthrough", detail: "The rep followed a clear checklist: CRM integration first, then call recording setup, then scoring rubric configuration. Each step was explained before being executed, and the rep confirmed completion before moving on. This structured approach prevents the common onboarding pitfall of overwhelming new clients with too much at once." },
+      ],
+      red_flags: [
+        { title: "Prospect silence", detail: "There were two stretches of 30+ seconds where the prospect was completely silent while the rep was configuring settings. In an onboarding context, silence usually means the prospect is lost or disengaged. A quick 'are you following along okay?' or 'any questions before I move to the next step?' would have maintained engagement." },
+      ],
+      improvements: [
+        { area: "Check for understanding", tip: "After each major setup step, pause and ask the prospect to confirm what was just done in their own words. For example: 'So we just connected your GHL account. Can you tell me what you expect to see in your dashboard tomorrow morning?' This ensures they actually absorbed the information rather than just watching passively. It also surfaces confusion early." },
+      ],
+    },
+  };
 
-  let summary = `${callType.charAt(0).toUpperCase() + callType.slice(1)} call demonstrated `;
-  summary += strengths.length > 1 ? `${strengths[0]} and ${strengths[1]}. ` : `${strengths[0]}. `;
-  summary += improvements.length > 0 ? `Focus on ${improvements[0].area.toLowerCase()} next time.` : '';
-
+  const d = data[callType] ?? data.qualification;
   return {
-    strengths,
-    improvements,
-    summary,
-    red_flags: redFlags,
+    summary: d.summary,
+    strengths: d.strengths,
+    red_flags: d.red_flags,
+    improvements: d.improvements,
   };
 }
 
@@ -1946,17 +1891,36 @@ async function seedAppointments(companiesData: any[]) {
     const endDate = new Date(apptDate);
     endDate.setMinutes(endDate.getMinutes() + randomInt(30, 60));
 
+    const apptType = appointmentTypes[i % appointmentTypes.length];
+    const typeLabel: Record<string, string> = { qualification_call: 'Qualification Call', closing_call: 'Closing Review', onboarding_setup: 'Onboarding Setup', onboarding_demo: 'Onboarding Demo' };
+    const organizer = randomChoice(['Pablo Martin', 'Corey Lavinder']);
+    const primaryGhlId = `demo-${generateSlug(company.name)}-1`;
+    const secondaryContact = contactsData.find(c => c.companyIndex === companyIndex && !c.isPrimary);
+    const attendeeIds = secondaryContact
+      ? [primaryGhlId, `demo-${generateSlug(company.name)}-2`]
+      : [primaryGhlId];
+
+    // Status: past appointments get showed/no_show/cancelled, future get confirmed
+    let status = 'confirmed';
+    if (dayOffsets[i] < 0) {
+      if (i === 18) status = 'no_show';
+      else if (i === 19) status = 'cancelled';
+      else status = 'showed';
+    }
+
     appointmentRecords.push({
       id: crypto.randomUUID(),
       tenant_id: TENANT_ID,
       company_id: company.id,
-      contact_ghl_id: `demo-${generateSlug(companiesData[companyIndex].name)}-1`,
-      title: `${randomChoice(appointmentTypes)} - ${company.name}`,
-      appointment_type: randomChoice(appointmentTypes),
+      contact_ghl_id: primaryGhlId,
+      title: `${typeLabel[apptType] ?? apptType} — ${company.name}`,
+      appointment_type: apptType,
       starts_at: apptDate.toISOString(),
       ends_at: endDate.toISOString(),
-      status: 'confirmed',
-      assigned_to: randomChoice(['Pablo Martin', 'Corey Lavinder']),
+      status,
+      assigned_to: organizer,
+      organizer,
+      attendee_contact_ids: attendeeIds,
       meeting_url: `https://meet.google.com/${randomMeetSlug()}`,
     });
   }

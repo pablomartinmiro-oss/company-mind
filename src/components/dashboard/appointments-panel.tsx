@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
 import { formatExactTime } from '@/lib/format';
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_PILL, APPOINTMENT_STATUS_ORDER, APPOINTMENT_TYPE_LABELS, APPOINTMENT_TYPE_PILL } from '@/lib/pipeline-config';
+import { AppointmentDetailModal } from './appointment-detail-modal';
 
 interface Appointment {
   id: string;
@@ -25,6 +26,7 @@ export function AppointmentsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [modalAppt, setModalAppt] = useState<Appointment | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   async function fetchAppointments(d: Date) {
@@ -123,7 +125,7 @@ export function AppointmentsPanel() {
             return (
               <div key={appt.id}>
                 <div
-                  onClick={() => toggleExpand(appt.id)}
+                  onClick={() => setModalAppt(appt)}
                   className="flex items-start gap-2 px-3 py-2 border-b border-white/30 last:border-0 hover:bg-white/30 cursor-pointer transition-colors"
                 >
                   <span className="text-[10px] font-mono text-zinc-500 w-[80px] shrink-0 pt-0.5 leading-tight">
@@ -201,6 +203,17 @@ export function AppointmentsPanel() {
           })
         )}
       </div>
+
+      {/* Detail modal */}
+      {modalAppt && (
+        <AppointmentDetailModal
+          appointment={modalAppt}
+          onClose={() => setModalAppt(null)}
+          onStatusChange={(newStatus) => {
+            setAppointments(prev => prev.map(a => a.id === modalAppt.id ? { ...a, status: newStatus } : a));
+          }}
+        />
+      )}
     </div>
   );
 }

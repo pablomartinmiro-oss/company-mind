@@ -21,6 +21,8 @@ interface Props {
 
 export function NextStepsTab({ steps, callId }: Props) {
   const [items, setItems] = useState(steps);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
 
   const handleAction = async (stepId: string, action: 'push' | 'skip') => {
     setItems(prev => prev.map(s =>
@@ -69,9 +71,26 @@ export function NextStepsTab({ steps, callId }: Props) {
                   )}
                 </div>
                 <h4 className="text-[13px] font-medium text-[#1a1a1a]">{step.title}</h4>
-                {step.description && (
+                {editingId === step.id ? (
+                  <div className="mt-1">
+                    <textarea
+                      autoFocus
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      rows={2}
+                      className="w-full text-[11px] px-2 py-1.5 border border-white/60 rounded-lg bg-white/80 focus:outline-none focus:border-zinc-400 resize-none"
+                    />
+                    <div className="flex gap-1.5 mt-1">
+                      <button
+                        onClick={() => { setItems(prev => prev.map(s => s.id === step.id ? { ...s, description: editText } : s)); setEditingId(null); }}
+                        className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-[#1a1a1a] text-white"
+                      >Save</button>
+                      <button onClick={() => setEditingId(null)} className="text-[10px] text-zinc-500 px-2 py-1">Cancel</button>
+                    </div>
+                  </div>
+                ) : step.description ? (
                   <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{step.description}</p>
-                )}
+                ) : null}
               </div>
 
               {!isActed && (
@@ -82,7 +101,10 @@ export function NextStepsTab({ steps, callId }: Props) {
                   >
                     <Send className="w-3 h-3" /> Push
                   </button>
-                  <button className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[10px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 inline-flex items-center gap-1">
+                  <button
+                    onClick={() => { setEditingId(step.id); setEditText(step.description ?? ''); }}
+                    className="bg-white/60 backdrop-blur border border-white/70 text-zinc-700 text-[10px] font-medium px-3 py-1.5 rounded-full hover:bg-white/80 inline-flex items-center gap-1"
+                  >
                     <Pencil className="w-3 h-3" /> Edit
                   </button>
                   <button

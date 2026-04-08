@@ -221,6 +221,7 @@ export function DataPointsView({ callId }: Props) {
           <DataPointCard
             key={dp.id}
             dp={dp}
+            callId={callId}
             selectable
             selected={selected.has(dp.id)}
             onToggleSelect={() => toggleSelect(dp.id)}
@@ -228,6 +229,7 @@ export function DataPointsView({ callId }: Props) {
             error={errors[dp.id]}
             onApprove={() => handleApprove(dp.id)}
             onReject={() => handleReject(dp.id)}
+            onValueUpdate={(newVal) => setDataPoints(prev => prev.map(d => d.id === dp.id ? { ...d, field_value: newVal, source: 'manual' } : d))}
           />
         ))}
       </Section>
@@ -242,7 +244,7 @@ export function DataPointsView({ callId }: Props) {
           pillClass="bg-emerald-50/80 text-emerald-700"
         >
           {approved.map(dp => (
-            <DataPointCard key={dp.id} dp={dp} statusPill="approved" />
+            <DataPointCard key={dp.id} dp={dp} callId={callId} statusPill="approved" />
           ))}
         </Section>
       )}
@@ -257,7 +259,7 @@ export function DataPointsView({ callId }: Props) {
           pillClass="bg-rose-50/80 text-rose-700"
         >
           {rejected.map(dp => (
-            <DataPointCard key={dp.id} dp={dp} statusPill="rejected" />
+            <DataPointCard key={dp.id} dp={dp} callId={callId} statusPill="rejected" />
           ))}
         </Section>
       )}
@@ -325,6 +327,7 @@ function Checkbox({ checked, onChange }: { checked: boolean; onChange: () => voi
 
 function DataPointCard({
   dp,
+  callId,
   selectable = false,
   selected = false,
   onToggleSelect,
@@ -332,9 +335,11 @@ function DataPointCard({
   error,
   onApprove,
   onReject,
+  onValueUpdate,
   statusPill,
 }: {
   dp: DataPoint;
+  callId: string;
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
@@ -342,8 +347,30 @@ function DataPointCard({
   error?: string;
   onApprove?: () => void;
   onReject?: () => void;
+  onValueUpdate?: (newValue: string) => void;
   statusPill?: 'approved' | 'rejected';
 }) {
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(dp.field_value);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    if (editValue === dp.field_value) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/calls/${callId}/data-points/${dp.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field_value: editValue }),
+      });
+      if (res.ok) {
+        onValueUpdate?.(editValue);
+        setEditing(false);
+      }
+    } catch { /* ignore */ }
+    setSaving(false);
+  }
+
   const isReadOnly = !!statusPill;
   const scope = dp.company_id ? 'company' : dp.contact_id ? 'contact' : 'unscoped';
 
@@ -378,7 +405,25 @@ function DataPointCard({
             )}
           </div>
 
-          <p className="text-[13px] text-[#52525b] mt-1">{dp.field_value}</p>
+          {editing ? (
+            <div className="mt-1">
+              <input
+                autoFocus
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') { setEditValue(dp.field_value); setEditing(false); } }}
+                className="w-full text-[13px] text-[#1a1a1a] bg-white/80 border border-white/80 rounded-lg px-2 py-1 focus:outline-none focus:border-[#ff6a3d]/40"
+              />
+              <div className="flex gap-2 mt-1.5">
+                <button onClick={handleSave} disabled={saving} className="text-[11px] font-medium px-3 py-1 rounded-lg bg-[#1a1a1a] text-white hover:bg-black disabled:opacity-50">
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button onClick={() => { setEditValue(dp.field_value); setEditing(false); }} className="text-[11px] text-zinc-500 px-2 py-1">Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[13px] text-[#52525b] mt-1">{dp.field_value}</p>
+          )}
 
           <p className="text-[11px] text-[#71717a] mt-2">
             Scope: {scope} · Extracted {timeAgo(dp.created_at)}
@@ -396,9 +441,16 @@ function DataPointCard({
                 Approve
               </button>
               <button
-                onClick={onReject}
+                onClick={() => setEditing(true)}
                 disabled={processing}
                 className="text-[11px] font-medium px-3 py-1 rounded-lg border border-white/60 bg-white/40 text-[#52525b] hover:bg-white/60 transition-colors disabled:opacity-50"
+              >
+                Edit
+              </button>
+              <button
+                onClick={onReject}
+                disabled={processing}
+                className="text-[11px] font-medium px-3 py-1 rounded-lg border border-white/60 bg-white/40 text-[#52525b] hover:text-rose-600 transition-colors disabled:opacity-50"
               >
                 Reject
               </button>
