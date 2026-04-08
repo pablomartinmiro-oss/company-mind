@@ -171,6 +171,7 @@ export function ContactDetailClient(props: Props) {
             companyId={props.company.id}
             mrr={props.company.mrr}
             setupFee={props.company.setup_fee}
+            termLength={null}
           />
           <CompanyDetailsCard
             companyId={props.company.id}
@@ -182,7 +183,7 @@ export function ContactDetailClient(props: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <DealCard companyId={null} mrr={null} setupFee={null} />
+          <DealCard companyId={null} mrr={null} setupFee={null} termLength={null} />
           <CompanyDetailsCard companyId={null} website={null} location={null} industry={null} leadSource={null} />
         </div>
       )}

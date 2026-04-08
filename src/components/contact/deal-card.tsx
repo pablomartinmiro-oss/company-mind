@@ -11,11 +11,13 @@ interface Props {
   companyId: string | null;
   mrr: number | null;
   setupFee: number | null;
+  termLength: number | null;
 }
 
-export function DealCard({ companyId, mrr, setupFee }: Props) {
+export function DealCard({ companyId, mrr, setupFee, termLength }: Props) {
   const [mrrVal, setMrrVal] = useState(mrr);
   const [feeVal, setFeeVal] = useState(setupFee);
+  const [termVal, setTermVal] = useState(termLength);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +35,12 @@ export function DealCard({ companyId, mrr, setupFee }: Props) {
       if (!res.ok) throw new Error('Save failed');
       if (field === 'mrr') setMrrVal(value);
       if (field === 'setup_fee') setFeeVal(value);
+      if (field === 'term_length') setTermVal(value);
     } catch {
       setError('Failed to save');
-      // Revert
       if (field === 'mrr') setMrrVal(mrr);
       if (field === 'setup_fee') setFeeVal(setupFee);
+      if (field === 'term_length') setTermVal(termLength);
     }
     setSaving(false);
     setEditingField(null);
@@ -76,6 +79,19 @@ export function DealCard({ companyId, mrr, setupFee }: Props) {
         editing={editingField === 'setup_fee'}
         onEdit={() => !disabled && setEditingField('setup_fee')}
         onSave={v => save('setup_fee', v)}
+        onCancel={() => setEditingField(null)}
+        saving={saving}
+        disabled={disabled}
+      />
+
+      <EditableRow
+        label="Term length"
+        value={termVal}
+        format={v => `${v} mo`}
+        field="term_length"
+        editing={editingField === 'term_length'}
+        onEdit={() => !disabled && setEditingField('term_length')}
+        onSave={v => save('term_length', v)}
         onCancel={() => setEditingField(null)}
         saving={saving}
         disabled={disabled}

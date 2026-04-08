@@ -145,6 +145,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       website={company.website ?? null}
       mrr={company.mrr ?? 0}
       setupFee={company.setup_fee ?? 0}
+      termLength={company.term_length ?? null}
       enrollments={enrollments}
       contacts={enrichedContacts}
       calls={calls}

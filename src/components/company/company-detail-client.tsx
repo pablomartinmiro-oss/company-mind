@@ -70,6 +70,7 @@ interface Props {
   website: string | null;
   mrr: number;
   setupFee: number;
+  termLength: number | null;
   enrollments: Enrollment[];
   contacts: ContactInfo[];
   calls: CallInfo[];
@@ -176,6 +177,7 @@ export function CompanyDetailClient(props: Props) {
           companyId={props.companyId}
           mrr={props.mrr}
           setupFee={props.setupFee}
+          termLength={props.termLength}
         />
         <CompanyDetailsCard
           companyId={props.companyId}

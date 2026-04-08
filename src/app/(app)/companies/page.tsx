@@ -104,6 +104,7 @@ export default async function CompaniesPage() {
       name: string;
       industry: string | null;
       lead_source: string | null;
+      mrr: number | null;
       pipeline_companies: { pipeline_id: string; stage: string; deal_value: string | null; stage_entered_at: string }[];
       company_contacts: { contact_id: string; is_primary: boolean; role: string | null }[];
     };
@@ -112,12 +113,6 @@ export default async function CompaniesPage() {
       pipeline_name: pipelineNameMap[pc.pipeline_id] ?? 'Unknown',
       stage: pc.stage,
     }));
-
-    const totalDeal = typed.pipeline_companies.reduce((sum, pc) => {
-      if (!pc.deal_value) return sum;
-      const num = parseFloat(String(pc.deal_value).replace(/[^0-9.]/g, ''));
-      return sum + (isNaN(num) ? 0 : num);
-    }, 0);
 
     const maxDays = Math.max(0, ...typed.pipeline_companies.map((pc) =>
       Math.floor((Date.now() - new Date(pc.stage_entered_at).getTime()) / 86400000)
@@ -131,7 +126,7 @@ export default async function CompaniesPage() {
       industry: typed.industry,
       lead_source: typed.lead_source,
       enrollments,
-      deal_value: totalDeal > 0 ? `$${totalDeal}` : null,
+      deal_value: typed.mrr ? `$${typed.mrr.toLocaleString('en-US')}/mo` : null,
       days_in_stage: maxDays,
       contact_count: typed.company_contacts.length,
       primary_contact_name: primary ? (nameMap[primary.contact_id] ?? null) : null,
