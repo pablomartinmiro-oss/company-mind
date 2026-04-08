@@ -99,6 +99,21 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
     }
   }, [isOpen]);
 
+  // Auto-submit pending query from AI search bar
+  useEffect(() => {
+    function handleQuery(e: Event) {
+      const query = (e as CustomEvent<{ query: string }>).detail?.query;
+      if (query && !isStreaming) {
+        // Small delay to ensure panel is open and transport is ready
+        setTimeout(() => {
+          sendMessage({ text: query });
+        }, 300);
+      }
+    }
+    window.addEventListener('ai-query', handleQuery);
+    return () => window.removeEventListener('ai-query', handleQuery);
+  }, [sendMessage, isStreaming]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Close on Esc
   useEffect(() => {
     if (!isOpen) return;
