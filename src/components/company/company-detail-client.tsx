@@ -248,7 +248,7 @@ export function CompanyDetailClient(props: Props) {
                     <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Graded Calls</h3>
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 text-zinc-500">{props.calls.length}</span>
                   </div>
-                  <div className="max-h-[320px] overflow-y-auto">
+                  <div>
                     {props.calls.map((call) => {
                       const grade = call.score != null ? scoreGrade(call.score) : null;
                       return (
