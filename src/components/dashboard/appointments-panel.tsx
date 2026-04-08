@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
 import { formatExactTime } from '@/lib/format';
-import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_PILL, APPOINTMENT_STATUS_ORDER } from '@/lib/pipeline-config';
+import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_PILL, APPOINTMENT_STATUS_ORDER, APPOINTMENT_TYPE_LABELS, APPOINTMENT_TYPE_PILL } from '@/lib/pipeline-config';
 
 interface Appointment {
   id: string;
@@ -130,10 +130,24 @@ export function AppointmentsPanel() {
                     {timeStr}
                   </span>
                   <div className={`w-[2px] self-stretch rounded-sm ${isToday && isConfirmed ? 'bg-[#1a1a1a]' : 'bg-zinc-200'}`} />
-                  <div>
-                    <p className="text-[12px] font-medium text-zinc-800">{appt.contactName || appt.title}</p>
-                    <p className="text-[10px] text-zinc-500 mt-0.5">{appt.type || appt.title}</p>
-                    <StatusPill ghlEventId={appt.id} initial={appt.status || 'confirmed'} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-[#1a1a1a] truncate">{appt.contactName || appt.title}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className={`text-[9px] font-medium px-2 py-0.5 rounded-full ${APPOINTMENT_TYPE_PILL[appt.type] ?? 'bg-zinc-100 text-zinc-500'}`}>
+                        {APPOINTMENT_TYPE_LABELS[appt.type] ?? appt.type ?? appt.title}
+                      </span>
+                      {appt.meetingLink && (
+                        <a
+                          href={appt.meetingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/60 bg-white/40 text-[#52525b] hover:bg-white/60 transition-colors"
+                        >
+                          Join
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
 

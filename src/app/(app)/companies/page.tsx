@@ -135,28 +135,38 @@ export default async function CompaniesPage() {
     };
   });
 
-  // Stats — use MRR from companies table
+  // Stats — Total MRR from companies in Sales Pipeline → Closed
+  const closedCompanyIds = new Set(
+    (companiesRaw ?? []).filter((c) => {
+      const typed = c as { pipeline_companies: { pipeline_id: string; stage: string }[] };
+      const salesId = pipelineNameMap['Sales Pipeline'] ? Object.entries(pipelineNameMap).find(([, name]) => name === 'Sales Pipeline')?.[0] : null;
+      // Also check raw pipeline ID matching
+      return typed.pipeline_companies.some(pc => {
+        const pName = pipelineNameMap[pc.pipeline_id];
+        return pName === 'Sales Pipeline' && pc.stage === 'Closed';
+      });
+    }).map((c) => (c as { id: string }).id)
+  );
+
   const totalMRR = (companiesRaw ?? []).reduce((sum, c) => {
-    const typed = c as { mrr?: number };
+    const typed = c as { id: string; mrr?: number };
+    if (!closedCompanyIds.has(typed.id)) return sum;
     return sum + (typed.mrr ?? 0);
   }, 0);
 
-  const formattedValue = totalMRR >= 1000
-    ? `$${(totalMRR / 1000).toFixed(0)}k/mo`
-    : `$${Math.round(totalMRR)}/mo`;
+  const formattedValue = `$${totalMRR.toLocaleString('en-US')}/mo`;
 
-  const activeDeals = companies.length;
+  // Active deals: companies NOT in Closed/Dead/Nurture stages
+  const inactiveStages = new Set(['Closed', 'Dead', 'Nurture']);
+  const activeDeals = companies.filter(c =>
+    c.enrollments.some(e => !inactiveStages.has(e.stage))
+  ).length;
+
   const allDays = companies.map(c => c.days_in_stage);
   const avgDaysInStage = allDays.length > 0 ? Math.round(allDays.reduce((a, b) => a + b, 0) / allDays.length) : 0;
 
-  // "Closing soon" = companies in the last stage of any pipeline
-  const lastStages = new Set(
-    (pipelinesRaw ?? []).map((p: { stages: unknown }) => {
-      const stages = Array.isArray(p.stages) ? p.stages as string[] : JSON.parse(String(p.stages)) as string[];
-      return stages[stages.length - 1];
-    }).filter(Boolean)
-  );
-  const closingSoon = companies.filter(c => c.enrollments.some(e => lastStages.has(e.stage))).length;
+  // "Closing soon" = companies where stage='Closing' in Sales Pipeline
+  const closingSoon = companies.filter(c => c.enrollments.some(e => e.stage === 'Closing')).length;
 
   return (
     <PipelinePageClient

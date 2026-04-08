@@ -20,11 +20,13 @@ interface ScoreData {
 
 interface CoachingData {
   strengths: string[];
+  red_flags?: string[];
   improvements: Array<{
     area: string;
-    current: string;
-    suggested: string;
-    example_script: string;
+    tip?: string;
+    current?: string;
+    suggested?: string;
+    example_script?: string;
   }>;
   summary: string;
 }
@@ -166,17 +168,17 @@ function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null
       )}
 
       {/* Red Flags */}
-      {coaching.improvements && coaching.improvements.length > 0 && (
+      {coaching.red_flags && coaching.red_flags.length > 0 && (
         <div className="mb-6">
           <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
-            <span className="h-4 w-4 rounded-full bg-amber-100 flex items-center justify-center text-[10px] text-amber-600">⚠</span>
+            <span className="h-4 w-4 rounded-full bg-red-100 flex items-center justify-center text-[10px] text-red-600">⚠</span>
             Red Flags
           </h3>
           <div className="space-y-2">
-            {coaching.improvements.map((imp, i) => (
+            {coaching.red_flags.map((flag, i) => (
               <div key={i} className="flex gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 shrink-0" />
-                <span className="text-[13px] text-zinc-600 leading-relaxed">{imp.area}</span>
+                <span className="text-[13px] text-zinc-600 leading-relaxed">{flag}</span>
               </div>
             ))}
           </div>
@@ -193,7 +195,9 @@ function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null
           {coaching.improvements.map((imp, i) => (
             <div key={i} className="mb-6">
               <p className="text-[14px] text-zinc-700 leading-relaxed">
-                <span className="font-medium">{imp.area}:</span> {imp.current}
+                <span className="font-medium">{imp.area}</span>
+                {imp.tip && <span className="text-zinc-500">: {imp.tip}</span>}
+                {!imp.tip && imp.current && <span className="text-zinc-500">: {imp.current}</span>}
               </p>
 
               {imp.suggested && (
@@ -257,13 +261,27 @@ function CriteriaView({ score }: { score: ScoreData | null }) {
 function TranscriptView({ text, duration, recordingUrl }: { text: string; duration: number; recordingUrl?: string | null }) {
   const [audioError, setAudioError] = useState(false);
 
-  // Parse transcript
+  // Parse transcript — supports both "Rep: text" and "[00:01:23] Name: text" formats
   const lines: TranscriptLine[] = [];
   if (text) {
     const parts = text.split(/\n/).filter(Boolean);
+    // Detect rep name from first timestamped line (speaker A = rep)
+    let repName = 'Rep';
+    const firstTimestamped = parts.find(l => /^\[\d{2}:\d{2}(:\d{2})?\]/.test(l.trim()));
+    if (firstTimestamped) {
+      const m = firstTimestamped.match(/^\[\d{2}:\d{2}(?::\d{2})?\]\s*(.+?):\s/);
+      if (m) repName = m[1];
+    }
+
     for (const line of parts) {
       const trimmed = line.trim();
-      if (trimmed.startsWith('Rep:')) {
+      // Timestamped format: [00:01:23] Speaker Name: text
+      const tsMatch = trimmed.match(/^\[(\d{2}:\d{2}(?::\d{2})?)\]\s*(.+?):\s*(.+)/);
+      if (tsMatch) {
+        const [, timestamp, speakerName, lineText] = tsMatch;
+        const isRep = speakerName === repName;
+        lines.push({ speaker: isRep ? 'rep' : 'contact', speakerName, text: lineText, timestamp });
+      } else if (trimmed.startsWith('Rep:')) {
         lines.push({ speaker: 'rep', speakerName: 'Rep', text: trimmed.replace(/^Rep:\s*/, '') });
       } else if (trimmed.startsWith('Prospect:') || trimmed.startsWith('Contact:')) {
         lines.push({ speaker: 'contact', speakerName: 'Contact', text: trimmed.replace(/^(Prospect|Contact):\s*/, '') });
@@ -300,9 +318,10 @@ function TranscriptView({ text, duration, recordingUrl }: { text: string; durati
         <div className="space-y-3">
           {lines.map((line, i) => (
             <div key={i} className="flex gap-3">
-              <span className="text-[11px] font-medium text-zinc-400 w-[80px] shrink-0 pt-1 text-right">
-                {line.speakerName}
-              </span>
+              <div className="w-[80px] shrink-0 pt-1 text-right">
+                <span className="text-[11px] font-medium text-zinc-400 block">{line.speakerName}</span>
+                {line.timestamp && <span className="text-[9px] font-mono text-zinc-300">{line.timestamp}</span>}
+              </div>
               <div className={`px-3 py-2 rounded-lg text-[13px] leading-relaxed ${
                 line.speaker === 'rep'
                   ? 'bg-zinc-100 text-zinc-800 rounded-tl-none'

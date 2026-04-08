@@ -35,6 +35,14 @@ function daysAgo(days: number): Date {
   return d;
 }
 
+function randomMeetSlug(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const part1 = Array(3).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const part2 = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const part3 = Array(3).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `${part1}-${part2}-${part3}`;
+}
+
 function randomBool(probability: number = 0.5): boolean {
   return Math.random() < probability;
 }
@@ -591,52 +599,52 @@ function generateResearchValue(
 // CALL TRANSCRIPT & SCORING
 // ============================================================================
 
-function generateCallTranscript(callType: string, durationSeconds: number): string {
-  const speakers = ['Pablo Martin', 'Prospect'];
+function generateCallTranscript(callType: string, durationSeconds: number, repName: string = 'Pablo Martin', contactName: string = 'Prospect'): string {
+  const contactFirstName = contactName.split(' ')[0];
   const lines: string[] = [];
   let currentTime = 0;
 
   // Generate realistic exchanges based on call type
   const exchanges = {
     cold_call: [
-      { speaker: 0, text: "Hi, this is Pablo Martin with Company Mind. Do you have a quick moment?" },
-      { speaker: 1, text: "Sure, what's this about?" },
-      { speaker: 0, text: "We help businesses like yours streamline their sales process. I noticed you use HubSpot. Are you happy with how it's working?" },
-      { speaker: 1, text: "It's okay, but our team struggles with follow-ups sometimes." },
-      { speaker: 0, text: "That's exactly what we solve. Many teams using HubSpot are missing automated follow-up triggers. Would it make sense to chat for 15 minutes?" },
-      { speaker: 1, text: "Maybe, can you send me something about it?" },
-      { speaker: 0, text: "Absolutely, I'll send over a quick overview. Can I grab your email?" },
+      { speaker: 0, text: `Hi, this is ${repName} with Company Mind. Do you have a quick moment?` },
+      { speaker: 1, text: `Sure, what's this about?` },
+      { speaker: 0, text: `We help businesses like yours streamline their sales process. I noticed you use HubSpot. Are you happy with how it's working?` },
+      { speaker: 1, text: `It's okay, but our team struggles with follow-ups sometimes.` },
+      { speaker: 0, text: `That's exactly what we solve. Many teams using HubSpot are missing automated follow-up triggers. Would it make sense to chat for 15 minutes?` },
+      { speaker: 1, text: `Maybe, can you send me something about it?` },
+      { speaker: 0, text: `Absolutely, I'll send over a quick overview. Can I grab your email?` },
     ],
     qualification: [
-      { speaker: 0, text: "Thanks for jumping on the call. Can you walk me through your current sales process?" },
-      { speaker: 1, text: "Sure, we have leads coming from multiple channels and struggle to track them all." },
-      { speaker: 0, text: "How many reps do you have on the team?" },
-      { speaker: 1, text: "We have 3 full-time and 2 part-time." },
-      { speaker: 0, text: "And what's your monthly lead volume?" },
-      { speaker: 1, text: "Probably around 50 to 80 depending on the month." },
-      { speaker: 0, text: "Okay, and are those leads assigned automatically or manually?" },
-      { speaker: 1, text: "Mostly manual, which takes a lot of time." },
-      { speaker: 0, text: "Got it. We could automate that. What does your ideal process look like?" },
+      { speaker: 0, text: `Thanks for jumping on the call ${contactFirstName}. Can you walk me through your current sales process?` },
+      { speaker: 1, text: `Sure, we have leads coming from multiple channels and struggle to track them all.` },
+      { speaker: 0, text: `How many reps do you have on the team?` },
+      { speaker: 1, text: `We have 3 full-time and 2 part-time.` },
+      { speaker: 0, text: `And what's your monthly lead volume?` },
+      { speaker: 1, text: `Probably around 50 to 80 depending on the month.` },
+      { speaker: 0, text: `Okay, and are those leads assigned automatically or manually?` },
+      { speaker: 1, text: `Mostly manual, which takes a lot of time.` },
+      { speaker: 0, text: `Got it. We could automate that. What does your ideal process look like?` },
     ],
     closing: [
-      { speaker: 0, text: "Let me review the proposal we discussed. You liked the three-month onboarding timeline, correct?" },
-      { speaker: 1, text: "Yes, that works with our schedule." },
-      { speaker: 0, text: "And the pricing model with the setup fee and monthly recurring revenue?" },
-      { speaker: 1, text: "That makes sense for us. Can you confirm the feature set one more time?" },
-      { speaker: 0, text: "Absolutely. You get automated lead routing, call recording, transcription, and monthly coaching. Any questions?" },
-      { speaker: 1, text: "No, I think we are ready to move forward." },
-      { speaker: 0, text: "Excellent! I will get the paperwork over to you today. Should I send to you or accounting?" },
-      { speaker: 1, text: "To me is fine. I can handle it." },
+      { speaker: 0, text: `Let me review the proposal we discussed ${contactFirstName}. You liked the three-month onboarding timeline, correct?` },
+      { speaker: 1, text: `Yes, that works with our schedule.` },
+      { speaker: 0, text: `And the pricing model with the setup fee and monthly recurring revenue?` },
+      { speaker: 1, text: `That makes sense for us. Can you confirm the feature set one more time?` },
+      { speaker: 0, text: `Absolutely. You get automated lead routing, call recording, transcription, and monthly coaching. Any questions?` },
+      { speaker: 1, text: `No, I think we are ready to move forward.` },
+      { speaker: 0, text: `Excellent! I will get the paperwork over to you today. Should I send to you or accounting?` },
+      { speaker: 1, text: `To me is fine. I can handle it.` },
     ],
     onboarding: [
-      { speaker: 0, text: "Welcome! This is your first onboarding call. How are you feeling about the implementation?" },
-      { speaker: 1, text: "Good, ready to get started." },
-      { speaker: 0, text: "Great. Today we will set up your CRM integrations. Do you have your HubSpot API key?" },
-      { speaker: 1, text: "Yes, let me pull that up." },
-      { speaker: 0, text: "Perfect. We will also configure your call recording. Any concerns there?" },
-      { speaker: 1, text: "None at all." },
-      { speaker: 0, text: "Next week we will do the training session with your team. Does Tuesday at 2 PM work?" },
-      { speaker: 1, text: "Yes, that should be fine." },
+      { speaker: 0, text: `Welcome ${contactFirstName}! This is your first onboarding call. How are you feeling about the implementation?` },
+      { speaker: 1, text: `Good, ready to get started.` },
+      { speaker: 0, text: `Great. Today we will set up your CRM integrations. Do you have your HubSpot API key?` },
+      { speaker: 1, text: `Yes, let me pull that up.` },
+      { speaker: 0, text: `Perfect. We will also configure your call recording. Any concerns there?` },
+      { speaker: 1, text: `None at all.` },
+      { speaker: 0, text: `Next week we will do the training session with your team. Does Tuesday at 2 PM work?` },
+      { speaker: 1, text: `Yes, that should be fine.` },
     ],
   };
 
@@ -645,7 +653,7 @@ function generateCallTranscript(callType: string, durationSeconds: number): stri
 
   while (currentTime < durationSeconds && exchangeIndex < exchangeList.length) {
     const exchange = exchangeList[exchangeIndex];
-    const speakerName = speakers[exchange.speaker];
+    const speakerName = exchange.speaker === 0 ? repName : contactName;
     const timeStr = formatCallTime(currentTime);
     lines.push(`[${timeStr}] ${speakerName}: ${exchange.text}`);
     currentTime += randomInt(20, 80);
@@ -663,23 +671,45 @@ function formatCallTime(seconds: number): string {
 
 function generateCallScore(callType: string): object {
   const baseScores: Record<string, number> = {
-    closing: 85,
-    qualification: 80,
-    onboarding: 80,
-    cold_call: 65,
-    follow_up: 75,
+    closing: 8.5,
+    qualification: 8.0,
+    onboarding: 8.0,
+    cold_call: 6.5,
+    follow_up: 7.5,
   };
 
-  const baseScore = baseScores[callType as keyof typeof baseScores] || 75;
-  const variance = randomInt(-10, 15);
-  const overall = Math.max(60, Math.min(100, baseScore + variance));
+  const baseScore = baseScores[callType as keyof typeof baseScores] || 7.5;
+  const variance = (Math.random() - 0.5) * 3; // -1.5 to +1.5
+  const baseScoreNormalized = Math.max(5.0, Math.min(10.0, baseScore + variance));
 
   const criteria = [
-    { name: 'Discovery', score: randomInt(Math.max(40, overall - 20), Math.min(100, overall + 10)), weight: 25 },
-    { name: 'Pain identification', score: randomInt(Math.max(40, overall - 15), Math.min(100, overall + 5)), weight: 25 },
-    { name: 'Next step clarity', score: randomInt(Math.max(40, overall - 10), overall), weight: 25 },
-    { name: 'Objection handling', score: randomInt(Math.max(40, overall - 20), Math.min(100, overall + 10)), weight: 25 },
+    {
+      name: 'Discovery',
+      score: parseFloat((Math.max(5.0, Math.min(10.0, baseScoreNormalized + (Math.random() - 0.5) * 2))).toFixed(1)),
+      weight: 25
+    },
+    {
+      name: 'Pain identification',
+      score: parseFloat((Math.max(5.0, Math.min(10.0, baseScoreNormalized + (Math.random() - 0.5) * 2))).toFixed(1)),
+      weight: 25
+    },
+    {
+      name: 'Next step clarity',
+      score: parseFloat((Math.max(5.0, Math.min(10.0, baseScoreNormalized + (Math.random() - 0.5) * 2))).toFixed(1)),
+      weight: 25
+    },
+    {
+      name: 'Objection handling',
+      score: parseFloat((Math.max(5.0, Math.min(10.0, baseScoreNormalized + (Math.random() - 0.5) * 2))).toFixed(1)),
+      weight: 25
+    },
   ];
+
+  // Calculate overall as weighted average of criteria scores, then convert to 0-100 scale
+  const weightedSum = criteria.reduce((sum, c) => sum + c.score * c.weight, 0);
+  const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
+  const averageScore = weightedSum / totalWeight; // 5.0-10.0
+  const overall = Math.round(averageScore * 10); // Convert to 0-100 scale
 
   return { overall, criteria };
 }
@@ -706,28 +736,92 @@ function generateCoaching(callType: string): object {
     ],
   };
 
-  const improvementMap: Record<string, Array<{ area: string; tip: string }>> = {
+  const improvementMap: Record<string, Array<{ area: string; current: string; suggested: string; example_script: string }>> = {
     closing: [
-      { area: 'Handle pricing objections', tip: 'Confirm value before discussing price' },
-      { area: 'Timeline pressure', tip: 'Give time to decide, but set a deadline' },
+      {
+        area: 'Handle pricing objections',
+        current: 'Moved to pricing without confirming value alignment',
+        suggested: 'Confirm value before discussing price',
+        example_script: '"Before we talk pricing, let me make sure we\'re aligned on how this solves your problem..."'
+      },
+      {
+        area: 'Timeline pressure',
+        current: 'Pushed for decision without allowing thinking time',
+        suggested: 'Give time to decide, but set a deadline',
+        example_script: '"Take 24 hours to think it over. Can we connect tomorrow at 3 PM?"'
+      },
     ],
     qualification: [
-      { area: 'Budget qualification', tip: 'Ask earlier in the call' },
-      { area: 'Next steps clarity', tip: 'End with concrete follow-up date' },
+      {
+        area: 'Budget qualification',
+        current: 'Avoided budget discussion early in the call',
+        suggested: 'Ask earlier in the call',
+        example_script: '"Just so we\'re on the same page — what budget range were you thinking?"'
+      },
+      {
+        area: 'Next steps clarity',
+        current: 'Ended with vague follow-up plan',
+        suggested: 'End with concrete follow-up date',
+        example_script: '"Let\'s schedule a callback for Thursday at 2 PM. Does that work?"'
+      },
     ],
     cold_call: [
-      { area: 'Discovery depth', tip: 'Dig deeper into their situation before pitching' },
-      { area: 'Silence comfort', tip: 'Pause longer to let them respond' },
+      {
+        area: 'Discovery depth',
+        current: 'Pitched solution too early without understanding their situation',
+        suggested: 'Dig deeper into their situation before pitching',
+        example_script: '"Tell me more about that challenge. How long has it been an issue?"'
+      },
+      {
+        area: 'Silence comfort',
+        current: 'Filled silence instead of letting them respond',
+        suggested: 'Pause longer to let them respond',
+        example_script: '[Ask question and pause for 3-5 seconds before speaking again]'
+      },
     ],
     onboarding: [
-      { area: 'Expectation setting', tip: 'Confirm deliverables and timeline' },
+      {
+        area: 'Expectation setting',
+        current: 'Rushed through process without confirming milestones',
+        suggested: 'Confirm deliverables and timeline',
+        example_script: '"By end of this call, we\'ll have X set up. Next week we\'ll do Y. Sound good?"'
+      },
+    ],
+  };
+
+  const redFlagsMap: Record<string, string[]> = {
+    closing: [
+      'Missed opportunity to address pricing objection',
+      'Did not confirm next steps timeline',
+      'Failed to get decision commitment',
+    ],
+    qualification: [
+      'Did not qualify budget early enough',
+      'Missed key pain point indicators',
+      'No clear next steps established',
+    ],
+    cold_call: [
+      'Pitched too early without discovery',
+      'Did not ask probing follow-up questions',
+      'Prospect disengaged during call',
+    ],
+    onboarding: [
+      'Did not set clear expectations',
+      'Moved too quickly through content',
+      'Did not confirm understanding',
     ],
   };
 
   const strengths = strengthMap[callType as keyof typeof strengthMap] || ['Professional tone', 'Active listening'];
   const improvements = improvementMap[callType as keyof typeof improvementMap] || [
-    { area: 'Overall', tip: 'Good effort' },
+    {
+      area: 'Overall',
+      current: 'Call was completed professionally',
+      suggested: 'Continue focusing on strong listening skills',
+      example_script: 'Good effort on this call'
+    },
   ];
+  const redFlags = redFlagsMap[callType as keyof typeof redFlagsMap] || [];
 
   let summary = `${callType.charAt(0).toUpperCase() + callType.slice(1)} call demonstrated `;
   summary += strengths.length > 1 ? `${strengths[0]} and ${strengths[1]}. ` : `${strengths[0]}. `;
@@ -737,6 +831,7 @@ function generateCoaching(callType: string): object {
     strengths,
     improvements,
     summary,
+    red_flags: redFlags,
   };
 }
 
@@ -1048,8 +1143,15 @@ async function seedResearch(companiesData: any[]) {
 
   // Company field counts per spec: sum ~1,100 company + ~335 contact = ~1,435
   const fieldCounts = [8, 8, 30, 25, 75, 80, 92, 92, 92, 92, 92, 50, 55, 45, 75, 70];
-  // Companies 6-10 (indices) also get contact research
-  const contactResearchCompanies = [6, 7, 8, 9, 10]; // Thompson, GreenLeaf, Chen, Precision, Summit
+
+  // All companies get contact research now
+  // Closed companies (indices 6-10): all 67 contact fields
+  // Others: 20-40 contact fields based on stage
+  const contactFieldCounts: Record<number, number> = {
+    0: 25, 1: 25, 2: 35, 3: 30, 4: 40, 5: 40,
+    6: 67, 7: 67, 8: 67, 9: 67, 10: 67, // Closed companies get all fields
+    11: 20, 12: 25, 13: 30, 14: 20, 15: 25,
+  };
 
   const researchRecords: any[] = [];
 
@@ -1092,8 +1194,8 @@ async function seedResearch(companiesData: any[]) {
     }
   }
 
-  // Contact-scope research for top 5 companies
-  for (const compIdx of contactResearchCompanies) {
+  // Contact-scope research for ALL companies
+  for (let compIdx = 0; compIdx < companiesData.length; compIdx++) {
     const company = companiesData[compIdx];
     const primaryContact = contactsData.find(c => c.companyIndex === compIdx && c.isPrimary);
     if (!primaryContact) continue;
@@ -1106,8 +1208,11 @@ async function seedResearch(companiesData: any[]) {
       }
     }
 
-    for (let i = 0; i < allContactFields.length; i++) {
-      const { section, key } = allContactFields[i];
+    const fieldCount = contactFieldCounts[compIdx] || 30;
+    const fieldsToUse = allContactFields.slice(0, fieldCount);
+
+    for (let i = 0; i < fieldsToUse.length; i++) {
+      const { section, key } = fieldsToUse[i];
       const sourceOptions = ['api', 'ai', 'manual'];
       const source = sourceOptions[i % 3];
 
@@ -1219,30 +1324,57 @@ function generateContactResearchValue(contactName: string, role: string, fieldKe
 }
 
 // ============================================================================
-// SEED CALLS (15 calls)
+// CALL SPECS (shared between seedCalls and seedCallActions)
 // ============================================================================
 
-async function seedCalls(companiesData: any[]) {
-  console.log('Seeding 15 calls...');
-
-  // Call distribution
-  const callSpecs = [
-    { companyIndex: 6, type: 'closing', durationSeconds: 1820, score: 91, outcome: 'closed_won', rep: 'Pablo Martin', daysAgo: 6 },
+const callSpecs = [
+    // Thompson HVAC (index 6) - 4 calls
+    { companyIndex: 6, type: 'cold_call', durationSeconds: 580, score: 72, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 22 },
     { companyIndex: 6, type: 'qualification', durationSeconds: 1340, score: 84, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 9 },
+    { companyIndex: 6, type: 'closing', durationSeconds: 1820, score: 91, outcome: 'closed_won', rep: 'Pablo Martin', daysAgo: 6 },
+    { companyIndex: 6, type: 'onboarding', durationSeconds: 1450, score: 88, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 2 },
+
+    // GreenLeaf Lawn Care (index 7) - 3 calls
+    { companyIndex: 7, type: 'cold_call', durationSeconds: 650, score: 74, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 20 },
+    { companyIndex: 7, type: 'qualification', durationSeconds: 1520, score: 85, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 12 },
+    { companyIndex: 7, type: 'closing', durationSeconds: 1680, score: 90, outcome: 'closed_won', rep: 'Corey Lavinder', daysAgo: 3 },
+
+    // Chen Solutions (index 8) - 4 calls
+    { companyIndex: 8, type: 'cold_call', durationSeconds: 720, score: 75, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 25 },
+    { companyIndex: 8, type: 'qualification', durationSeconds: 1680, score: 87, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 15 },
     { companyIndex: 8, type: 'closing', durationSeconds: 2150, score: 88, outcome: 'closed_won', rep: 'Corey Lavinder', daysAgo: 10 },
-    { companyIndex: 7, type: 'onboarding', durationSeconds: 1450, score: 79, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 4 },
+    { companyIndex: 8, type: 'onboarding', durationSeconds: 1750, score: 86, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 1 },
+
+    // Precision Dental Care (index 9) - 3 calls
+    { companyIndex: 9, type: 'qualification', durationSeconds: 1420, score: 81, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 21 },
     { companyIndex: 9, type: 'closing', durationSeconds: 1920, score: 93, outcome: 'closed_won', rep: 'Corey Lavinder', daysAgo: 14 },
+    { companyIndex: 9, type: 'onboarding', durationSeconds: 1580, score: 85, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 5 },
+
+    // Summit Roofing & Restoration (index 10) - 3 calls
+    { companyIndex: 10, type: 'qualification', durationSeconds: 1520, score: 83, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 26 },
     { companyIndex: 10, type: 'closing', durationSeconds: 1700, score: 86, outcome: 'closed_won', rep: 'Pablo Martin', daysAgo: 18 },
+    { companyIndex: 10, type: 'onboarding', durationSeconds: 1620, score: 87, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 8 },
+
+    // Other companies - qualification and cold calls
     { companyIndex: 2, type: 'qualification', durationSeconds: 980, score: 76, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 2 },
     { companyIndex: 4, type: 'qualification', durationSeconds: 1280, score: 82, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 3 },
     { companyIndex: 5, type: 'qualification', durationSeconds: 1620, score: 78, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 5 },
     { companyIndex: 3, type: 'cold_call', durationSeconds: 760, score: 68, outcome: 'follow_up_scheduled', rep: 'Pablo Martin', daysAgo: 7 },
     { companyIndex: 0, type: 'cold_call', durationSeconds: 540, score: 65, outcome: 'follow_up_scheduled', rep: 'Corey Lavinder', daysAgo: 1 },
+
+    // Skipped/no-score calls
     { companyIndex: 11, type: 'qualification', durationSeconds: 80, score: null, outcome: 'no_answer', rep: 'Pablo Martin', daysAgo: 22 },
     { companyIndex: 14, type: 'closing', durationSeconds: 75, score: null, outcome: 'not_interested', rep: 'Corey Lavinder', daysAgo: 28 },
     { companyIndex: 1, type: 'cold_call', durationSeconds: 45, score: null, outcome: 'no_answer', rep: 'Pablo Martin', daysAgo: 2, skipped: true },
     { companyIndex: 12, type: 'follow_up', durationSeconds: 38, score: null, outcome: 'voicemail', rep: 'Corey Lavinder', daysAgo: 12, skipped: true },
   ];
+
+// ============================================================================
+// SEED CALLS
+// ============================================================================
+
+async function seedCalls(companiesData: any[]) {
+  console.log('Seeding calls...');
 
   const callRecords: any[] = [];
   const callIds: string[] = [];
@@ -1261,7 +1393,7 @@ async function seedCalls(companiesData: any[]) {
     let coaching: any = null;
 
     if (!isSkipped) {
-      transcript = generateCallTranscript(spec.type, spec.durationSeconds);
+      transcript = generateCallTranscript(spec.type, spec.durationSeconds, spec.rep, contact?.name || 'Prospect');
       if (spec.score !== null) {
         score = generateCallScore(spec.type);
         coaching = generateCoaching(spec.type);
@@ -1271,6 +1403,7 @@ async function seedCalls(companiesData: any[]) {
       }
     }
 
+    const callDateTime = daysAgo(spec.daysAgo);
     callRecords.push({
       id: callId,
       tenant_id: TENANT_ID,
@@ -1287,7 +1420,8 @@ async function seedCalls(companiesData: any[]) {
       score: score,
       coaching: coaching,
       call_summary: summary || null,
-      called_at: daysAgo(spec.daysAgo).toISOString(),
+      called_at: callDateTime.toISOString(),
+      created_at: callDateTime.toISOString(),
       archived: false,
       outcome: spec.outcome,
       speaker_map: { A: 'rep', B: 'prospect' },
@@ -1315,22 +1449,80 @@ async function seedCallActions(callIds: string[]) {
   const actionTypes = ['send_proposal', 'schedule_followup', 'send_email', 'create_task'];
   const actionRecords: any[] = [];
 
-  // Only for graded calls (first 11)
-  for (let i = 0; i < Math.min(11, callIds.length); i++) {
+  const companyNames = [
+    'Mountain Roofing Co',
+    'Coastal Insurance Group',
+    'Bright Smile Dental',
+    'Apex Auto Detailing',
+    'Northstar HVAC Services',
+    'Riverside Legal LLP',
+    'Thompson HVAC',
+    'GreenLeaf Lawn Care',
+    'Chen Solutions',
+    'Precision Dental Care',
+    'Summit Roofing & Restoration',
+  ];
+
+  // Only for graded calls (where score !== null)
+  let gradedCallIndex = 0;
+  for (let i = 0; i < callIds.length; i++) {
+    const spec = callSpecs[i];
+    if (spec?.score === null) continue; // Skip non-graded calls
+
+    const companyIndex = spec?.companyIndex || i;
+    const companyName = companyNames[companyIndex] || `Company ${i + 1}`;
     const numActions = randomInt(2, 4);
     for (let j = 0; j < numActions; j++) {
       const actionType = randomChoice(actionTypes);
-      const suggested_payload = {
-        action_type: actionType,
-        details: `Action from call ${i + 1}`,
-      };
+      let description = '';
+      let suggested_payload: any = {};
+
+      switch (actionType) {
+        case 'send_proposal':
+          description = `Send proposal to ${companyName} with pricing and timeline`;
+          suggested_payload = {
+            subject: `Company Mind Proposal for ${companyName}`,
+            body: `Dear ${companyName} team,\n\nPlease find attached our proposal with our recommended plan and pricing.\n\nBest regards`,
+            recipient: 'contact@example.com',
+          };
+          break;
+        case 'schedule_followup':
+          const followupDate = new Date(now);
+          followupDate.setDate(followupDate.getDate() + randomInt(3, 7));
+          description = `Schedule follow-up call with ${companyName} to discuss proposal`;
+          suggested_payload = {
+            contact: companyName,
+            date: followupDate.toISOString().split('T')[0],
+            duration: 30,
+            notes: 'Review proposal and address any questions',
+          };
+          break;
+        case 'create_task':
+          description = `Create task: Send proposal follow-up for ${companyName}`;
+          const dueDate = new Date(now);
+          dueDate.setDate(dueDate.getDate() + randomInt(1, 5));
+          suggested_payload = {
+            title: `Follow up on ${companyName} proposal`,
+            assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+            due_date: dueDate.toISOString().split('T')[0],
+          };
+          break;
+        case 'send_email':
+          description = `Send follow-up email to ${companyName} with next steps`;
+          suggested_payload = {
+            subject: `Following Up - ${companyName}`,
+            body: `Hi there,\n\nThank you for the great conversation. I wanted to follow up on our discussion and answer any additional questions.\n\nLooking forward to working together!\n\nBest regards`,
+            recipient: 'contact@example.com',
+          };
+          break;
+      }
 
       actionRecords.push({
         id: crypto.randomUUID(),
         tenant_id: TENANT_ID,
         call_id: callIds[i],
         action_type: actionType,
-        description: `${actionType} - followup action`,
+        description,
         suggested_payload,
         status: randomBool(0.6) ? 'pending' : 'approved',
         priority: randomChoice(['high', 'medium', 'low']),
@@ -1415,12 +1607,38 @@ async function seedDataPoints(companiesData: any[], callIds: string[]) {
 // ============================================================================
 
 async function seedTasks(companiesData: any[]) {
-  console.log('Seeding 15 tasks...');
+  console.log('Seeding tasks...');
 
-  const taskTypes = ['follow_up', 'admin', 'new_lead'];
+  const taskTypes = ['follow_up', 'admin', 'implementation', 'onboarding'];
   const taskRecords: any[] = [];
 
-  // 5 of each type
+  // Add 1-3 tasks per closed company (indices 6-10)
+  const closedCompanyIndices = [6, 7, 8, 9, 10];
+  for (const compIdx of closedCompanyIndices) {
+    const company = companiesData[compIdx];
+    const numTasks = randomInt(1, 3);
+    for (let i = 0; i < numTasks; i++) {
+      const taskType = randomChoice(taskTypes);
+      const daysOut = randomInt(1, 14); // Future tasks for closed companies
+      const dueDate = new Date(now);
+      dueDate.setDate(dueDate.getDate() + daysOut);
+
+      taskRecords.push({
+        id: crypto.randomUUID(),
+        tenant_id: TENANT_ID,
+        contact_id: `demo-${generateSlug(company.name)}-1`,
+        pipeline_stage: 'Closed',
+        task_type: taskType,
+        title: `${taskType.charAt(0).toUpperCase() + taskType.slice(1)} - ${company.name}`,
+        description: `${taskType} task for ${company.name} implementation`,
+        assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+        due_date: dueDate.toISOString().split('T')[0],
+        completed: false,
+      });
+    }
+  }
+
+  // Original distribution: 5 of each type for other companies
   for (let type = 0; type < 3; type++) {
     for (let i = 0; i < 5; i++) {
       const taskType = taskTypes[type];
@@ -1441,7 +1659,12 @@ async function seedTasks(companiesData: any[]) {
       const dueDate = new Date(now);
       dueDate.setDate(dueDate.getDate() + daysOut);
 
-      const companyIndex = (type * 5 + i) % companiesData.length;
+      // Skip closed company indices
+      let companyIndex = (type * 5 + i) % companiesData.length;
+      while (closedCompanyIndices.includes(companyIndex)) {
+        companyIndex = (companyIndex + 1) % companiesData.length;
+      }
+
       const company = companiesData[companyIndex];
       const contact = contactsData.find((c) => c.companyIndex === companyIndex && c.isPrimary);
 
@@ -1449,7 +1672,7 @@ async function seedTasks(companiesData: any[]) {
         id: crypto.randomUUID(),
         tenant_id: TENANT_ID,
         contact_id: `demo-${generateSlug(company.name)}-1`,
-        pipeline_stage: randomChoice(['New Lead', 'Qualification', 'Closing', 'Closed']),
+        pipeline_stage: randomChoice(['New Lead', 'Qualification', 'Closing']),
         task_type: taskType,
         title: `${taskType.charAt(0).toUpperCase() + taskType.slice(1)} - ${company.name}`,
         description: `Task for ${company.name}`,
@@ -1507,7 +1730,7 @@ async function seedActivityFeed(companiesData: any[], callIds: string[]) {
     // Entry count based on stage
     let entryCount = 2;
     if (['Qualification', 'Closing'].includes(currentStage)) entryCount = randomInt(3, 4);
-    if (['Closed', 'Operating'].includes(currentStage)) entryCount = randomInt(7, 8);
+    if (['Closed', 'Operating'].includes(currentStage)) entryCount = randomInt(5, 8);
     if (['Nurture', 'Dead'].includes(currentStage)) entryCount = randomInt(4, 5);
 
     for (let i = 0; i < entryCount; i++) {
@@ -1546,6 +1769,14 @@ async function seedActivityFeed(companiesData: any[], callIds: string[]) {
           break;
       }
 
+      // Spread activity realistically: newer entries for later-stage companies
+      let daysBack = randomInt(1, 30);
+      if (['Closed', 'Operating'].includes(currentStage)) {
+        daysBack = randomInt(1, 14); // More recent activity for closed companies
+      } else if (['Qualification', 'Closing'].includes(currentStage)) {
+        daysBack = randomInt(1, 20);
+      }
+
       activityRecords.push({
         id: crypto.randomUUID(),
         tenant_id: TENANT_ID,
@@ -1553,7 +1784,7 @@ async function seedActivityFeed(companiesData: any[], callIds: string[]) {
         type: activityType,
         content,
         author: randomChoice(authors),
-        created_at: daysAgo(randomInt(1, 30)).toISOString(),
+        created_at: daysAgo(daysBack).toISOString(),
       });
     }
   }
@@ -1583,6 +1814,7 @@ async function seedInbox(companiesData: any[]) {
   const messageRecords: any[] = [];
 
   // 12 conversations
+  const closedCompanyIndices = [6, 7, 8, 9, 10];
   for (let i = 0; i < 12; i++) {
     const companyIndex = Math.floor(Math.random() * companiesData.length);
     const company = companiesData[companyIndex];
@@ -1590,7 +1822,7 @@ async function seedInbox(companiesData: any[]) {
     const channel = channels[i];
 
     const convId = crypto.randomUUID();
-    const lastMessageDate = daysAgo(randomInt(0, 14));
+    const lastMessageDate = daysAgo(randomInt(0, 1)); // Today or yesterday only
 
     // Determine conversation state
     let unreadCount = 0;
@@ -1621,11 +1853,12 @@ async function seedInbox(companiesData: any[]) {
       unread_count: unreadCount,
     });
 
-    // 3-8 messages per conversation
-    const numMessages = randomInt(3, 8);
+    // More messages for closed company conversations (8-12), fewer for others (3-8)
+    const isClosed = closedCompanyIndices.includes(companyIndex);
+    const numMessages = isClosed ? randomInt(8, 12) : randomInt(3, 8);
     for (let j = 0; j < numMessages; j++) {
       const isInbound = j % 2 === 0;
-      const messageDate = daysAgo(Math.max(0, randomInt(0, 14) - j));
+      const messageDate = daysAgo(Math.max(0, randomInt(0, 1))); // Today or yesterday only
 
       messageRecords.push({
         id: crypto.randomUUID(),
@@ -1633,7 +1866,7 @@ async function seedInbox(companiesData: any[]) {
         conversation_id: convId,
         direction: isInbound ? 'inbound' : 'outbound',
         channel,
-        body: isInbound ? `Message from prospect: ${randomChoice(['Interested', 'Can you send more info?', 'Call tomorrow?'])}` : `Response to prospect: ${randomChoice(['Great to hear!', 'Sending details now', 'Looking forward to it'])}`,
+        body: isInbound ? randomChoice(['Interested', 'Can you send more info?', 'Call tomorrow?']) : randomChoice(['Great to hear!', 'Sending details now', 'Looking forward to it']),
         sent_at: messageDate.toISOString(),
         read: !isInbound || Math.random() > 0.3,
       });
@@ -1704,6 +1937,7 @@ async function seedAppointments(companiesData: any[]) {
       ends_at: endDate.toISOString(),
       status: 'confirmed',
       assigned_to: randomChoice(['pablo.martin.miro@gmail.com', 'corey@getgunner.ai']),
+      meeting_url: `https://meet.google.com/${randomMeetSlug()}`,
     });
   }
 

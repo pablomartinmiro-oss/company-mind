@@ -6,7 +6,23 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Demo Seed v2 (2026-04-08)
+## Latest: Mega Fix — Seed v3 + UI Fixes (2026-04-08)
+
+- Seed v3: 26 calls (was 15), 24 tasks (was 15), 67 call actions (was 33), 1631 research (was 1316)
+- Closed companies get 2-4 calls, 8-12 inbox messages, richer transcripts with real names
+- Call actions have realistic suggested_payload (send_proposal, schedule_followup, etc.)
+- Coaching JSONB now includes red_flags array + improvement tips
+- Score criteria on 1-10 scale
+- Appointments panel: type-colored pills (Qualification Call, Closing Call, etc.) + Join meeting button
+- Pipeline stats: Total MRR now sums only Sales→Closed companies, formatted with commas
+- Active Deals excludes Closed/Dead/Nurture stages; Closing Soon = stage='Closing' only
+- Activity feed fix: company detail page now fetches activity for ALL contacts in company (was empty)
+- Call detail tabs: transcript parser handles [HH:MM:SS] Name: format, coaching shows red_flags, improvements show tips
+- Data points: field names formatted (why_now → Why Now)
+- Task list: expanded view shows team member name (not email)
+- Pipeline config: added send_proposal/schedule_followup/create_task/send_email to NEXT_STEP constants
+
+## Demo Seed v2 (2026-04-08)
 
 - Wiped all demo data, reseeded 16 companies
 - Story-driven distribution: 2 New Lead, 2 Qual, 2 Closing, 5 Closed, 3 Nurture, 2 Dead

@@ -78,6 +78,7 @@ interface Props {
   teamMembers: { name: string; initials: string; role: string }[];
   companyResearch: Record<string, { value: string; source: string; source_detail?: string }>;
   contactResearchMap: Record<string, Record<string, { value: string; source: string; source_detail?: string }>>;
+  activity: { id: string; type: string; content: Record<string, unknown> | null; author: string | null; created_at: string }[];
 }
 
 const TABS = ['Overview', 'Activity', 'Research'] as const;
@@ -306,7 +307,7 @@ export function CompanyDetailClient(props: Props) {
           )}
 
           {activeTab === 'Activity' && (
-            <ActivityFeed contactId={props.companyId} initialEntries={[]} />
+            <ActivityFeed contactId={contactsState[0]?.contact_id ?? props.companyId} initialEntries={props.activity} />
           )}
 
           {activeTab === 'Research' && (

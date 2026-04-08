@@ -32,7 +32,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   const contactIds = contacts.map((c: { contact_id: string }) => c.contact_id);
 
   // Fetch contact names, calls, tasks, data points in parallel
-  const [callNamesRes, callsRes, tasksRes, dataPointsRes, allContactResearchRes] = await Promise.all([
+  const [callNamesRes, callsRes, tasksRes, dataPointsRes, allContactResearchRes, activityRes] = await Promise.all([
     contactIds.length > 0
       ? supabaseAdmin.from('calls').select('contact_ghl_id, contact_name').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
       : Promise.resolve({ data: [] }),
@@ -45,6 +45,9 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     Promise.resolve({ data: [] }), // was contact_data_points — migrated to company_contacts JOIN
     contactIds.length > 0
       ? supabaseAdmin.from('research').select('*').eq('tenant_id', tenantId).eq('scope', 'contact').in('contact_id', contactIds)
+      : Promise.resolve({ data: [] }),
+    contactIds.length > 0
+      ? supabaseAdmin.from('activity_feed').select('*').eq('tenant_id', tenantId).in('contact_id', contactIds).order('created_at', { ascending: false }).limit(50)
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -135,6 +138,15 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   // Team members
   const teamMembers = TEAM_MEMBERS.map((m) => ({ name: m.name, initials: m.initials, role: 'Rep' }));
 
+  // Activity feed for all contacts in this company
+  const activity = (activityRes.data ?? []).map((a: { id: string; type: string; content: Record<string, unknown> | null; author: string | null; created_at: string }) => ({
+    id: a.id,
+    type: a.type,
+    content: a.content,
+    author: a.author,
+    created_at: a.created_at,
+  }));
+
   return (
     <CompanyDetailClient
       companyId={companyId}
@@ -153,6 +165,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       teamMembers={teamMembers}
       companyResearch={companyResearch}
       contactResearchMap={contactResearchMap}
+      activity={activity}
     />
   );
 }

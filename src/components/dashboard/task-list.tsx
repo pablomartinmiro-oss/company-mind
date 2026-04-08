@@ -396,11 +396,14 @@ export function TaskList({ initialTasks }: Props) {
                         <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${typeClass}`}>
                           {typeLabel}
                         </span>
-                        {task.assigned_to && (
-                          <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-blue-100/60 text-blue-700 border border-blue-200/40">
-                            @{task.assigned_to}
-                          </span>
-                        )}
+                        {task.assigned_to && (() => {
+                          const m = getTeamMember(task.assigned_to);
+                          return (
+                            <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${m.pillClass}`}>
+                              {m.name}
+                            </span>
+                          );
+                        })()}
                         {stages && stages.length > 0 && (
                           <span className="text-[10px] text-zinc-400">
                             · {stages[0].pipeline_name}

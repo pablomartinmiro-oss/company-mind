@@ -20,6 +20,10 @@ interface Props {
   callId: string;
 }
 
+function formatFieldName(name: string): string {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function timeAgo(dateStr: string): string {
   const ms = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(ms / 60000);
@@ -358,7 +362,7 @@ function DataPointCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium text-[#1a1a1a]">{dp.field_name}</span>
+            <span className="text-[13px] font-medium text-[#1a1a1a]">{formatFieldName(dp.field_name)}</span>
             <span className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-blue-50/80 text-blue-700 border border-blue-200/60">
               AI
             </span>

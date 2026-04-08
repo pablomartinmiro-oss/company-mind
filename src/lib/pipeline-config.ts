@@ -118,17 +118,25 @@ export const TASK_TYPE_PILL: Record<string, string> = {
 };
 
 export const NEXT_STEP_TYPE_LABELS: Record<string, string> = {
-  follow_up:  'Follow Up',
-  scheduling: 'Scheduling',
-  admin:      'Admin',
-  new_lead:   'New Lead',
+  follow_up:          'Follow Up',
+  scheduling:         'Scheduling',
+  admin:              'Admin',
+  new_lead:           'New Lead',
+  send_proposal:      'Send Proposal',
+  schedule_followup:  'Schedule Followup',
+  create_task:        'Create Task',
+  send_email:         'Send Email',
 };
 
 export const NEXT_STEP_TYPE_PILL: Record<string, string> = {
-  follow_up:  'bg-amber-50 text-amber-700 border border-amber-200',
-  scheduling: 'bg-blue-50 text-blue-700 border border-blue-200',
-  admin:      'bg-zinc-100 text-zinc-500 border border-zinc-200',
-  new_lead:   'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  follow_up:          'bg-amber-50 text-amber-700 border border-amber-200',
+  scheduling:         'bg-blue-50 text-blue-700 border border-blue-200',
+  admin:              'bg-zinc-100 text-zinc-500 border border-zinc-200',
+  new_lead:           'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  send_proposal:      'bg-violet-50/80 text-violet-700 border border-violet-200/60',
+  schedule_followup:  'bg-blue-50/80 text-blue-700 border border-blue-200/60',
+  create_task:        'bg-amber-50/80 text-amber-700 border border-amber-200/60',
+  send_email:         'bg-teal-50/80 text-teal-700 border border-teal-200/60',
 };
 
 export const ACTION_TYPE_CONFIG: Record<string, { label: string; pillClass: string; icon: string }> = {
