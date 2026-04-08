@@ -43,9 +43,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     contactIds.length > 0
       ? supabaseAdmin.from('tasks').select('*').eq('tenant_id', tenantId).in('contact_id', contactIds).order('due_date', { ascending: true, nullsFirst: false })
       : Promise.resolve({ data: [] }),
-    contactIds.length > 0
-      ? supabaseAdmin.from('contact_data_points').select('contact_ghl_id, field_name, field_value').eq('tenant_id', tenantId).in('contact_ghl_id', contactIds)
-      : Promise.resolve({ data: [] }),
+    Promise.resolve({ data: [] }), // was contact_data_points — migrated to company_contacts JOIN
     contactIds.length > 0
       ? supabaseAdmin.from('research').select('*').eq('tenant_id', tenantId).eq('scope', 'contact').in('contact_id', contactIds)
       : Promise.resolve({ data: [] }),
@@ -55,12 +53,8 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   const nameMap: Record<string, string> = {};
   for (const c of callNamesRes.data ?? []) nameMap[c.contact_ghl_id] = c.contact_name;
 
-  // Data points map (for contact details + company research population)
+  // Legacy dpMap removed — contact email/phone now from company_contacts directly
   const dpMap: Record<string, Record<string, string>> = {};
-  for (const dp of dataPointsRes.data ?? []) {
-    if (!dpMap[dp.contact_ghl_id]) dpMap[dp.contact_ghl_id] = {};
-    dpMap[dp.contact_ghl_id][dp.field_name] = dp.field_value;
-  }
 
   // Contact research — flat map per contact_id keyed by field_name
   const contactResearchMap: Record<string, Record<string, { value: string; source: string; source_detail?: string }>> = {};
@@ -118,33 +112,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     }
   }
 
-  // Also populate from contact_data_points of primary contact (map old keys → catalog keys)
-  const primaryContactId = contacts.find((c: { is_primary: boolean }) => c.is_primary)?.contact_id ?? contactIds[0];
-  const primaryDPs = primaryContactId ? dpMap[primaryContactId] ?? {} : {};
-
-  const dpToCatalog: Record<string, string> = {
-    industry: 'industry_primary',
-    employees: 'employees_range',
-    annual_revenue: 'revenue_range',
-    years_in_business: 'year_founded',
-    website: 'domain',
-    location: 'city',
-    primary_pain: 'primary_pain_stated',
-    current_crm: 'crm_current',
-    lead_volume: 'monthly_lead_volume',
-    monthly_ad_spend: 'monthly_ad_spend',
-    budget_range: 'budget_range_stated',
-    timeline: 'timeline_stated',
-    key_objections: 'key_objections',
-    competitor_alternatives: 'competitor_alternatives',
-    overall_fit: 'fit_score',
-  };
-
-  for (const [dpKey, catalogKey] of Object.entries(dpToCatalog)) {
-    if (primaryDPs[dpKey] && !companyResearch[catalogKey]) {
-      companyResearch[catalogKey] = { value: primaryDPs[dpKey], source: 'api' };
-    }
-  }
+  // Legacy dpToCatalog mapping removed — research table is now the source of truth
 
   // Calls for overview
   const calls = (callsRes.data ?? []).map((c) => ({
@@ -172,10 +140,10 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     <CompanyDetailClient
       companyId={companyId}
       companyName={company.name}
-      industry={company.industry ?? primaryDPs.industry ?? null}
+      industry={company.industry ?? null}
       leadSource={company.lead_source ?? null}
-      location={company.location ?? primaryDPs.location ?? null}
-      website={company.website ?? primaryDPs.website ?? null}
+      location={company.location ?? null}
+      website={company.website ?? null}
       mrr={company.mrr ?? 0}
       setupFee={company.setup_fee ?? 0}
       enrollments={enrollments}

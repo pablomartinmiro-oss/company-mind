@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { ContactDetailClient } from '@/components/contact/contact-detail-client';
 import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 import { getTenantForUser } from '@/lib/get-tenant';
+import { getContactInfo } from '@/lib/lookups';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,16 +22,20 @@ export default async function ContactDetailPage({ params }: PageProps) {
     supabaseAdmin.from('tasks').select('*').eq('tenant_id', tenantId).eq('contact_id', contactId).order('due_date', { ascending: true, nullsFirst: false }),
     supabaseAdmin.from('activity_feed').select('*').eq('tenant_id', tenantId).eq('contact_id', contactId).order('created_at', { ascending: false }),
     supabaseAdmin.from('research').select('section, field_name, field_value, source').eq('tenant_id', tenantId).eq('contact_id', contactId),
-    supabaseAdmin.from('contact_data_points').select('field_name, field_value').eq('tenant_id', tenantId).eq('contact_ghl_id', contactId),
+    getContactInfo(tenantId, contactId).then(info => ({ data: info })),
   ]);
 
   const calls = callsRes.data ?? [];
   const contactName = calls[0]?.contact_name ?? contactId;
 
-  // Data points for contact info
+  // Contact info from company_contacts → companies JOIN
+  const contactInfo = dataPointsRes.data;
   const dpMap: Record<string, string> = {};
-  for (const dp of dataPointsRes.data ?? []) {
-    dpMap[dp.field_name] = dp.field_value;
+  if (contactInfo) {
+    if (contactInfo.contact_phone) dpMap.phone = contactInfo.contact_phone;
+    if (contactInfo.contact_email) dpMap.email = contactInfo.contact_email;
+    if (contactInfo.company_name) dpMap.company_name = contactInfo.company_name;
+    if (contactInfo.company_location) dpMap.address = contactInfo.company_location;
   }
 
   // Pipeline enrollments with stage log

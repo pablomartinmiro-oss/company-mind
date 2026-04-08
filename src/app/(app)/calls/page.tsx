@@ -6,6 +6,7 @@ import { CALL_TYPE_LABELS, CALL_TYPE_PILL, OUTCOME_LABELS, OUTCOME_PILL } from '
 import { StatCard } from '@/components/ui/stat-card';
 import { CallFilters } from '@/components/calls/call-filters';
 import { getTenantForUser } from '@/lib/get-tenant';
+import { getContactInfoBatch } from '@/lib/lookups';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,20 +109,14 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   };
 
   const contactIds = [...new Set((calls ?? []).map((c: CallRow) => c.contact_ghl_id).filter(Boolean))];
-  const { data: dataPoints } = contactIds.length > 0
-    ? await supabaseAdmin
-        .from('contact_data_points')
-        .select('contact_ghl_id, field_name, field_value')
-        .eq('tenant_id', tenantId)
-        .in('contact_ghl_id', contactIds)
-        .in('field_name', ['company_name', 'address'])
-    : { data: [] };
+  const contactInfoMap = await getContactInfoBatch(tenantId, contactIds);
 
   const dpMap: Record<string, { company?: string; address?: string }> = {};
-  for (const dp of dataPoints ?? []) {
-    if (!dpMap[dp.contact_ghl_id]) dpMap[dp.contact_ghl_id] = {};
-    if (dp.field_name === 'company_name') dpMap[dp.contact_ghl_id].company = dp.field_value;
-    if (dp.field_name === 'address') dpMap[dp.contact_ghl_id].address = dp.field_value;
+  for (const [id, info] of contactInfoMap) {
+    dpMap[id] = {
+      company: info.company_name ?? undefined,
+      address: info.company_location ?? undefined,
+    };
   }
 
   if (error) {

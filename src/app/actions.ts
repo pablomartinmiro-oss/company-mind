@@ -8,10 +8,19 @@ import { findSectionForField } from '@/lib/ai/helpers';
 export async function approveAction(actionId: string) {
   const { tenantId } = await getTenantForUser();
 
+  const { data: action } = await supabaseAdmin
+    .from('call_actions')
+    .select('id')
+    .eq('id', actionId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (!action) throw new Error('Action not found or access denied');
+
   await supabaseAdmin
     .from('call_actions')
     .update({ status: 'approved' })
-    .eq('id', actionId);
+    .eq('id', actionId)
+    .eq('tenant_id', tenantId);
 
   await supabaseAdmin.from('feedback_log').insert({
     tenant_id: tenantId,
@@ -27,10 +36,19 @@ export async function approveAction(actionId: string) {
 export async function rejectAction(actionId: string) {
   const { tenantId } = await getTenantForUser();
 
+  const { data: action } = await supabaseAdmin
+    .from('call_actions')
+    .select('id')
+    .eq('id', actionId)
+    .eq('tenant_id', tenantId)
+    .single();
+  if (!action) throw new Error('Action not found or access denied');
+
   await supabaseAdmin
     .from('call_actions')
     .update({ status: 'rejected' })
-    .eq('id', actionId);
+    .eq('id', actionId)
+    .eq('tenant_id', tenantId);
 
   await supabaseAdmin.from('feedback_log').insert({
     tenant_id: tenantId,

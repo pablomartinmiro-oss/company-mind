@@ -7,6 +7,7 @@ import { AppointmentsPanel } from '@/components/dashboard/appointments-panel';
 import { TaskList } from '@/components/dashboard/task-list';
 import { StatCards } from '@/components/dashboard/stat-cards';
 import { getTenantForUser } from '@/lib/get-tenant';
+import { getContactInfoBatch } from '@/lib/lookups';
 
 export default async function DashboardPage() {
   const { tenantId } = await getTenantForUser();
@@ -78,14 +79,11 @@ export default async function DashboardPage() {
     nameMap[c.contact_ghl_id] = c.contact_name;
   }
 
-  // Company names from data points
-  const { data: companyDPs } = allContactIds.length > 0
-    ? await supabaseAdmin.from('contact_data_points').select('contact_ghl_id, field_value').eq('tenant_id', tenantId).in('contact_ghl_id', allContactIds).eq('field_name', 'company_name')
-    : { data: [] };
-
+  // Company names from company_contacts → companies JOIN
+  const contactInfoMap = await getContactInfoBatch(tenantId, allContactIds);
   const companyMap: Record<string, string> = {};
-  for (const dp of companyDPs ?? []) {
-    companyMap[dp.contact_ghl_id] = dp.field_value;
+  for (const [id, info] of contactInfoMap) {
+    if (info.company_name) companyMap[id] = info.company_name;
   }
 
   const tasks = (taskRes.data ?? []).map((t: Record<string, unknown>) => ({
