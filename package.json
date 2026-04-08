@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx scripts/seed-demo.ts",
+    "seed:demo": "npx tsx scripts/seed-demo-v2.ts",
     "fix-seed": "npx tsx scripts/fix-seed-data.ts",
     "create-auth-users": "npx tsx scripts/create-auth-users.ts"
   },

@@ -6,7 +6,20 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Demo Prep — Inbox/Appointments Tables + Stage Log Caution (2026-04-08)
+## Latest: Demo Seed v2 (2026-04-08)
+
+- Wiped all demo data, reseeded 16 companies
+- Story-driven distribution: 2 New Lead, 2 Qual, 2 Closing, 5 Closed, 3 Nurture, 2 Dead
+- Sales Closed companies dual-enrolled in Onboarding + Upsell
+- Follow Up companies retain historical Sales stage_log
+- Research distribution: 5 fully baked at 92 company fields, others scaled by stage (981 total)
+- 15 calls (11 graded, 2 summary, 2 skipped), 15 tasks, 222 data points
+- 12 inbox conversations + 63 messages, 20 appointments
+- 30 call_actions, 75 activity_feed entries, 61 stage_log entries
+- Intentional missing log on Thompson HVAC Sales Qualification (caution badge test)
+- Script: scripts/seed-demo-v2.ts, run via `npm run seed:demo`
+
+## Demo Prep — Inbox/Appointments Tables + Stage Log Caution (2026-04-08)
 
 - New tables: inbox_conversations, inbox_messages, appointments (migration: 20260408_demo_inbox_appointments.sql, run against prod)
 - API fallback: /api/inbox and /api/appointments now read local DB when GHL unavailable (isGhlAuthError helper in src/lib/ghl-errors.ts)
