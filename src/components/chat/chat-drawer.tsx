@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import type { UIMessage } from 'ai';
+import { MarkdownMessage } from './markdown-message';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -260,8 +261,8 @@ function MessageBubble({ message }: { message: UIMessage }) {
         {message.parts.map((part, i) => {
           if (part.type === 'text') {
             return (
-              <div key={i} className="whitespace-pre-wrap break-words">
-                {part.text}
+              <div key={i} className="break-words">
+                <MarkdownMessage text={part.text} />
               </div>
             );
           }
