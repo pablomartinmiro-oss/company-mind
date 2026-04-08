@@ -4,7 +4,7 @@ import { getTenantForUser } from '@/lib/get-tenant';
 
 export async function POST(req: NextRequest) {
   try {
-    const { tenantId, email } = await getTenantForUser();
+    const { tenantId, userName } = await getTenantForUser();
     const { contactId, content, type } = await req.json();
 
     const { data, error } = await supabaseAdmin
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         contact_id: contactId,
         type: type ?? 'note',
         content: { text: content },
-        author: email ?? 'Unknown',
+        author: userName,
       })
       .select()
       .single();

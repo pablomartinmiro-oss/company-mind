@@ -156,9 +156,9 @@ export function ContactDetailClient(props: Props) {
 
       {/* Tab content */}
       {activeTab === 'Overview' && (
-        <div className="grid grid-cols-[300px_1fr] gap-5">
+        <div className="grid grid-cols-[300px_1fr] gap-5 max-w-full overflow-hidden">
           {/* Left column */}
-          <div>
+          <div className="min-w-0">
             {/* Contacts */}
             <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-2">Contacts</h3>
             <div className="border border-white/40 rounded-lg p-3 mb-1.5">
@@ -195,7 +195,7 @@ export function ContactDetailClient(props: Props) {
           </div>
 
           {/* Right column */}
-          <div>
+          <div className="min-w-0">
             {/* Graded calls */}
             <div className="flex items-center gap-1.5 mb-2">
               <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Graded Calls</h3>

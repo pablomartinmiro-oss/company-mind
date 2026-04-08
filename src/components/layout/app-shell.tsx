@@ -42,8 +42,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <AiBar />
           </div>
 
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-8 py-6">
+          {/* Scrollable content — pb-24 clears floating AI button */}
+          <div className="flex-1 overflow-y-auto px-8 pt-6 pb-24">
             {children}
           </div>
         </main>
