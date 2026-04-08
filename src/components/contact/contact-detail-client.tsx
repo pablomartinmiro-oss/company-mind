@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { PipelineTracker } from './pipeline-tracker';
+import { DealCard } from './deal-card';
+import { CompanyDetailsCard } from './company-details-card';
 import { ActivityFeed } from './activity-feed';
 import { ResearchTab } from './research-tab';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
 import { scoreGrade, scoreBg, scoreColor } from '@/lib/format';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-react';
+import { ReEnrichButton } from '@/components/company/re-enrich-button';
 
 interface StageLogEntry {
   id: string;
@@ -76,6 +79,7 @@ interface Props {
   contactDetails: { label: string; value: string }[];
   contactRole?: string | null;
   appointments?: { id: string; contactName: string; type: string; startTime: string; status: string }[];
+  company?: { id: string; name: string; mrr: number | null; setup_fee: number | null; website: string | null; location: string | null; industry: string | null; lead_source: string | null } | null;
 }
 
 const TABS = ['Overview', 'Activity', 'Research'] as const;
@@ -86,56 +90,62 @@ export function ContactDetailClient(props: Props) {
 
   return (
     <div className="p-5 animate-fade-in">
-      {/* Unified frosted glass header card */}
-      <div className="relative glass-card rounded-3xl overflow-hidden mb-5">
+      {/* ══ HEADER — frosted glass ══ */}
+      <div className="relative glass-card rounded-3xl overflow-hidden mb-4">
         <div className="glass-card-inner" />
         <div className="relative">
-          {/* Top section: back + name + meta + actions */}
           <div className="px-6 py-5 border-b border-white/40">
             <Link href="/companies" className="text-[12px] text-zinc-500 hover:text-zinc-800 mb-3 inline-flex items-center gap-1.5">
-              <ArrowLeft className="h-3 w-3" /> Back to companies
+              <ArrowLeft className="h-3 w-3" /> Back to pipeline
             </Link>
 
+            {/* Top row: company name + actions */}
             <div className="flex items-start justify-between gap-4 mt-2">
               <div>
-                <h1 className="text-[24px] font-semibold tracking-tight text-[#1a1a1a] leading-tight">{props.contactName}</h1>
-                {(props.companyName || props.location) && (
-                  <p className="text-[14px] text-zinc-500 mt-1">
-                    {props.companyName}{props.companyName && props.location ? ' · ' : ''}{props.location}
-                  </p>
+                <h1 className="text-[24px] font-medium text-[#1a1a1a] leading-tight">
+                  {props.companyName ?? props.contactName}
+                </h1>
+                {props.companyName && (
+                  <p className="text-[14px] text-[#52525b] mt-1">{props.contactName}</p>
                 )}
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  {props.enrollments.map((e) => (
-                    <span
-                      key={e.pipelineId}
-                      className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
-                    >
-                      {e.pipelineName} · {e.currentStage}
-                    </span>
-                  ))}
-                  <span className="text-[11px] text-zinc-400 font-mono">
-                    {props.daysInStage}d in stage
-                  </span>
-                  {props.callType && (
-                    <span className="text-[11px] text-zinc-500">· {props.callType}</span>
-                  )}
-                </div>
               </div>
-
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {props.company && <ReEnrichButton companyId={props.company.id} />}
                 <button className="text-[12px] font-medium px-4 py-2 rounded-full bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/80 flex items-center gap-1.5">
                   GHL <ExternalLink className="h-3 w-3" />
                 </button>
               </div>
             </div>
+
+            {/* Pill row: pipeline stages + industry + lead source */}
+            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+              {props.enrollments.map((e) => (
+                <span
+                  key={e.pipelineId}
+                  className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${STAGE_PILL_CLASSES[e.currentStage] ?? 'bg-zinc-100 text-zinc-500'}`}
+                >
+                  {e.pipelineName} · {e.currentStage}
+                </span>
+              ))}
+              {props.company?.industry && (
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-blue-50/80 text-blue-700 border border-blue-200/60">
+                  {props.company.industry}
+                </span>
+              )}
+              {props.company?.lead_source && (
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-violet-50/80 text-violet-700 border border-violet-200/60">
+                  {props.company.lead_source}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Pipeline tracker inside the card */}
+          {/* Pipeline tracker */}
           <div className="px-6 py-4 border-b border-white/40">
             <PipelineTracker enrollments={props.enrollments} />
           </div>
 
-          {/* Tabs inside the card */}
+          {/* Tabs */}
           <div className="flex px-6">
             {TABS.map((tab) => (
               <button
@@ -153,6 +163,29 @@ export function ContactDetailClient(props: Props) {
           </div>
         </div>
       </div>
+
+      {/* ══ DEAL + COMPANY CARDS ══ */}
+      {props.company ? (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <DealCard
+            companyId={props.company.id}
+            mrr={props.company.mrr}
+            setupFee={props.company.setup_fee}
+          />
+          <CompanyDetailsCard
+            companyId={props.company.id}
+            website={props.company.website}
+            location={props.company.location}
+            industry={props.company.industry}
+            leadSource={props.company.lead_source}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <DealCard companyId={null} mrr={null} setupFee={null} />
+          <CompanyDetailsCard companyId={null} website={null} location={null} industry={null} leadSource={null} />
+        </div>
+      )}
 
       {/* Tab content */}
       {activeTab === 'Overview' && (

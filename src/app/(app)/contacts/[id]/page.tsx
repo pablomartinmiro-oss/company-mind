@@ -124,6 +124,18 @@ export default async function ContactDetailPage({ params }: PageProps) {
   if (dpMap.email) contactDetails.push({ label: 'Email', value: dpMap.email });
   if (dpMap.address) contactDetails.push({ label: 'Address', value: dpMap.address });
 
+  // Fetch company data for deal + details cards
+  let companyData: { id: string; name: string; mrr: number | null; setup_fee: number | null; website: string | null; location: string | null; industry: string | null; lead_source: string | null } | null = null;
+  if (contactInfo?.company_id) {
+    const { data: company } = await supabaseAdmin
+      .from('companies')
+      .select('id, name, mrr, setup_fee, website, location, industry, lead_source')
+      .eq('id', contactInfo.company_id)
+      .eq('tenant_id', tenantId)
+      .single();
+    companyData = company;
+  }
+
   const teamMembers = TEAM_MEMBERS.map((m) => ({ name: m.name, initials: m.initials, role: 'Rep' }));
 
   // Fetch appointments for this contact via internal API
@@ -138,8 +150,8 @@ export default async function ContactDetailPage({ params }: PageProps) {
     <ContactDetailClient
       contactId={contactId}
       contactName={contactName}
-      companyName={dpMap.company_name ?? null}
-      location={dpMap.address ?? dpMap.location ?? null}
+      companyName={companyData?.name ?? dpMap.company_name ?? null}
+      location={companyData?.location ?? dpMap.address ?? null}
       currentStage={currentStage}
       daysInStage={daysInStage}
       callType={calls[0]?.call_type ?? null}
@@ -152,6 +164,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
       teamMembers={teamMembers}
       contactDetails={contactDetails}
       appointments={appointments}
+      company={companyData}
     />
   );
 }

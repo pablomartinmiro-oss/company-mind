@@ -177,6 +177,11 @@ export const SALES_RESEARCH_SECTIONS: Record<string, string[]> = {
   'Sales Context':  ['Referral source','Last call score','Overall fit','Next step agreed','Notes'],
 };
 
+export const LEAD_SOURCES = [
+  'Google Ads', 'Facebook Ads', 'Referral', 'Cold outbound',
+  'Trade show', 'Inbound website', 'Other',
+] as const;
+
 export const ONBOARDING_RESEARCH_SECTIONS: Record<string, string[]> = {
   'Account Setup':    ['GHL sub-account ID','Sub-account name','Domain','Billing status','Plan tier','Contract start date'],
   'Technical Setup':  ['Phone number provisioned','CRM data imported','Team members added','Call recording enabled','First pipeline configured','AI scoring activated'],

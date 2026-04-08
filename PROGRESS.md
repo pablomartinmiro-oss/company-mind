@@ -6,7 +6,19 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: QA Cleanup (2026-04-08)
+## Latest: Contact Header Rebuild (2026-04-08)
+
+- New `src/components/contact/deal-card.tsx` — MRR (editable), ARR (calculated), Setup fee (editable)
+- New `src/components/contact/company-details-card.tsx` — Website, Location, Industry (text), Lead Source (select)
+- Both use frosted glass card with inline editing, save to PATCH /api/companies/[id]
+- Added LEAD_SOURCES constant to pipeline-config.ts
+- Rebuilt contact detail header: company name prominent, contact name below, pipeline + industry + lead source pills
+- Removed old badge row (call type, days in stage)
+- Re-enrich button moved to header (was only on company detail)
+- Server page fetches company row and passes as `company` prop
+- Contacts with no linked company get placeholder cards with disabled inputs
+
+## QA Cleanup (2026-04-08)
 
 - P0-1: Added notFound() to contacts/[id] + frosted not-found.tsx page
 - P0-2: Replaced inline error div with notFound() in companies/[id] + not-found.tsx + loading.tsx
