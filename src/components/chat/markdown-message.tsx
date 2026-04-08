@@ -7,7 +7,7 @@ type Props = { text: string };
 
 export function MarkdownMessage({ text }: Props) {
   return (
-    <div className="text-[13px] leading-relaxed">
+    <div className="text-[12px] leading-[1.55]">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -21,16 +21,16 @@ export function MarkdownMessage({ text }: Props) {
             <ol className="list-decimal pl-4 mb-2 last:mb-0 space-y-0.5">{children}</ol>
           ),
           li: ({ children }) => (
-            <li className="text-[13px] leading-relaxed">{children}</li>
+            <li className="text-[12px] leading-[1.55]">{children}</li>
           ),
           h1: ({ children }) => (
-            <h1 className="text-[15px] font-semibold text-[#1a1a1a] mb-2 mt-1">{children}</h1>
+            <h1 className="text-[14px] font-semibold text-[#1a1a1a] mb-2 mt-1">{children}</h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-[14px] font-semibold text-[#1a1a1a] mb-1.5 mt-1">{children}</h2>
+            <h2 className="text-[13px] font-semibold text-[#1a1a1a] mb-1.5 mt-1">{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-[13px] font-semibold text-[#1a1a1a] mb-1">{children}</h3>
+            <h3 className="text-[12px] font-semibold text-[#1a1a1a] mb-1">{children}</h3>
           ),
           strong: ({ children }) => (
             <strong className="font-semibold text-[#1a1a1a]">{children}</strong>
@@ -39,7 +39,7 @@ export function MarkdownMessage({ text }: Props) {
             <em className="italic">{children}</em>
           ),
           code: ({ children }) => (
-            <code className="px-1 py-0.5 rounded bg-white/60 border border-white/60 font-mono text-[11px]">
+            <code className="px-1 py-0.5 rounded bg-white/60 border border-white/60 font-mono text-[10px]">
               {children}
             </code>
           ),

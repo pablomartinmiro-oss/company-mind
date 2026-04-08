@@ -54,6 +54,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
 
   const pathname = usePathname();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const contextRef = useRef(getPageContext(pathname));
@@ -81,12 +82,10 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
 
   const isStreaming = status === 'streaming' || status === 'submitted';
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages + during streaming
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, status]);
 
   // Focus input when drawer opens
   useEffect(() => {
@@ -209,6 +208,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
               {error.message || 'Something went wrong.'}
             </div>
           )}
+          <div ref={bottomRef} />
         </div>
 
         {/* Input area */}

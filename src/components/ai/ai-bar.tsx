@@ -10,6 +10,19 @@ export function AiBar() {
   const [isListening, setIsListening] = useState(false);
   const [supported, setSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Cmd+K focuses the AI bar
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -59,12 +72,14 @@ export function AiBar() {
       <div className="relative flex items-center gap-2 bg-white/60 backdrop-blur-xl backdrop-saturate-150 border border-white/70 rounded-full shadow-[0_2px_8px_rgba(28,25,22,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] px-4 py-2 transition-all duration-150 focus-within:bg-white/80 focus-within:shadow-[0_4px_16px_rgba(28,25,22,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
         <Sparkles className="w-4 h-4 text-[#ff6a3d] flex-shrink-0" />
         <input
+          ref={inputRef}
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={isListening ? 'Listening…' : 'Ask Scout anything…'}
           className="flex-1 bg-transparent border-none outline-none text-[13px] text-[#1a1a1a] placeholder:text-zinc-400"
         />
+        <span className="text-[10px] text-[#71717a] font-mono flex-shrink-0 mr-1">⌘K</span>
         {supported && (
           <button
             type="button"
