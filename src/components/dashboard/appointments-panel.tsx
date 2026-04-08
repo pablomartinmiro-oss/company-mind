@@ -51,7 +51,7 @@ export function AppointmentsPanel() {
       const data = await res.json();
       const list: Appointment[] = Array.isArray(data) ? data : [];
       // Client-side sort as safety net
-      list.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      list.sort((a, b) => (new Date(a.startTime || 0).getTime()) - (new Date(b.startTime || 0).getTime()));
       setAppointments(list);
     } catch (err) {
       clearTimeout(timeout);
@@ -116,7 +116,6 @@ export function AppointmentsPanel() {
           </div>
         ) : (
           appointments.map((appt) => {
-            const time = new Date(appt.startTime);
             const timeStr = formatExactTime(appt.startTime);
             const isConfirmed = appt.status === 'confirmed';
             const isExpanded = expandedId === appt.id;
@@ -143,7 +142,7 @@ export function AppointmentsPanel() {
                   <div className="bg-white/30 border-t border-white/30 px-3 py-3 space-y-2">
                     <p className="text-[13px] font-medium text-[#1a1a1a]">{appt.title || appt.contactName}</p>
                     <p className="text-[11px] font-mono text-zinc-500">
-                      {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {appt.startTime ? new Date(appt.startTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—'}
                       {' '}
                       {timeStr}
                       {appt.endTime && ` — ${formatExactTime(appt.endTime)}`}

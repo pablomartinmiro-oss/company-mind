@@ -971,6 +971,38 @@ async function seedPipelineAssignments(companiesData: any[], pipelineMap: Record
     }
   }
 
+  // Historical Sales pipeline stage_log for Follow Up companies (12-16, indices 11-15)
+  // These companies went through Sales stages before landing in Follow Up
+  const salesPipelineId = pipelineMap['Sales Pipeline'];
+  if (salesPipelineId) {
+    const followUpHistories: Array<{ companyIndex: number; stages: string[] }> = [
+      { companyIndex: 11, stages: ['New Lead', 'Qualification'] }, // Quick Lube: NL→Qual→dropped→Nurture
+      { companyIndex: 12, stages: ['New Lead', 'Qualification', 'Closing'] }, // Allstate: NL→Qual→Closing→Nurture
+      { companyIndex: 13, stages: ['New Lead', 'Qualification'] }, // Sunrise: NL→Qual→Nurture
+      { companyIndex: 14, stages: ['New Lead', 'Qualification', 'Closing'] }, // Iron Mountain: NL→Qual→Closing→Dead
+      { companyIndex: 15, stages: ['New Lead', 'Qualification'] }, // Velocity: NL→Qual→Dead
+    ];
+
+    for (const hist of followUpHistories) {
+      const company = companiesData[hist.companyIndex];
+      for (let i = 0; i < hist.stages.length; i++) {
+        stageLogRecords.push({
+          id: crypto.randomUUID(),
+          tenant_id: TENANT_ID,
+          company_id: company.id,
+          contact_id: `demo-${generateSlug(company.name)}-1`,
+          pipeline_id: salesPipelineId,
+          stage: hist.stages[i],
+          entered_at: daysAgo(60 - i * 10).toISOString(), // older history
+          moved_by: randomChoice(['Pablo Martin', 'Corey Lavinder']),
+          source: 'manual',
+          note: `Historical: ${hist.stages[i]} before moving to Follow Up`,
+          entry_number: i + 1,
+        });
+      }
+    }
+  }
+
   // Insert pipeline_companies
   if (pipelineCompaniesRecords.length > 0) {
     const { error: pcError } = await supabaseAdmin
@@ -1000,18 +1032,32 @@ async function seedPipelineAssignments(companiesData: any[], pipelineMap: Record
 // SEED RESEARCH
 // ============================================================================
 
-async function seedResearch(companiesData: any[]) {
-  console.log('Seeding research entries (~1,300-1,500 rows)...');
+// Contact research catalog (67 fields)
+const contactCatalog: Record<string, string[]> = {
+  contact_identity: ['full_name','preferred_name','title','department','tenure_at_company','previous_company','previous_role','education','certifications','linkedin_url'],
+  role_authority: ['formal_authority_level','budget_authority','veto_power','sphere_of_influence','reports_to','direct_reports_count','cross_functional_role','committee_memberships','strategic_initiatives','promotion_trajectory'],
+  communication_profile: ['preferred_channel','best_time_to_reach','response_speed','communication_style','meeting_preference','follow_up_frequency','email_tone','voicemail_preference','timezone','assistant_name','assistant_email','out_of_office_pattern'],
+  relationship: ['rapport_level','trust_score','ally_or_blocker','shared_connections','referral_potential','nps_likely','last_positive_interaction','last_negative_interaction','gift_history','relationship_notes'],
+  personal_context: ['hometown','hobbies','family_context','sports_teams','alma_mater','volunteer_work','pet_owner','travel_preferences','dietary_preferences','birthday','anniversary','favorite_restaurant'],
+  triggers_signals: ['recent_linkedin_activity','job_change_signal','company_news_mention','conference_attendance','content_engagement','technology_adoption','budget_cycle_timing','pain_signal'],
+  contact_predictive: ['engagement_score','conversion_influence','churn_risk','expansion_champion_score','next_best_touchpoint'],
+};
 
-  const fieldCounts = [8, 8, 25, 30, 75, 80, 92, 92, 92, 92, 92, 50, 55, 45, 70, 75];
+async function seedResearch(companiesData: any[]) {
+  console.log('Seeding research entries...');
+
+  // Company field counts per spec: sum ~1,100 company + ~335 contact = ~1,435
+  const fieldCounts = [8, 8, 30, 25, 75, 80, 92, 92, 92, 92, 92, 50, 55, 45, 75, 70];
+  // Companies 6-10 (indices) also get contact research
+  const contactResearchCompanies = [6, 7, 8, 9, 10]; // Thompson, GreenLeaf, Chen, Precision, Summit
 
   const researchRecords: any[] = [];
 
+  // Company-scope research
   for (let compIdx = 0; compIdx < companiesData.length; compIdx++) {
     const company = companiesData[compIdx];
     const fieldCount = fieldCounts[compIdx] || 50;
 
-    // Collect all available fields
     const allFields: Array<{ section: string; key: string }> = [];
     for (const [section, fields] of Object.entries(researchCatalog)) {
       for (const key of fields) {
@@ -1019,21 +1065,13 @@ async function seedResearch(companiesData: any[]) {
       }
     }
 
-    // Take first N fields
     const fieldsToUse = allFields.slice(0, fieldCount);
 
     for (let i = 0; i < fieldsToUse.length; i++) {
       const { section, key } = fieldsToUse[i];
       const sourceOptions = ['api', 'ai', 'manual'];
-      const source = sourceOptions[i % 3]; // ~33% distribution
+      const source = sourceOptions[i % 3];
       const confidence = i % 2 === 0 ? 0.95 : 0.85;
-
-      const fieldValue = generateResearchValue(
-        company.name,
-        company.industry,
-        company.location,
-        key
-      );
 
       researchRecords.push({
         id: crypto.randomUUID(),
@@ -1043,12 +1081,50 @@ async function seedResearch(companiesData: any[]) {
         scope: 'company',
         section,
         field_name: key,
-        field_value: fieldValue,
+        field_value: generateResearchValue(company.name, company.industry, company.location, key),
         source,
         confidence,
-        source_detail: `${source === 'api' ? 'GHL API' : source === 'ai' ? 'Claude analysis' : 'Manual entry'}`,
+        source_detail: source === 'api' ? 'GHL API' : source === 'ai' ? 'Claude analysis' : 'Manual entry',
         source_call_id: null,
         last_verified_at: daysAgo(randomInt(1, 30)).toISOString(),
+        locked: false,
+      });
+    }
+  }
+
+  // Contact-scope research for top 5 companies
+  for (const compIdx of contactResearchCompanies) {
+    const company = companiesData[compIdx];
+    const primaryContact = contactsData.find(c => c.companyIndex === compIdx && c.isPrimary);
+    if (!primaryContact) continue;
+
+    const contactGhlId = `demo-${generateSlug(company.name)}-1`;
+    const allContactFields: Array<{ section: string; key: string }> = [];
+    for (const [section, fields] of Object.entries(contactCatalog)) {
+      for (const key of fields) {
+        allContactFields.push({ section, key });
+      }
+    }
+
+    for (let i = 0; i < allContactFields.length; i++) {
+      const { section, key } = allContactFields[i];
+      const sourceOptions = ['api', 'ai', 'manual'];
+      const source = sourceOptions[i % 3];
+
+      researchRecords.push({
+        id: crypto.randomUUID(),
+        tenant_id: TENANT_ID,
+        company_id: null,
+        contact_id: contactGhlId,
+        scope: 'contact',
+        section,
+        field_name: key,
+        field_value: generateContactResearchValue(primaryContact.name, primaryContact.role, key),
+        source,
+        confidence: i % 2 === 0 ? 0.9 : 0.8,
+        source_detail: source === 'api' ? 'GHL API' : source === 'ai' ? 'Claude analysis' : 'Manual entry',
+        source_call_id: null,
+        last_verified_at: daysAgo(randomInt(1, 14)).toISOString(),
         locked: false,
       });
     }
@@ -1065,7 +1141,81 @@ async function seedResearch(companiesData: any[]) {
     }
   }
 
-  console.log(`✓ Seeded ${researchRecords.length} research entries`);
+  console.log(`✓ Seeded ${researchRecords.length} research entries (company + contact)`);
+}
+
+function generateContactResearchValue(contactName: string, role: string, fieldKey: string): string {
+  const firstName = contactName.split(' ')[0];
+  const defaults: Record<string, string> = {
+    full_name: contactName,
+    preferred_name: firstName,
+    title: role === 'decision_maker' ? 'Owner / CEO' : role === 'champion' ? 'VP Operations' : 'Manager',
+    department: role === 'decision_maker' ? 'Executive' : 'Operations',
+    tenure_at_company: `${randomInt(2, 15)} years`,
+    previous_company: 'Previously at regional competitor',
+    previous_role: 'Operations Manager',
+    education: 'BS Business Administration',
+    certifications: 'Industry certified',
+    linkedin_url: `https://linkedin.com/in/${firstName.toLowerCase()}`,
+    formal_authority_level: role === 'decision_maker' ? 'Final decision maker' : 'Recommender',
+    budget_authority: role === 'decision_maker' ? 'Full budget authority up to $50k' : 'Can recommend, needs approval',
+    veto_power: role === 'decision_maker' ? 'Yes' : 'No',
+    sphere_of_influence: 'Sales team, operations, customer service',
+    reports_to: role === 'decision_maker' ? 'Board / Self' : 'CEO',
+    direct_reports_count: `${randomInt(2, 12)}`,
+    cross_functional_role: 'Works across sales, marketing, and ops',
+    committee_memberships: 'Local business association',
+    strategic_initiatives: 'Digital transformation, growth expansion',
+    promotion_trajectory: 'Stable in current role',
+    preferred_channel: randomChoice(['Phone', 'SMS', 'Email']),
+    best_time_to_reach: `${randomChoice(['9-11 AM', '1-3 PM', '4-6 PM'])} ${randomChoice(['Mon-Fri', 'Tue-Thu'])}`,
+    response_speed: randomChoice(['Same day', 'Within 24h', 'Within 48h']),
+    communication_style: randomChoice(['Direct and concise', 'Detail-oriented', 'Relationship-first']),
+    meeting_preference: randomChoice(['Video call', 'Phone', 'In-person']),
+    follow_up_frequency: randomChoice(['Weekly', 'Bi-weekly', 'Monthly']),
+    email_tone: randomChoice(['Professional', 'Casual professional', 'Formal']),
+    voicemail_preference: 'Leave voicemail with callback number',
+    timezone: 'Central',
+    assistant_name: 'N/A',
+    assistant_email: 'N/A',
+    out_of_office_pattern: 'Typically unavailable weekends',
+    rapport_level: randomChoice(['Strong', 'Good', 'Building']),
+    trust_score: `${randomInt(6, 10)}/10`,
+    ally_or_blocker: 'Ally',
+    shared_connections: `${randomInt(0, 3)} mutual connections`,
+    referral_potential: randomChoice(['High', 'Medium', 'Low']),
+    nps_likely: `${randomInt(7, 10)}`,
+    last_positive_interaction: 'Agreed to proposal terms',
+    last_negative_interaction: 'N/A',
+    gift_history: 'None',
+    relationship_notes: `${firstName} is responsive and engaged. Values transparency.`,
+    hometown: randomChoice(['Nashville', 'Atlanta', 'San Francisco', 'Charlotte', 'Salt Lake City']),
+    hobbies: randomChoice(['Golf', 'Fishing', 'Running', 'BBQ', 'Coaching youth sports']),
+    family_context: randomChoice(['Married, 2 kids', 'Married, no kids', 'Single']),
+    sports_teams: randomChoice(['Titans', 'Falcons', '49ers', 'Panthers', 'Jazz']),
+    alma_mater: randomChoice(['State University', 'Local Community College', 'Private University']),
+    volunteer_work: randomChoice(['Chamber of Commerce', 'Rotary Club', 'Youth mentor', 'None']),
+    pet_owner: randomChoice(['Dog', 'Cat', 'None']),
+    travel_preferences: 'Domestic travel for conferences',
+    dietary_preferences: 'No restrictions',
+    birthday: 'Unknown',
+    anniversary: 'Unknown',
+    favorite_restaurant: 'Local steakhouse',
+    recent_linkedin_activity: 'Posted about business growth last week',
+    job_change_signal: 'None — stable',
+    company_news_mention: 'Featured in local business journal',
+    conference_attendance: 'Attended industry trade show Q1',
+    content_engagement: 'Opened last 3 emails, clicked CTA',
+    technology_adoption: randomChoice(['Early adopter', 'Pragmatist', 'Late majority']),
+    budget_cycle_timing: randomChoice(['Q4 planning', 'Annual review in Jan', 'Rolling budget']),
+    pain_signal: 'Mentioned frustration with current tools',
+    engagement_score: `${randomInt(60, 95)}/100`,
+    conversion_influence: randomChoice(['High', 'Medium', 'Critical']),
+    churn_risk: randomChoice(['Low', 'Medium']),
+    expansion_champion_score: `${randomInt(65, 95)}/100`,
+    next_best_touchpoint: randomChoice(['Schedule check-in call', 'Send ROI case study', 'Invite to webinar']),
+  };
+  return defaults[fieldKey] ?? `${firstName} — ${fieldKey.replace(/_/g, ' ')}`;
 }
 
 // ============================================================================

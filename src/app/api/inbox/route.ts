@@ -69,15 +69,24 @@ export async function GET() {
           .eq('conversation_id', conv.id)
           .order('sent_at', { ascending: true })
           .limit(10);
+
+        const mappedMessages = (messages ?? []).map((m) => ({
+          id: m.id,
+          body: m.body ?? '',
+          direction: m.direction,
+          type: (m.channel ?? conv.channel ?? 'sms').toUpperCase(),
+          dateAdded: m.sent_at ?? new Date().toISOString(),
+        }));
+
         return {
           id: conv.id,
           contactId: conv.contact_ghl_id,
           contactName: (conv.company as { name: string } | null)?.name ?? 'Unknown',
           lastMessageBody: conv.last_message_snippet ?? '',
-          lastMessageType: conv.channel?.toUpperCase() ?? 'SMS',
-          lastMessageDate: conv.last_message_at,
+          lastMessageType: (conv.channel ?? 'sms').toUpperCase(),
+          lastMessageDate: conv.last_message_at ?? new Date().toISOString(),
           unreadCount: conv.unread_count ?? 0,
-          messages: messages ?? [],
+          messages: mappedMessages,
         };
       }));
 

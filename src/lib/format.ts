@@ -6,9 +6,12 @@ export function formatDuration(seconds: number): string {
   return `${m}m ${s}s`;
 }
 
-export function timeAgo(date: string | Date): string {
+export function timeAgo(date: string | Date | null | undefined): string {
+  if (!date) return '—';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '—';
   const now = Date.now();
-  const then = new Date(date).getTime();
+  const then = d.getTime();
   const diff = now - then;
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -23,8 +26,10 @@ export function timeAgo(date: string | Date): string {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function formatExactDateTime(date: string | Date, timezone: string = DEFAULT_TIMEZONE): string {
+export function formatExactDateTime(date: string | Date | null | undefined, timezone: string = DEFAULT_TIMEZONE): string {
+  if (!date) return '—';
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -36,13 +41,17 @@ export function formatExactDateTime(date: string | Date, timezone: string = DEFA
   }).format(d);
 }
 
-export function formatExactDate(date: string | Date): string {
+export function formatExactDate(date: string | Date | null | undefined): string {
+  if (!date) return '—';
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function formatExactTime(date: string | Date, timezone: string = DEFAULT_TIMEZONE): string {
+export function formatExactTime(date: string | Date | null | undefined, timezone: string = DEFAULT_TIMEZONE): string {
+  if (!date) return '—';
   const d = new Date(date);
+  if (isNaN(d.getTime())) return '—';
   return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: '2-digit',
