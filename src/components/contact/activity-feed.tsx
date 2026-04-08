@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { scoreGrade } from '@/lib/format';
 import { CALL_TYPE_PILL, CALL_TYPE_LABELS } from '@/lib/pipeline-config';
+import { MentionInput } from '@/components/ui/mention-input';
 
 interface ActivityEntry {
   id: string;
@@ -43,13 +44,12 @@ export function ActivityFeed({ contactId, initialEntries }: Props) {
 
   return (
     <div>
-      {/* Note input */}
-      <textarea
+      {/* Note input with @ mention autocomplete */}
+      <MentionInput
         value={noteText}
-        onChange={(e) => setNoteText(e.target.value)}
+        onChange={setNoteText}
         placeholder="Add a note... use @ to tag a team member"
         className="bg-white/50 border border-white/60 rounded-lg px-3 py-2 text-[13px] text-[#1a1a1a] w-full resize-none min-h-[64px] mb-2 focus:outline-none focus:border-zinc-400"
-        onKeyDown={(e) => { if (e.key === 'Enter' && e.shiftKey) return; if (e.key === 'Enter') { e.preventDefault(); postNote(); } }}
       />
       <div className="flex items-center justify-between mb-4">
         <span className="text-[11px] text-zinc-500">@ to mention · Shift+Enter for new line</span>

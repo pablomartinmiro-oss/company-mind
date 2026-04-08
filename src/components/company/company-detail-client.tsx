@@ -251,7 +251,7 @@ export function CompanyDetailClient(props: Props) {
       </div>
 
       {/* Two-column body */}
-      <div className="grid grid-cols-[300px_1fr] gap-5">
+      <div className="grid grid-cols-[300px_1fr] gap-5 max-w-full overflow-hidden">
         {/* Left: Contacts */}
         <ContactsPanel
           companyId={props.companyId}
@@ -262,7 +262,7 @@ export function CompanyDetailClient(props: Props) {
         />
 
         {/* Right: Tab content */}
-        <div>
+        <div className="min-w-0">
           {activeTab === 'Overview' && (
             <div className="grid grid-cols-[1fr] gap-5">
               {/* Team */}
