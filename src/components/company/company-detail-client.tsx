@@ -311,6 +311,7 @@ export function CompanyDetailClient(props: Props) {
 
           {activeTab === 'Research' && (
             <CompanyResearchTab
+              key={selectedContactId ?? '__none__'}
               companyId={props.companyId}
               selectedContactId={selectedContactId}
               selectedContactName={selectedContact?.contact_name ?? null}
