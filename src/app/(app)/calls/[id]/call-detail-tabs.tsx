@@ -124,7 +124,7 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
         {activeTab === 'Next Steps' && (
           nextSteps && nextSteps.length > 0
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
-            : <NextStepsView actions={actions} />
+            : <NextStepsView actions={actions} callId={callId ?? ''} />
         )}
         {activeTab === 'Data Points' && <DataPointsView callId={callId ?? ''} />}
       </div>
@@ -320,7 +320,7 @@ function TranscriptView({ text, duration, recordingUrl }: { text: string; durati
 
 /* ── Next Steps Tab ── */
 
-function NextStepsView({ actions }: { actions: Action[] }) {
+function NextStepsView({ actions, callId }: { actions: Action[]; callId: string }) {
   const pending = actions.filter((a) => a.status === 'suggested');
   const [pushing, setPushing] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -329,7 +329,7 @@ function NextStepsView({ actions }: { actions: Action[] }) {
   async function handlePush(action: Action) {
     setPushing((prev) => new Set(prev).add(action.id));
     try {
-      await fetch(`/api/calls/${action.id}/next-steps/push`, {
+      await fetch(`/api/calls/${callId}/next-steps/push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actionId: action.id }),

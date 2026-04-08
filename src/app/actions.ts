@@ -6,7 +6,7 @@ import { getTenantForUser } from '@/lib/get-tenant';
 import { findSectionForField } from '@/lib/ai/helpers';
 
 export async function approveAction(actionId: string) {
-  const { tenantId } = await getTenantForUser();
+  const { tenantId, userId } = await getTenantForUser();
 
   const { data: action } = await supabaseAdmin
     .from('call_actions')
@@ -26,7 +26,7 @@ export async function approveAction(actionId: string) {
     tenant_id: tenantId,
     call_action_id: actionId,
     feedback_type: 'approve',
-    user_id: 'default',
+    user_id: userId,
   });
 
   revalidatePath('/dashboard');
@@ -34,7 +34,7 @@ export async function approveAction(actionId: string) {
 }
 
 export async function rejectAction(actionId: string) {
-  const { tenantId } = await getTenantForUser();
+  const { tenantId, userId } = await getTenantForUser();
 
   const { data: action } = await supabaseAdmin
     .from('call_actions')
@@ -54,7 +54,7 @@ export async function rejectAction(actionId: string) {
     tenant_id: tenantId,
     call_action_id: actionId,
     feedback_type: 'reject',
-    user_id: 'default',
+    user_id: userId,
   });
 
   revalidatePath('/dashboard');

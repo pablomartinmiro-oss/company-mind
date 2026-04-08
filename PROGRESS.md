@@ -6,7 +6,17 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Audit Cleanup Batch (2026-04-07)
+## Latest: QA Cleanup (2026-04-08)
+
+- P0-1: Added notFound() to contacts/[id] + frosted not-found.tsx page
+- P0-2: Replaced inline error div with notFound() in companies/[id] + not-found.tsx + loading.tsx
+- P1-1: Activity feed author now uses email from getTenantForUser() instead of hardcoded "Pablo Martin"
+- P1-2: Inbox send reply now shows inline error on failure (was silently swallowing)
+- P1-3: Push to CRM URL fixed — uses callId instead of action.id in URL path
+- P1-4: Company search now matches by industry in addition to name and contact
+- Bonus: Replaced hardcoded user_id 'default' with real userId from auth in chat messages and feedback_log
+
+## Audit Cleanup Batch (2026-04-07)
 
 ### Commit 1: P0 security fixes
 - Deleted /api/test-ghl (unauthenticated GHL access)

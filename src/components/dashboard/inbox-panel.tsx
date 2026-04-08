@@ -87,11 +87,14 @@ export function InboxPanel() {
     setEmailSubject('');
   }
 
+  const [sendError, setSendError] = useState<string | null>(null);
+
   async function handleSend() {
     if (!selected || !replyText.trim()) return;
     setSending(true);
+    setSendError(null);
     try {
-      await fetch('/api/inbox/send', {
+      const res = await fetch('/api/inbox/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,10 +105,16 @@ export function InboxPanel() {
           subject: replyChannel === 'Email' ? emailSubject : undefined,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `Send failed (${res.status})`);
+      }
       setReplyText('');
       setEmailSubject('');
       fetchInbox();
-    } catch { /* ignore */ }
+    } catch (e: unknown) {
+      setSendError(e instanceof Error ? e.message : 'Failed to send message');
+    }
     setSending(false);
   }
 
@@ -271,6 +280,9 @@ export function InboxPanel() {
                     </span>
                   </button>
                 </div>
+                {sendError && (
+                  <p className="text-[11px] text-rose-600 mt-1 px-1">{sendError}</p>
+                )}
               </div>
             </>
           ) : allConvos.length > 0 ? (

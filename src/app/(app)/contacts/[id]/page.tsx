@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase';
+import { notFound } from 'next/navigation';
 import { ContactDetailClient } from '@/components/contact/contact-detail-client';
 import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 import { getTenantForUser } from '@/lib/get-tenant';
@@ -26,10 +27,14 @@ export default async function ContactDetailPage({ params }: PageProps) {
   ]);
 
   const calls = callsRes.data ?? [];
-  const contactName = calls[0]?.contact_name ?? contactId;
+
+  // Validate contact exists — check company_contacts or calls
+  const contactInfo = dataPointsRes.data;
+  if (!contactInfo && calls.length === 0) notFound();
+
+  const contactName = contactInfo?.contact_name ?? calls[0]?.contact_name ?? contactId;
 
   // Contact info from company_contacts → companies JOIN
-  const contactInfo = dataPointsRes.data;
   const dpMap: Record<string, string> = {};
   if (contactInfo) {
     if (contactInfo.contact_phone) dpMap.phone = contactInfo.contact_phone;

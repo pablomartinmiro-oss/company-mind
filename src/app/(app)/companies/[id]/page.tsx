@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase';
+import { notFound } from 'next/navigation';
 import { getTenantForUser } from '@/lib/get-tenant';
 import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 import { CompanyDetailClient } from '@/components/company/company-detail-client';
@@ -25,9 +26,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   ]);
 
   const company = companyRes.data;
-  if (!company) {
-    return <div className="p-5"><p className="text-[13px] text-red-500">Company not found.</p></div>;
-  }
+  if (!company) notFound();
 
   const contacts = contactsRes.data ?? [];
   const contactIds = contacts.map((c: { contact_id: string }) => c.contact_id);

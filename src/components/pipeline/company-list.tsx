@@ -50,9 +50,11 @@ export function CompanyList({ contacts, selectedStage, onClearStage }: Props) {
   const [search, setSearch] = useState('');
 
   const filtered = contacts.filter((c) => {
+    const q = search.toLowerCase();
     const matchesSearch = !search ||
-      c.company_name.toLowerCase().includes(search.toLowerCase()) ||
-      (c.primary_contact_name?.toLowerCase().includes(search.toLowerCase()));
+      c.company_name.toLowerCase().includes(q) ||
+      (c.primary_contact_name?.toLowerCase().includes(q)) ||
+      (c.industry?.toLowerCase().includes(q));
     const matchesStage = !selectedStage || c.enrollments.some(e => e.stage === selectedStage);
     return matchesSearch && matchesStage;
   });

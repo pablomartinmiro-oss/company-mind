@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { getTenantForUser } from '@/lib/get-tenant';
 
 export async function POST(req: Request) {
-  const { tenantId, email } = await getTenantForUser();
+  const { tenantId, userId, email } = await getTenantForUser();
   const { messages, context = {} } = await req.json();
 
   const agent = mastra.getAgent('companyMind');
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   if (lastUserMsg) {
     await supabaseAdmin.from('chat_messages').insert({
       tenant_id: tenantId,
-      user_id: 'default',
+      user_id: userId,
       role: 'user',
       content: typeof lastUserMsg.content === 'string'
         ? lastUserMsg.content
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
       if (fullText) {
         await supabaseAdmin.from('chat_messages').insert({
           tenant_id: tenantId,
-          user_id: 'default',
+          user_id: userId,
           role: 'assistant',
           content: fullText,
         });
