@@ -167,22 +167,6 @@ export function CompanyDetailClient(props: Props) {
             <PipelineTracker enrollments={trackerEnrollments} />
           </div>
 
-          {/* Tabs */}
-          <div className="flex px-6">
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 pt-3 pb-[10px] text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all ${
-                  activeTab === tab
-                    ? 'text-[#1a1a1a] border-[#ff6a3d]'
-                    : 'text-zinc-500 border-transparent hover:text-zinc-700'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -200,6 +184,23 @@ export function CompanyDetailClient(props: Props) {
           industry={props.industry}
           leadSource={props.leadSource}
         />
+      </div>
+
+      {/* ══ TABS ══ */}
+      <div className="flex gap-1 mb-4">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-[13px] font-medium rounded-full transition-all ${
+              activeTab === tab
+                ? 'bg-white/70 text-[#1a1a1a] shadow-sm border border-white/60'
+                : 'text-zinc-500 hover:text-zinc-700 hover:bg-white/40'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Two-column body */}
