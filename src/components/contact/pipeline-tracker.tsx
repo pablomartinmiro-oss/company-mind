@@ -49,6 +49,12 @@ export function PipelineTracker({ enrollments }: Props) {
         const logForStage = (stage: string) =>
           enrollment.stageLog.filter((l) => l.stage === stage);
 
+        // Stages up to current that have no log entry
+        const loggedStages = new Set(enrollment.stageLog.map(l => l.stage));
+        const missingLogs = new Set(
+          enrollment.stages.slice(0, currentIdx + 1).filter(s => !loggedStages.has(s))
+        );
+
         return (
           <div key={enrollment.pipelineId} className={`relative ${idx > 0 ? 'border-t border-white/30' : ''}`}>
             <div className="flex items-center gap-1.5 px-3 pt-2 pb-0.5">
@@ -71,14 +77,22 @@ export function PipelineTracker({ enrollments }: Props) {
                       onClick={() => toggleLog(enrollment.pipelineId, stage)}
                       className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
                     >
-                      <div className={`h-[26px] w-[26px] rounded-full border flex items-center justify-center ${
-                        isActive
-                          ? 'bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white border-[#ff6a3d] text-[10px] font-bold shadow-[0_2px_8px_rgba(255,106,61,0.35)]'
-                          : isPast
-                          ? 'border-zinc-400 bg-zinc-100 text-zinc-600 text-[10px]'
-                          : 'border-zinc-300 bg-white/30 text-zinc-400 text-[10px] font-mono'
-                      } ${isOpen ? 'border-[2px] border-zinc-700' : ''}`}>
-                        {isPast ? '✓' : sIdx + 1}
+                      <div className="relative">
+                        <div className={`h-[26px] w-[26px] rounded-full border flex items-center justify-center ${
+                          isActive
+                            ? 'bg-gradient-to-br from-[#ff7a4d] to-[#ff5a2d] text-white border-[#ff6a3d] text-[10px] font-bold shadow-[0_2px_8px_rgba(255,106,61,0.35)]'
+                            : isPast
+                            ? 'border-zinc-400 bg-zinc-100 text-zinc-600 text-[10px]'
+                            : 'border-zinc-300 bg-white/30 text-zinc-400 text-[10px] font-mono'
+                        } ${isOpen ? 'border-[2px] border-zinc-700' : ''}`}>
+                          {isPast ? '✓' : sIdx + 1}
+                        </div>
+                        {missingLogs.has(stage) && (
+                          <div
+                            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-[#ebe7e0]"
+                            title="No stage log entry"
+                          />
+                        )}
                       </div>
                       <span className={`text-[8px] text-center max-w-[48px] leading-tight ${
                         isActive ? 'font-semibold text-[#ff6a3d]' : isPast ? 'text-zinc-600' : 'text-zinc-500'

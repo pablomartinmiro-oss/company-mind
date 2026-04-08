@@ -12,6 +12,7 @@ interface StageLogEntry {
   source: string | null;
   note: string | null;
   entry_number: number;
+  company_id?: string | null;
 }
 
 interface PipelineData {
@@ -49,6 +50,15 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
         const isExpanded = expanded[pipeline.id] ?? false;
         const contactsInStage = (stage: string) =>
           pipeline.contacts.filter((c) => c.stage === stage).length;
+
+        // Stages where any company is missing a log entry
+        const stagesWithMissingLogs = new Set<string>();
+        for (const contact of pipeline.contacts) {
+          const hasLog = pipeline.stageLog.some(
+            l => l.stage === contact.stage && l.company_id === contact.contact_id
+          );
+          if (!hasLog) stagesWithMissingLogs.add(contact.stage);
+        }
 
         return (
           <div key={pipeline.id} className={`relative ${pIdx > 0 ? 'border-t border-white/30' : ''}`}>
@@ -100,6 +110,12 @@ export function PipelineFunnel({ pipelines, onStageSelect, selectedStage }: Prop
                             <span className="absolute -top-1 -right-1 h-[18px] min-w-[18px] px-1 rounded-full bg-zinc-900 text-white text-[9px] font-medium flex items-center justify-center">
                               {count}
                             </span>
+                          )}
+                          {stagesWithMissingLogs.has(stage) && (
+                            <div
+                              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-[#ebe7e0]"
+                              title="Missing stage log entry"
+                            />
                           )}
                         </div>
                         <span

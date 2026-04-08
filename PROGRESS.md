@@ -6,7 +6,20 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Company Header Rebuild + Contact Redirect (2026-04-08)
+## Latest: Demo Prep — Inbox/Appointments Tables + Stage Log Caution (2026-04-08)
+
+- New tables: inbox_conversations, inbox_messages, appointments (migration: 20260408_demo_inbox_appointments.sql, run against prod)
+- API fallback: /api/inbox and /api/appointments now read local DB when GHL unavailable (isGhlAuthError helper in src/lib/ghl-errors.ts)
+- /api/inbox/send also falls back to local DB insert when GHL auth fails
+- Stage log caution badge: amber dot on pipeline funnel + pipeline tracker when a stage has no log entry
+- Pipeline funnel computes missing logs per-company per-stage from stageLog data
+- Pipeline tracker computes missing logs from stageLog prop (client-side, no extra DB call)
+- Added term_length column to companies + editable in DealCard
+- Pipeline list dollar value now shows company MRR
+- Unified all dropdown styles to match contacts-panel role picker
+- Research tab has inline contact switcher tabs
+
+## Company Header Rebuild + Contact Redirect (2026-04-08)
 
 - Rebuilt company detail header to match new layout: company name H1, primary contact below, pipeline stage popovers + industry/lead source pills
 - Added DealCard + CompanyDetailsCard below header (MRR, ARR, setup fee + website, location, industry, lead source — all inline-editable)

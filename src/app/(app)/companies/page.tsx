@@ -76,9 +76,10 @@ export default async function CompaniesPage() {
 
     const stageLog = (stageLogRaw ?? [])
       .filter((sl: { pipeline_id: string }) => sl.pipeline_id === p.id)
-      .map((sl: { id: string; stage: string; entered_at: string; moved_by: string | null; source: string | null; note: string | null; entry_number: number }) => ({
+      .map((sl: { id: string; stage: string; entered_at: string; moved_by: string | null; source: string | null; note: string | null; entry_number: number; company_id: string | null }) => ({
         id: sl.id, stage: sl.stage, entered_at: sl.entered_at,
         moved_by: sl.moved_by, source: sl.source, note: sl.note, entry_number: sl.entry_number,
+        company_id: sl.company_id,
       }));
 
     return { id: p.id, name: p.name, stages, contacts, stageLog };
