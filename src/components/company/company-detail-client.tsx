@@ -108,7 +108,7 @@ export function CompanyDetailClient(props: Props) {
   }
 
   return (
-    <div className="p-5 animate-fade-in">
+    <div className="p-5 animate-fade-in overflow-hidden">
       {/* ══ HEADER — frosted glass ══ */}
       <div className="relative glass-card rounded-3xl overflow-hidden mb-4">
         <div className="glass-card-inner" />
@@ -217,75 +217,88 @@ export function CompanyDetailClient(props: Props) {
         {/* Right: Tab content */}
         <div className="min-w-0">
           {activeTab === 'Overview' && (
-            <div className="grid grid-cols-[1fr] gap-5">
+            <div className="space-y-4">
               {/* Team */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Team</h3>
-                  <span className="text-[11px] text-blue-600 cursor-pointer">+</span>
-                </div>
-                {props.teamMembers.map((m) => (
-                  <div key={m.name} className="flex items-center gap-2 py-1.5 border-b border-white/30 last:border-0">
-                    <div className="h-[26px] w-[26px] rounded-full bg-zinc-700 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
-                      {m.initials}
-                    </div>
-                    <span className="text-[12px] font-medium text-[#1a1a1a] flex-1">{m.name}</span>
-                    <span className="text-[9px] font-medium px-2 py-0.5 rounded bg-white/30 text-zinc-500 tracking-wide uppercase">{m.role}</span>
+              <div className="glass-card rounded-2xl overflow-hidden relative">
+                <div className="glass-card-inner" />
+                <div className="relative px-4 py-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Team</h3>
+                    <span className="text-[11px] text-blue-600 cursor-pointer">+</span>
                   </div>
-                ))}
+                  {props.teamMembers.map((m) => (
+                    <div key={m.name} className="flex items-center gap-2 py-1.5 border-b border-white/30 last:border-0">
+                      <div className="h-[26px] w-[26px] rounded-full bg-zinc-700 text-white text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
+                        {m.initials}
+                      </div>
+                      <span className="text-[12px] font-medium text-[#1a1a1a] flex-1 truncate">{m.name}</span>
+                      <span className="text-[9px] font-medium px-2 py-0.5 rounded bg-white/30 text-zinc-500 tracking-wide uppercase">{m.role}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Graded Calls */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Graded Calls</h3>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 text-zinc-500">{props.calls.length}</span>
+              <div className="glass-card rounded-2xl overflow-hidden relative">
+                <div className="glass-card-inner" />
+                <div className="relative px-4 py-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500">Graded Calls</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 text-zinc-500">{props.calls.length}</span>
+                  </div>
+                  <div className="max-h-[320px] overflow-y-auto">
+                    {props.calls.map((call) => {
+                      const grade = call.score != null ? scoreGrade(call.score) : null;
+                      return (
+                        <Link
+                          key={call.id}
+                          href={`/calls/${call.id}`}
+                          className="flex items-start gap-2.5 py-2 border-b border-white/30 last:border-0 cursor-pointer hover:bg-white/30 rounded-lg px-1 -mx-1"
+                        >
+                          {grade && call.score != null ? (
+                            <div className={`h-[34px] w-[34px] rounded-full border-[1.5px] flex flex-col items-center justify-center flex-shrink-0 ${scoreBg(call.score)}`}>
+                              <span className={`text-[11px] font-medium font-mono ${scoreColor(call.score)}`}>{call.score}</span>
+                              <span className={`text-[8px] ${scoreColor(call.score)}`}>{grade.letter}</span>
+                            </div>
+                          ) : (
+                            <div className="h-[34px] w-[34px] rounded-full border-[1.5px] border-white/50 flex items-center justify-center flex-shrink-0">
+                              <span className="text-[11px] text-zinc-400">—</span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12px] text-zinc-700 line-clamp-2">{call.call_summary ?? 'No summary'}</p>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">
+                              {new Date(call.called_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                    {props.calls.length === 0 && <p className="text-[12px] text-zinc-400 py-4">No graded calls.</p>}
+                  </div>
                 </div>
-                {props.calls.map((call) => {
-                  const grade = call.score != null ? scoreGrade(call.score) : null;
-                  return (
-                    <Link
-                      key={call.id}
-                      href={`/calls/${call.id}`}
-                      className="flex items-start gap-2.5 py-2 border-b border-white/30 last:border-0 cursor-pointer hover:bg-white/30 rounded-lg px-1 -mx-1"
-                    >
-                      {grade && call.score != null ? (
-                        <div className={`h-[34px] w-[34px] rounded-full border-[1.5px] flex flex-col items-center justify-center flex-shrink-0 ${scoreBg(call.score)}`}>
-                          <span className={`text-[11px] font-medium font-mono ${scoreColor(call.score)}`}>{call.score}</span>
-                          <span className={`text-[8px] ${scoreColor(call.score)}`}>{grade.letter}</span>
-                        </div>
-                      ) : (
-                        <div className="h-[34px] w-[34px] rounded-full border-[1.5px] border-white/50 flex items-center justify-center flex-shrink-0">
-                          <span className="text-[11px] text-zinc-400">—</span>
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] text-zinc-700 line-clamp-2">{call.call_summary ?? 'No summary'}</p>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">
-                          {new Date(call.called_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-                {props.calls.length === 0 && <p className="text-[12px] text-zinc-400 py-4">No graded calls.</p>}
               </div>
 
               {/* Tasks */}
-              <div>
-                <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-2">Tasks</h3>
-                {props.tasks.filter(t => !t.completed).map((task) => (
-                  <div key={task.id} className="flex items-center gap-2 py-2 border-b border-white/30 last:border-0">
-                    <div className="h-3.5 w-3.5 rounded border border-zinc-300 flex-shrink-0" />
-                    <span className="text-[12px] text-zinc-700 flex-1">{task.title}</span>
-                    {task.due_date && (
-                      <span className="text-[10px] text-zinc-500">
-                        {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                    )}
+              <div className="glass-card rounded-2xl overflow-hidden relative">
+                <div className="glass-card-inner" />
+                <div className="relative px-4 py-3">
+                  <h3 className="text-[10px] font-medium tracking-widest uppercase text-zinc-500 mb-2">Tasks</h3>
+                  <div className="max-h-[240px] overflow-y-auto">
+                    {props.tasks.filter(t => !t.completed).map((task) => (
+                      <div key={task.id} className="flex items-center gap-2 py-2 border-b border-white/30 last:border-0">
+                        <div className="h-3.5 w-3.5 rounded border border-zinc-300 flex-shrink-0" />
+                        <span className="text-[12px] text-zinc-700 flex-1 truncate">{task.title}</span>
+                        {task.due_date && (
+                          <span className="text-[10px] text-zinc-500 flex-shrink-0">
+                            {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {props.tasks.filter(t => !t.completed).length === 0 && <p className="text-[12px] text-zinc-400 py-4">No tasks.</p>}
                   </div>
-                ))}
-                {props.tasks.filter(t => !t.completed).length === 0 && <p className="text-[12px] text-zinc-400 py-4">No tasks.</p>}
+                </div>
               </div>
             </div>
           )}
