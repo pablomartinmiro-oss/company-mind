@@ -77,8 +77,8 @@ export function StagePopover({ pipelineName, pipelineId, stages, currentStage, c
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/80 rounded-2xl shadow-[0_12px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-2">
-          <div className="px-3 pb-1.5 text-[9px] font-semibold tracking-widest uppercase text-zinc-400 border-b border-zinc-100">
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1">
+          <div className="px-3 pb-1.5 pt-1 text-[9px] font-semibold tracking-widest uppercase text-zinc-400 border-b border-zinc-100">
             {pipelineName}
           </div>
           <div className="py-1">
@@ -86,7 +86,7 @@ export function StagePopover({ pipelineName, pipelineId, stages, currentStage, c
               <button
                 key={stage}
                 onClick={() => moveToStage(stage)}
-                className={`w-full text-left px-3 py-1.5 text-[12px] flex items-center justify-between gap-2 hover:bg-zinc-100/60 transition-colors ${stage === currentStage ? 'font-semibold text-[#1a1a1a]' : 'text-zinc-600'}`}
+                className={`w-full text-left px-3 py-1.5 text-[11px] flex items-center justify-between gap-2 hover:bg-zinc-50 transition-colors ${stage === currentStage ? 'font-medium text-[#1a1a1a]' : 'text-zinc-600'}`}
               >
                 <span>{stage}</span>
                 {stage === currentStage && <Check className="w-3 h-3 text-[#ff6a3d]" />}

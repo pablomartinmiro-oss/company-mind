@@ -307,7 +307,7 @@ export function TaskList({ initialTasks }: Props) {
                             type="date"
                             value={editForm.due_date}
                             onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
-                            className="text-[12px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/50 text-zinc-700 focus:outline-none focus:border-zinc-400"
+                            className="text-[11px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/95 backdrop-blur-xl text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:border-[#ff6a3d]/40"
                           />
                         </div>
                         <div>
@@ -315,7 +315,7 @@ export function TaskList({ initialTasks }: Props) {
                           <select
                             value={editForm.task_type}
                             onChange={(e) => setEditForm({ ...editForm, task_type: e.target.value })}
-                            className="text-[12px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/50 text-zinc-700 focus:outline-none focus:border-zinc-400"
+                            className="text-[11px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/95 backdrop-blur-xl text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:border-[#ff6a3d]/40"
                           >
                             {TASK_TYPE_OPTIONS.map((t) => (
                               <option key={t} value={t}>{TASK_TYPE_LABELS[t] ?? t}</option>
@@ -327,7 +327,7 @@ export function TaskList({ initialTasks }: Props) {
                           <select
                             value={editForm.assigned_to}
                             onChange={(e) => setEditForm({ ...editForm, assigned_to: e.target.value })}
-                            className="text-[12px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/50 text-zinc-700 focus:outline-none focus:border-zinc-400"
+                            className="text-[11px] border border-white/60 rounded-lg px-3 py-1.5 bg-white/95 backdrop-blur-xl text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:border-[#ff6a3d]/40"
                           >
                             <option value="">Unassigned</option>
                             {TEAM_MEMBERS.map((m) => (

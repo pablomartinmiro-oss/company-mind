@@ -15,7 +15,7 @@ export function SelectPill({ value, onChange, options, placeholder }: SelectPill
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none cursor-pointer bg-white/60 backdrop-blur-xl border border-white/70 text-zinc-700 text-[12px] font-medium px-4 py-1.5 pr-8 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white/80 transition-colors focus:outline-none focus:border-[#ff6a3d]/40"
+        className="appearance-none cursor-pointer bg-white/95 backdrop-blur-xl border border-white/60 text-zinc-700 text-[11px] font-medium px-4 py-1.5 pr-8 rounded-full shadow-[0_2px_8px_-2px_rgba(28,25,22,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] hover:bg-white transition-colors focus:outline-none focus:border-[#ff6a3d]/40"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map(opt => (

@@ -65,7 +65,7 @@ export function ResearchField({ field, value, source, sourceDetail, onSave }: Re
             value={draft}
             onChange={(e) => { setDraft(e.target.value); }}
             onBlur={handleSave}
-            className="w-full mt-1 text-[12px] text-[#1a1a1a] bg-white/80 border border-white/80 rounded-lg p-1.5 focus:outline-none focus:border-[#ff6a3d]/40"
+            className="w-full mt-1 text-[11px] text-[#1a1a1a] bg-white/95 backdrop-blur-xl border border-white/60 rounded-lg p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus:outline-none focus:border-[#ff6a3d]/40"
             onClick={(e) => e.stopPropagation()}
           >
             <option value="">—</option>

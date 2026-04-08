@@ -50,20 +50,20 @@ function UserAvatarMenu() {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-full ml-2 mb-0 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/80 rounded-2xl shadow-[0_12px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-2">
-          <div className="px-3 pb-2 border-b border-zinc-100">
-            <div className="text-[12px] font-semibold text-[#1a1a1a]">{CURRENT_USER.name}</div>
+        <div className="absolute bottom-full left-full ml-2 mb-0 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1">
+          <div className="px-3 py-1.5 border-b border-zinc-100">
+            <div className="text-[11px] font-medium text-[#1a1a1a]">{CURRENT_USER.name}</div>
             <div className="text-[10px] text-zinc-500 mt-0.5">{CURRENT_USER.email}</div>
           </div>
           <button
             onClick={() => { setOpen(false); router.push('/settings'); }}
-            className="w-full text-left px-3 py-2 text-[12px] text-zinc-700 flex items-center gap-2 hover:bg-zinc-100/60 transition-colors"
+            className="w-full text-left px-3 py-1.5 text-[11px] text-zinc-600 flex items-center gap-2 hover:bg-zinc-50 transition-colors"
           >
             <Settings className="w-3.5 h-3.5" /> Settings
           </button>
           <button
             onClick={handleSignOut}
-            className="w-full text-left px-3 py-2 text-[12px] text-red-600 flex items-center gap-2 hover:bg-red-50 transition-colors"
+            className="w-full text-left px-3 py-1.5 text-[11px] text-[#ff6a3d] flex items-center gap-2 hover:bg-zinc-50 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>
