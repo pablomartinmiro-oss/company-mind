@@ -6,7 +6,16 @@
 - **Live URL**: https://company-mind.vercel.app
 - **First tenant**: Company Mind (Pablo + Corey)
 
-## Latest: Mega Fix — Seed v3 + UI Fixes (2026-04-08)
+## Latest: Agent Rewire (2026-04-08)
+
+- db-companies.ts rewired: getCompanies and getCompanyDetail now read from companies + company_contacts + research (was reading empty contact_data_points)
+- getCompanyDetail returns: company info, contacts, pipeline stages, recent calls with scores, open tasks, research grouped by section, stage history
+- getCompanies supports filters: industry, stage, pipelineName, search
+- Agent system prompt extended: data model docs, reasoning approach, example query mapping, sales coach persona
+- Removed all contact_data_points references from db-companies.ts (3 reads)
+- call-analysis.ts still has 1 contact_data_points write (locked, accepted regression)
+
+## Mega Fix — Seed v3 + UI Fixes (2026-04-08)
 
 - Seed v3: 26 calls (was 15), 24 tasks (was 15), 67 call actions (was 33), 1631 research (was 1316)
 - Closed companies get 2-4 calls, 8-12 inbox messages, richer transcripts with real names
