@@ -140,7 +140,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
     router.refresh();
   }
 
-  async function handleMoveToFollowUp(currentPipelineId: string, stage: 'Nurture' | 'Dead') {
+  async function handleMoveToFollowUp(currentPipelineId: string, stage: string) {
     if (!companyId) return;
     // Remove from current pipeline, then enroll in Follow Up at Nurture or Dead
     await fetch('/api/pipeline/remove', {
@@ -261,21 +261,20 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
 
                       return (
                         <div key={ms}>
-                          <div className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-150 ${
+                          <div
+                            onClick={() => {
+                              if (!companyId) return;
+                              if (!done) handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
+                            }}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-150 ${
                             done
                               ? 'bg-emerald-50/60 border border-emerald-200/40'
-                              : 'bg-white/40 border border-white/30'
+                              : 'bg-white/40 border border-white/30 cursor-pointer hover:bg-white/60'
                           }`}>
                             {/* Checkbox */}
-                            <div
-                              onClick={() => {
-                                if (!companyId || done) return;
-                                handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
-                              }}
-                              className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
-                                done ? 'bg-emerald-500 text-white' : 'border border-zinc-300 cursor-pointer hover:border-zinc-400'
-                              }`}
-                            >
+                            <div className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
+                              done ? 'bg-emerald-500 text-white' : 'border border-zinc-300'
+                            }`}>
                               {done && <Check className="h-2.5 w-2.5" />}
                             </div>
                             <span className={`text-[11px] flex-1 ${done ? 'text-emerald-700 font-medium' : 'text-zinc-600'}`}>{ms}</span>
@@ -292,7 +291,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                             )}
                             {/* Per-milestone edit + delete */}
                             {done && entry && !isEditingMs && companyId && (
-                              <div className="flex items-center gap-0.5">
+                              <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                                 <button onClick={() => startEdit(entry)} className="text-zinc-400 hover:text-zinc-700 p-0.5 transition-all duration-150" title="Edit">
                                   <Pencil className="h-2.5 w-2.5" />
                                 </button>
