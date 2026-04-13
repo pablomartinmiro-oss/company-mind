@@ -130,7 +130,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
         aiGenerated: true,
         status: 'pending',
         pushedAt: null,
-        fields: { content: callSummary },
+        fields: { content: shortenSummary(callSummary) },
       });
       uiInit[noteId] = { showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
     }
@@ -545,11 +545,29 @@ function TaskForm({ fields, onChange, ctx }: { fields: Record<string, string>; o
 }
 
 function AppointmentForm({ fields, onChange, ctx }: { fields: Record<string, string>; onChange: (k: string, v: string) => void; ctx: CallContext }) {
+  const [calendars, setCalendars] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/calendars')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setCalendars(data);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-3">
       <div>
         <label className={LABEL}>Appointment Title</label>
         <input type="text" value={fields.title ?? ''} onChange={e => onChange('title', e.target.value)} className={INPUT} />
+      </div>
+      <div>
+        <label className={LABEL}>Calendar</label>
+        <select value={fields.calendarId ?? ''} onChange={e => onChange('calendarId', e.target.value)} className={INPUT}>
+          <option value="">Select calendar…</option>
+          {calendars.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -631,6 +649,12 @@ function NoteForm({ fields, onChange, ctx }: { fields: Record<string, string>; o
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────
+
+function shortenSummary(text: string): string {
+  if (text.length <= 400) return text;
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  return sentences.slice(0, 3).join(' ');
+}
 
 function buildDefaultFields(type: ActionType, step: Pick<NextStep, 'title' | 'description'>, ctx: CallContext | null): Record<string, string> {
   const rep = ctx?.repName ?? TEAM_MEMBERS[0].name;
