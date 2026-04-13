@@ -81,7 +81,7 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+    <div className="flex-1 flex flex-col min-h-0">
       <div className="flex border-b border-zinc-200/60 shrink-0 px-6">
         {TABS.map((tab) => (
           <button
@@ -106,7 +106,7 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5">
+      <div className="px-6 py-5">
         {activeTab === 'Overview' && <OverviewTab score={score} coaching={coaching} callSummary={callSummary} contactGhlId={contactGhlId} />}
         {activeTab === 'Next Steps' && (
           <NextStepsTab steps={nextSteps ?? []} callId={callId ?? ''} callSummary={callSummary} contactGhlId={contactGhlId} />

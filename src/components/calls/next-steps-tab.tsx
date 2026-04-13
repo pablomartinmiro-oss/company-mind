@@ -407,7 +407,9 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
               <Sparkles className="h-2.5 w-2.5" /> AI
             </span>
           )}
-          {ctx.contacts.length > 1 ? (
+          {card.type === 'note' && ctx.companyName ? (
+            <span className="ml-auto text-[11px] text-zinc-400">re: {ctx.companyName}</span>
+          ) : ctx.contacts.length > 1 ? (
             <span className="ml-auto text-[11px] text-zinc-400">
               re: {ctx.contacts.find(c => c.id === card.fields.selectedContactGhlId)?.name ?? ctx.contacts[0]?.name}
             </span>
@@ -679,9 +681,8 @@ function NoteForm({ fields, onChange, ctx }: { fields: Record<string, string>; o
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 function shortenSummary(text: string): string {
-  if (text.length <= 400) return text;
-  const sentences = text.split(/(?<=[.!?])\s+/);
-  return sentences.slice(0, 3).join(' ');
+  const sentences = text.split('. ').slice(0, 3).join('. ').trim();
+  return sentences.endsWith('.') ? sentences : sentences + '.';
 }
 
 function buildDefaultFields(type: ActionType, step: Pick<NextStep, 'title' | 'description'>, ctx: CallContext | null): Record<string, string> {
