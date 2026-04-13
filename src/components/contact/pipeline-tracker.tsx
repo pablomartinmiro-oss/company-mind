@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Pencil } from 'lucide-react';
+import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 
 interface StageLogEntry {
   id: string;
@@ -38,15 +40,46 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
   const [logForm, setLogForm] = useState<{ pipelineId: string; stage: string } | null>(null);
   const [logNote, setLogNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editMovedBy, setEditMovedBy] = useState('');
+  const [editNote, setEditNote] = useState('');
 
   function toggleLog(pipelineId: string, stage: string) {
     if (openLog?.pipelineId === pipelineId && openLog?.stage === stage) {
       setOpenLog(null);
       setLogForm(null);
+      setEditingId(null);
     } else {
       setOpenLog({ pipelineId, stage });
       setLogForm(null);
+      setEditingId(null);
     }
+  }
+
+  function startEdit(entry: StageLogEntry) {
+    setEditingId(entry.id);
+    setEditDate(entry.entered_at.slice(0, 10));
+    setEditMovedBy(entry.moved_by ?? '');
+    setEditNote(entry.note ?? '');
+  }
+
+  async function saveEdit() {
+    if (!editingId) return;
+    setSaving(true);
+    await fetch('/api/pipeline/stage-log', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: editingId,
+        entered_at: new Date(editDate + 'T12:00:00Z').toISOString(),
+        moved_by: editMovedBy || null,
+        note: editNote || null,
+      }),
+    });
+    setEditingId(null);
+    setSaving(false);
+    router.refresh();
   }
 
   async function handleAddLog(pipelineId: string, stage: string) {
@@ -103,7 +136,6 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
         const logForStage = (stage: string) =>
           enrollment.stageLog.filter((l) => l.stage === stage);
 
-        // Stages up to current that have no log entry
         const loggedStages = new Set(enrollment.stageLog.map(l => l.stage));
         const missingLogs = new Set(
           enrollment.stages.slice(0, currentIdx + 1).filter(s => !loggedStages.has(s))
@@ -172,7 +204,6 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                       >
                         + Log
                       </button>
-                      {/* Edit: move to a different stage */}
                       <div className="relative group">
                         <button className="border border-white/60 text-[11px] px-2.5 py-1 rounded-full text-zinc-500 hover:bg-white/40 transition-all duration-150">
                           Edit
@@ -232,22 +263,77 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                 ) : (
                   logForStage(openLog.stage).map((entry) => (
                     <div key={entry.id} className="bg-white/50 border border-white/30 rounded-lg p-2.5 mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-zinc-500">
-                          {new Date(entry.entered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        {entry.moved_by && <span className="text-[11px] font-medium text-zinc-700">{entry.moved_by}</span>}
-                        {entry.source && (
-                          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${SOURCE_BADGE[entry.source] ?? 'bg-zinc-100 text-zinc-500'}`}>
-                            {entry.source}
-                          </span>
-                        )}
-                        {entry.entry_number > 1 && (
-                          <span className="text-[9px] px-1.5 rounded-full bg-amber-50 text-amber-600">repeat entry</span>
-                        )}
-                      </div>
-                      {entry.note && (
-                        <p className="text-[11px] text-zinc-500 mt-1.5 pt-1.5 border-t border-white/30">{entry.note}</p>
+                      {editingId === entry.id ? (
+                        /* Inline edit form */
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <label className="text-[10px] text-zinc-400 w-[40px]">Date</label>
+                            <input
+                              type="date"
+                              value={editDate}
+                              onChange={(e) => setEditDate(e.target.value)}
+                              className="text-[11px] px-2 py-1 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <label className="text-[10px] text-zinc-400 w-[40px]">By</label>
+                            <select
+                              value={editMovedBy}
+                              onChange={(e) => setEditMovedBy(e.target.value)}
+                              className="text-[11px] px-2 py-1 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
+                            >
+                              <option value="">Select...</option>
+                              {TEAM_MEMBERS.map(m => (
+                                <option key={m.name} value={m.name}>{m.name}</option>
+                              ))}
+                              <option value="system">System</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <label className="text-[10px] text-zinc-400 w-[40px]">Note</label>
+                            <input
+                              type="text"
+                              value={editNote}
+                              onChange={(e) => setEditNote(e.target.value)}
+                              placeholder="Optional note..."
+                              className="flex-1 text-[11px] px-2 py-1 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-1.5 pt-1">
+                            <button onClick={() => setEditingId(null)} className="text-[11px] text-zinc-400 px-2 py-1 hover:text-zinc-700 transition-all duration-150">Cancel</button>
+                            <button onClick={saveEdit} disabled={saving} className="text-[11px] px-3 py-1 bg-zinc-900 text-white rounded-lg disabled:opacity-40 hover:bg-zinc-700 transition-all duration-150">
+                              {saving ? 'Saving...' : 'Save'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Display mode */
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono text-zinc-500">
+                              {new Date(entry.entered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                            {entry.moved_by && <span className="text-[11px] font-medium text-zinc-700">{entry.moved_by}</span>}
+                            {entry.source && (
+                              <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${SOURCE_BADGE[entry.source] ?? 'bg-zinc-100 text-zinc-500'}`}>
+                                {entry.source}
+                              </span>
+                            )}
+                            {entry.entry_number > 1 && (
+                              <span className="text-[9px] px-1.5 rounded-full bg-amber-50 text-amber-600">repeat entry</span>
+                            )}
+                            <button
+                              onClick={() => startEdit(entry)}
+                              className="ml-auto text-zinc-400 hover:text-zinc-700 transition-all duration-150"
+                              title="Edit log entry"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          </div>
+                          {entry.note && (
+                            <p className="text-[11px] text-zinc-500 mt-1.5 pt-1.5 border-t border-white/30">{entry.note}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   ))

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'First and last name are required' }, { status: 400 });
     }
 
-    const { tenantId } = await getTenantForUser();
+    const { tenantId, userName } = await getTenantForUser();
     const ghl = await getGHLClientForTenant(tenantId);
 
     // 1. Create contact in GHL
@@ -77,6 +77,8 @@ export async function POST(req: Request) {
       .single();
 
     if (pipeline) {
+      const now = new Date().toISOString();
+
       // 5. Enroll company in pipeline at New Lead
       await supabaseAdmin.from('pipeline_companies').insert({
         tenant_id: tenantId,
@@ -84,7 +86,20 @@ export async function POST(req: Request) {
         contact_id: contactId,
         pipeline_id: pipeline.id,
         stage: 'New Lead',
-        stage_entered_at: new Date().toISOString(),
+        stage_entered_at: now,
+      });
+
+      // 6. Auto-log the New Lead stage entry
+      await supabaseAdmin.from('stage_log').insert({
+        tenant_id: tenantId,
+        company_id: company.id,
+        contact_id: contactId,
+        pipeline_id: pipeline.id,
+        stage: 'New Lead',
+        entered_at: now,
+        moved_by: userName,
+        source: 'api',
+        entry_number: 1,
       });
     }
 
