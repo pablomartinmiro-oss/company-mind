@@ -17,10 +17,26 @@ const navItems = [
 
 function UserAvatarMenu() {
   const [open, setOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ name: CURRENT_USER.name, email: CURRENT_USER.email });
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const member = getTeamMember(CURRENT_USER.name);
   const confirmDialog = useConfirm();
+
+  useEffect(() => {
+    const sb = getSupabaseBrowser();
+    if (!sb) return;
+    sb.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      sb.from('users').select('name').eq('auth_id', data.user.id).single()
+        .then(({ data: appUser }) => {
+          if (appUser?.name) {
+            setCurrentUser({ name: appUser.name as string, email: data.user!.email ?? '' });
+          }
+        });
+    });
+  }, []);
+
+  const member = getTeamMember(currentUser.name);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -53,8 +69,8 @@ function UserAvatarMenu() {
       {open && (
         <div className="absolute bottom-full left-full ml-2 mb-0 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1">
           <div className="px-3 py-1.5 border-b border-zinc-100">
-            <div className="text-[11px] font-medium text-[#1a1a1a]">{CURRENT_USER.name}</div>
-            <div className="text-[10px] text-zinc-500 mt-0.5">{CURRENT_USER.email}</div>
+            <div className="text-[11px] font-medium text-[#1a1a1a]">{currentUser.name}</div>
+            <div className="text-[10px] text-zinc-500 mt-0.5">{currentUser.email}</div>
           </div>
           <button
             onClick={() => { setOpen(false); router.push('/settings'); }}
