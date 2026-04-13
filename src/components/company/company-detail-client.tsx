@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { ReEnrichButton } from './re-enrich-button';
 import { STAGE_PILL_CLASSES } from '@/lib/pipeline-config';
@@ -85,7 +86,9 @@ const TABS = ['Overview', 'Activity', 'Research'] as const;
 type Tab = typeof TABS[number];
 
 export function CompanyDetailClient(props: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('Overview');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as Tab) ?? 'Overview';
+  const [activeTab, setActiveTab] = useState<Tab>(TABS.includes(initialTab as Tab) ? initialTab : 'Overview');
   const [selectedContactId, setSelectedContactId] = useState(
     props.contacts.find(c => c.is_primary)?.contact_id ?? props.contacts[0]?.contact_id ?? null
   );

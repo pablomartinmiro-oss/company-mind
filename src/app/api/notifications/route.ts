@@ -22,10 +22,28 @@ export async function GET() {
 
     // Filter to entries that mention this user's name
     const mentionPattern = `@${userName}`;
-    const mentions = (data ?? []).filter(entry => {
+    const filtered = (data ?? []).filter(entry => {
       const text = (entry.content as Record<string, unknown>)?.text;
       return typeof text === 'string' && text.includes(mentionPattern);
     });
+
+    // Resolve contact_id → company_id for navigation links
+    const contactIds = [...new Set(filtered.map(m => m.contact_id))];
+    const { data: links } = contactIds.length > 0
+      ? await supabaseAdmin
+          .from('company_contacts')
+          .select('contact_id, company_id')
+          .eq('tenant_id', tenantId)
+          .in('contact_id', contactIds)
+      : { data: [] };
+
+    const companyMap: Record<string, string> = {};
+    for (const l of links ?? []) companyMap[l.contact_id] = l.company_id;
+
+    const mentions = filtered.map(m => ({
+      ...m,
+      company_id: companyMap[m.contact_id] ?? null,
+    }));
 
     return NextResponse.json({ mentions });
   } catch (err) {
