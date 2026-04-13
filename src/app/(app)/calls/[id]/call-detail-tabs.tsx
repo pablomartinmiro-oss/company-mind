@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { approveAction, rejectAction } from '@/app/actions';
 import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
-import { Sparkles, AlertTriangle, Pencil, X } from 'lucide-react';
+import { Pencil, X, RefreshCw } from 'lucide-react';
+import { scoreColor } from '@/lib/format';
 import { NextStepsTab } from '@/components/calls/next-steps-tab';
 import { DataPointsView } from '@/components/calls/data-points-view';
 
 interface ScoreData {
   overall: number;
-  criteria: Array<{
+  criteria?: Array<{
     name: string;
     score: number;
     weight: number;
@@ -40,19 +41,6 @@ interface Action {
   suggested_payload?: { reasoning?: string } | null;
 }
 
-interface TranscriptLine {
-  speaker: 'rep' | 'contact';
-  speakerName: string;
-  text: string;
-  timestamp?: string;
-}
-
-interface KeyMoment {
-  time: string;
-  text: string;
-  type: 'positive' | 'negative' | 'neutral';
-}
-
 interface NextStepItem {
   id: string;
   action_type: string;
@@ -67,10 +55,8 @@ interface Props {
   coaching: CoachingData | null;
   callSummary: string;
   actions: Action[];
-  /** @deprecated Page passes these from contact_data_points; ignored by new DataPointsView */
   dataPoints?: unknown[];
   duration: number;
-  /** @deprecated Page passes this; ignored by new DataPointsView */
   contactGhlId?: string;
   nextSteps?: NextStepItem[];
   pendingDataPoints?: number;
@@ -78,16 +64,15 @@ interface Props {
   recordingUrl?: string | null;
 }
 
-const TABS = ['Coaching', 'Criteria', 'Transcript', 'Next Steps', 'Data Points'] as const;
+const TABS = ['Overview', 'Next Steps', 'Data Points'] as const;
 type Tab = typeof TABS[number];
 
-function formatType(s: string) {
-  return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+function itemText(item: string | { title: string; detail?: string }): string {
+  return typeof item === 'string' ? item : item.detail ?? item.title;
 }
 
-export function CallDetailTabs({ transcript, score, coaching, callSummary, actions, duration, nextSteps, pendingDataPoints, callId, recordingUrl }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('Coaching');
-  const pendingActions = actions.filter((a) => a.status === 'suggested');
+export function CallDetailTabs({ score, coaching, callSummary, actions, nextSteps, pendingDataPoints, callId }: Props) {
+  const [activeTab, setActiveTab] = useState<Tab>('Overview');
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -120,9 +105,9 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
 
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        {activeTab === 'Coaching' && <CoachingView coaching={coaching} callSummary={callSummary} />}
-        {activeTab === 'Criteria' && <CriteriaView score={score} />}
-        {activeTab === 'Transcript' && <TranscriptView text={transcript} duration={duration} recordingUrl={recordingUrl} />}
+        {activeTab === 'Overview' && (
+          <OverviewTab score={score} coaching={coaching} callSummary={callSummary} />
+        )}
         {activeTab === 'Next Steps' && (
           nextSteps && nextSteps.length > 0
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
@@ -134,247 +119,132 @@ export function CallDetailTabs({ transcript, score, coaching, callSummary, actio
   );
 }
 
-/* ── Coaching Tab ── */
+/* ── Overview Tab ── */
 
-function CoachingView({ coaching, callSummary }: { coaching: CoachingData | null; callSummary: string }) {
-  if (!coaching) return <p className="py-8 text-center text-[13px] text-zinc-400">No coaching data available.</p>;
-
+function OverviewTab({ score, coaching, callSummary }: { score: ScoreData | null; coaching: CoachingData | null; callSummary: string }) {
   return (
     <div>
-      {/* Summary */}
+      {/* Section 1: AI Summary */}
       {callSummary && (
-        <div className="mb-6">
-          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-2 flex items-center gap-1.5">Summary</h3>
-          <p className="text-[14px] text-zinc-700 leading-relaxed">{callSummary}</p>
-        </div>
-      )}
-
-      {/* Strengths */}
-      {coaching.strengths && coaching.strengths.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
-            <span className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-600">✓</span>
-            Strengths
-          </h3>
-          <div className="space-y-3">
-            {coaching.strengths.map((s, i) => {
-              const isObj = typeof s === 'object' && s !== null;
-              const title = isObj ? (s as { title: string }).title : null;
-              const detail = isObj ? (s as { detail: string }).detail : (s as string);
-              return (
-                <div key={i} className="border border-emerald-100 rounded-xl p-3">
-                  {title && <p className="text-[13px] font-medium text-[#1a1a1a] mb-1">{title}</p>}
-                  <p className="text-[13px] text-zinc-600 leading-relaxed">{detail}</p>
-                </div>
-              );
-            })}
+        <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-400">AI SUMMARY</span>
           </div>
+          <p className="text-[13px] text-zinc-600 leading-relaxed">{callSummary}</p>
+          <p className="text-[10px] text-zinc-400 mt-2">Scout · AI Generated</p>
         </div>
       )}
 
-      {/* Red Flags */}
-      {coaching.red_flags && coaching.red_flags.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
-            <span className="h-4 w-4 rounded-full bg-red-100 flex items-center justify-center text-[10px] text-red-600">⚠</span>
-            Red Flags
-          </h3>
-          <div className="space-y-3">
-            {coaching.red_flags.map((flag, i) => {
-              const isObj = typeof flag === 'object' && flag !== null;
-              const title = isObj ? (flag as { title: string }).title : null;
-              const detail = isObj ? (flag as { detail: string }).detail : (flag as string);
-              return (
-                <div key={i} className="border border-red-100 rounded-xl p-3">
-                  {title && <p className="text-[13px] font-medium text-[#1a1a1a] mb-1">{title}</p>}
-                  <p className="text-[13px] text-zinc-600 leading-relaxed">{detail}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Areas for Improvement */}
-      {coaching.improvements.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-amber-400" />
-            Areas for Improvement
-          </h3>
-          {coaching.improvements.map((imp, i) => (
-            <div key={i} className="mb-6">
-              <p className="text-[14px] text-zinc-700 leading-relaxed">
-                <span className="font-medium">{imp.area}</span>
-                {imp.tip && <span className="text-zinc-500">: {imp.tip}</span>}
-                {!imp.tip && imp.current && <span className="text-zinc-500">: {imp.current}</span>}
+      {/* Section 2: Coaching Scores */}
+      {score && (
+        <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`h-[52px] w-[52px] rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+              score.overall >= 70 ? 'border-emerald-400' : score.overall >= 40 ? 'border-amber-400' : 'border-red-400'
+            }`}>
+              <span className={`text-[18px] font-medium font-mono ${scoreColor(score.overall)}`}>{score.overall}</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-medium text-zinc-900">
+                {coaching?.summary ? coaching.summary.split('.')[0] + '.' : 'Call scored'}
               </p>
-
-              {imp.suggested && (
-                <div className="my-3 pl-3 border-l-2 border-zinc-300">
-                  <p className="italic text-[13px] text-zinc-500 leading-relaxed">{imp.suggested}</p>
-                </div>
-              )}
-
-              {imp.example_script && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Sparkles className="h-3 w-3 text-blue-600" />
-                    <span className="text-[11px] font-semibold tracking-widest uppercase text-blue-600">Script Suggestion</span>
-                  </div>
-                  <p className="text-[13px] text-blue-900 leading-relaxed">{imp.example_script}</p>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Criteria Tab ── */
-
-function CriteriaView({ score }: { score: ScoreData | null }) {
-  if (!score) return <p className="py-8 text-center text-[13px] text-zinc-400">No score data available.</p>;
-
-  function barColor(pct: number) {
-    if (pct > 70) return 'bg-emerald-500';
-    if (pct >= 40) return 'bg-amber-500';
-    return 'bg-red-500';
-  }
-
-  if (!score.criteria?.length) {
-    return <p className="py-8 text-center text-[13px] text-zinc-400">No detailed criteria available for this call.</p>;
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {score.criteria.map((c) => {
-        const maxScore = 10;
-        const pct = (c.score / maxScore) * 100;
-        return (
-          <div key={c.name} className="border border-zinc-100 rounded-xl p-4">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-[14px] font-medium text-[#1a1a1a]">{c.name}</span>
-              <span className="text-[14px] font-medium text-[#1a1a1a] font-mono">{c.score}/{maxScore}</span>
-            </div>
-            <div className="h-1.5 bg-zinc-100 rounded-full mb-3">
-              <div className={`h-full rounded-full ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
-            </div>
-            <p className="text-[13px] text-zinc-500 leading-relaxed">{c.feedback || c.evidence}</p>
           </div>
-        );
-      })}
-    </div>
-  );
-}
 
-/* ── Transcript Tab ── */
-
-function TranscriptView({ text, duration, recordingUrl }: { text: string; duration: number; recordingUrl?: string | null }) {
-  const [audioError, setAudioError] = useState(false);
-
-  // Parse transcript — supports both "Rep: text" and "[00:01:23] Name: text" formats
-  const lines: TranscriptLine[] = [];
-  if (text) {
-    const parts = text.split(/\n/).filter(Boolean);
-    // Detect rep name from first timestamped line (speaker A = rep)
-    let repName = 'Rep';
-    const firstTimestamped = parts.find(l => /^\[\d{2}:\d{2}(:\d{2})?\]/.test(l.trim()));
-    if (firstTimestamped) {
-      const m = firstTimestamped.match(/^\[\d{2}:\d{2}(?::\d{2})?\]\s*(.+?):\s/);
-      if (m) repName = m[1];
-    }
-
-    for (let i = 0; i < parts.length; i++) {
-      const trimmed = parts[i].trim();
-      // Format 1: [00:01:23] Speaker Name: text
-      const tsMatch = trimmed.match(/^\[(\d{2}:\d{2}(?::\d{2})?)\]\s*(.+?):\s*(.+)/);
-      if (tsMatch) {
-        const [, timestamp, speakerName, lineText] = tsMatch;
-        const isRep = speakerName === repName;
-        lines.push({ speaker: isRep ? 'rep' : 'contact', speakerName, text: lineText, timestamp });
-        continue;
-      }
-      // Format 2: "0:14 - Speaker Name" on one line, text on next lines (Fireflies/uploaded)
-      const headerMatch = trimmed.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)/);
-      if (headerMatch) {
-        const [, timestamp, speakerName] = headerMatch;
-        // Collect following lines until next header
-        let bodyText = '';
-        while (i + 1 < parts.length && !parts[i + 1].trim().match(/^\d{1,2}:\d{2}(?::\d{2})?\s*[-–]/)) {
-          i++;
-          bodyText += (bodyText ? ' ' : '') + parts[i].trim();
-        }
-        const isRep = speakerName === repName || speakerName.toLowerCase().includes('participant 1');
-        lines.push({ speaker: isRep ? 'rep' : 'contact', speakerName, text: bodyText, timestamp });
-        continue;
-      }
-      // Format 3: "Rep: text" / "Prospect: text"
-      if (trimmed.startsWith('Rep:')) {
-        lines.push({ speaker: 'rep', speakerName: 'Rep', text: trimmed.replace(/^Rep:\s*/, '') });
-      } else if (trimmed.startsWith('Prospect:') || trimmed.startsWith('Contact:')) {
-        lines.push({ speaker: 'contact', speakerName: 'Contact', text: trimmed.replace(/^(Prospect|Contact):\s*/, '') });
-      } else if (lines.length > 0) {
-        lines[lines.length - 1].text += ' ' + trimmed;
-      }
-    }
-  }
-
-  return (
-    <div>
-      {/* Call Recording Player */}
-      <div className="border border-zinc-100 rounded-xl p-4 mb-5">
-        <p className="text-[11px] uppercase tracking-widest text-zinc-400 mb-3">Call Recording</p>
-
-        {recordingUrl && !audioError ? (
-          <audio
-            controls
-            src={recordingUrl}
-            onError={() => setAudioError(true)}
-            className="w-full h-10"
-          />
-        ) : (
-          <p className="text-[13px] text-[#71717a] py-2">
-            {audioError ? 'Recording unavailable' : 'No recording available'}
-          </p>
-        )}
-      </div>
-
-      {/* Transcript */}
-      {lines.length === 0 ? (
-        <p className="py-8 text-center text-[13px] text-zinc-400">No transcript available.</p>
-      ) : (
-        <div className="space-y-3">
-          {lines.map((line, i) => (
-            <div key={i} className="flex gap-3">
-              <div className="w-[80px] shrink-0 pt-1 text-right">
-                <span className="text-[11px] font-medium text-zinc-400 block">{line.speakerName}</span>
-                {line.timestamp && <span className="text-[9px] font-mono text-zinc-300">{line.timestamp}</span>}
-              </div>
-              <div className={`px-3 py-2 rounded-lg text-[13px] leading-relaxed ${
-                line.speaker === 'rep'
-                  ? 'bg-zinc-100 text-zinc-800 rounded-tl-none'
-                  : 'bg-white border border-zinc-200 text-zinc-800 rounded-tr-none'
-              }`}>
-                {line.text}
-              </div>
+          {score.criteria && score.criteria.length > 0 && (
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+              {score.criteria.map(c => {
+                const pct = (c.score / 10) * 100;
+                return (
+                  <div key={c.name} className="flex items-center gap-2">
+                    <span className="text-[11px] text-zinc-500 w-[120px] shrink-0 truncate">{c.name}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-zinc-100">
+                      <div
+                        className={`h-full rounded-full ${pct > 70 ? 'bg-emerald-400' : pct >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
+                        style={{ width: `${Math.min(pct, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400 w-[32px] text-right">{c.score}/10</span>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          )}
         </div>
+      )}
+
+      {/* Section 3: What Went Well + Watch Out For */}
+      {coaching && (coaching.strengths.length > 0 || coaching.improvements.length > 0 || (coaching.red_flags ?? []).length > 0) && (
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* What Went Well */}
+          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-emerald-700 mb-3 block">
+              WHAT WENT WELL
+            </span>
+            {coaching.strengths.length > 0 ? coaching.strengths.map((s, i) => (
+              <div key={i} className="flex items-start gap-2 mb-2.5 last:mb-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                <span className="text-[12px] text-emerald-900 leading-relaxed">{itemText(s)}</span>
+              </div>
+            )) : (
+              <p className="text-[12px] text-emerald-700/60">No strengths noted.</p>
+            )}
+          </div>
+
+          {/* Watch Out For */}
+          <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-amber-700 mb-3 block">
+              WATCH OUT FOR
+            </span>
+            {[...(coaching.red_flags ?? []), ...coaching.improvements].length > 0 ? (
+              [...(coaching.red_flags ?? []), ...coaching.improvements].map((item, i) => {
+                const text = typeof item === 'string' ? item
+                  : 'detail' in item ? item.detail ?? (item as { title: string }).title
+                  : 'area' in item ? ((item as { area: string; tip?: string }).tip ?? (item as { area: string }).area)
+                  : String(item);
+                return (
+                  <div key={i} className="flex items-start gap-2 mb-2.5 last:mb-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                    <span className="text-[12px] text-amber-900 leading-relaxed">{text}</span>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-[12px] text-amber-700/60">Nothing flagged.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Section 4: For Next Call */}
+      {coaching?.summary && (
+        <div className="border-l-4 border-blue-400 bg-blue-50 rounded-r-xl px-4 py-3">
+          <span className="text-[10px] font-semibold tracking-widest uppercase text-blue-700 mb-2 block">
+            FOR NEXT CALL
+          </span>
+          <p className="text-[12px] text-blue-900 leading-relaxed">{coaching.summary}</p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!callSummary && !score && !coaching && (
+        <p className="py-8 text-center text-[13px] text-zinc-400">No analysis data available yet.</p>
       )}
     </div>
   );
 }
 
-/* ── Next Steps Tab ── */
+/* ── Next Steps (legacy actions fallback) ── */
 
 function NextStepsView({ actions, callId }: { actions: Action[]; callId: string }) {
   const pending = actions.filter((a) => a.status === 'suggested');
   const [pushing, setPushing] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+
+  function formatType(s: string) {
+    return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
 
   async function handlePush(action: Action) {
     setPushing((prev) => new Set(prev).add(action.id));
@@ -388,34 +258,10 @@ function NextStepsView({ actions, callId }: { actions: Action[]; callId: string 
     setPushing((prev) => { const n = new Set(prev); n.delete(action.id); return n; });
   }
 
-  function startEdit(action: Action) {
-    setEditingId(action.id);
-    setEditText(action.description);
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setEditText('');
-  }
-
-  async function saveEdit(actionId: string) {
-    await rejectAction(actionId);
-    setEditingId(null);
-    setEditText('');
-  }
-
-  function getStepType(action: Action): string {
-    const payload = action.suggested_payload as Record<string, unknown> | null;
-    return (payload?.type as string) ?? 'follow_up';
-  }
-
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <span className="text-[14px] font-medium text-[#1a1a1a]">{pending.length} pending</span>
-        <button className="border border-zinc-200 rounded-lg px-3 py-1.5 text-[13px] text-zinc-600 hover:bg-zinc-50">
-          Add Action
-        </button>
       </div>
 
       {actions.length === 0 ? (
@@ -423,45 +269,28 @@ function NextStepsView({ actions, callId }: { actions: Action[]; callId: string 
       ) : (
         actions.map((action) => {
           const reasoning = (action.suggested_payload as { reasoning?: string } | null)?.reasoning;
-          const stepType = getStepType(action);
+          const stepType = (action.suggested_payload as Record<string, unknown> | null)?.type as string ?? 'follow_up';
           const typePill = NEXT_STEP_TYPE_PILL[stepType] ?? 'bg-zinc-100 text-zinc-500 border border-zinc-200';
           const typeLabel = NEXT_STEP_TYPE_LABELS[stepType] ?? formatType(stepType);
-          const isEditing = editingId === action.id;
           const isPushing = pushing.has(action.id);
+          const isEditing = editingId === action.id;
 
           return (
             <div key={action.id} className="border border-zinc-100 rounded-xl p-4 mb-3">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typePill}`}>
-                    {typeLabel}
-                  </span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
-                    {formatType(action.action_type)}
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">AI</span>
-                </div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${typePill}`}>{typeLabel}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">AI</span>
               </div>
 
               {isEditing ? (
                 <div className="mb-3">
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    rows={3}
-                    className="w-full text-[13px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 resize-none"
-                  />
+                  <textarea value={editText} onChange={(e) => setEditText(e.target.value)} rows={3}
+                    className="w-full text-[13px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 resize-none" />
                   <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() => saveEdit(action.id)}
-                      className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1.5 flex items-center gap-1"
-                    >
+                    <button onClick={() => { rejectAction(action.id); setEditingId(null); }}
+                      className="bg-zinc-900 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg">Save</button>
+                    <button onClick={() => setEditingId(null)}
+                      className="text-[12px] text-zinc-400 hover:text-zinc-700 px-2 py-1.5 flex items-center gap-1">
                       <X className="h-3 w-3" /> Cancel
                     </button>
                   </div>
@@ -471,24 +300,17 @@ function NextStepsView({ actions, callId }: { actions: Action[]; callId: string 
               )}
 
               {reasoning && !isEditing && (
-                <div className="pl-3 border-l-2 border-zinc-200 italic text-[13px] text-zinc-400 mb-3">
-                  {reasoning}
-                </div>
+                <div className="pl-3 border-l-2 border-zinc-200 italic text-[13px] text-zinc-400 mb-3">{reasoning}</div>
               )}
 
               {action.status === 'suggested' && !isEditing && (
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePush(action)}
-                    disabled={isPushing}
-                    className="bg-zinc-900 text-white text-[13px] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-700 disabled:opacity-40"
-                  >
+                  <button onClick={() => handlePush(action)} disabled={isPushing}
+                    className="bg-zinc-900 text-white text-[13px] font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-700 disabled:opacity-40">
                     {isPushing ? 'Pushing…' : 'Push to CRM'}
                   </button>
-                  <button
-                    onClick={() => startEdit(action)}
-                    className="border border-zinc-200 text-[13px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50 flex items-center gap-1"
-                  >
+                  <button onClick={() => { setEditingId(action.id); setEditText(action.description); }}
+                    className="border border-zinc-200 text-[13px] text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-50 flex items-center gap-1">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                   <form action={rejectAction.bind(null, action.id)}>
@@ -503,8 +325,3 @@ function NextStepsView({ actions, callId }: { actions: Action[]; callId: string 
     </div>
   );
 }
-
-/* ── Data Points Tab ──
- * Moved to src/components/calls/data-points-view.tsx
- * Renders via import above, self-fetches from /api/calls/[id]/data-points
- */
