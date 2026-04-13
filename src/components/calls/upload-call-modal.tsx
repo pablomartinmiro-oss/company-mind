@@ -62,7 +62,12 @@ export function UploadCallModal({ isOpen, onClose, companies }: Props) {
       formData.append('contactIds', JSON.stringify(selectedContacts));
       formData.append('repName', repName);
       formData.append('callType', callType);
-      formData.append('calledAt', new Date(calledAt).toISOString());
+      // Send as Central Time — append CDT/CST offset
+      // CDT (Mar-Nov) = -05:00, CST (Nov-Mar) = -06:00
+      const d = new Date(calledAt);
+      const month = d.getMonth();
+      const offset = (month >= 2 && month <= 10) ? '-05:00' : '-06:00';
+      formData.append('calledAt', calledAt + offset);
 
       const res = await fetch('/api/calls/upload', { method: 'POST', body: formData });
       const data = await res.json();
