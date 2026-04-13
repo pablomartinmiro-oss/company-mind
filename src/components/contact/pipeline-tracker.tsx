@@ -351,6 +351,12 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                         </button>
                         <div className="absolute left-0 top-full mt-1 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2)] py-1 min-w-[140px] hidden group-hover:block z-50">
                           <button
+                            onClick={() => handleMoveToFollowUp(enrollment.pipelineId, 'Follow Up')}
+                            className="w-full text-left px-3 py-1.5 text-[11px] text-zinc-600 hover:bg-zinc-50 transition-colors"
+                          >
+                            Move to Follow Up
+                          </button>
+                          <button
                             onClick={() => handleMoveToFollowUp(enrollment.pipelineId, 'Nurture')}
                             className="w-full text-left px-3 py-1.5 text-[11px] text-zinc-600 hover:bg-zinc-50 transition-colors"
                           >

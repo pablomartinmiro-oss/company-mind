@@ -27,8 +27,9 @@ export const STAGE_ICONS: Record<string, LucideIcon> = {
   'Tier 2': TrendingUp,
   'Tier 3': Crown,
   // Follow Up
-  'Nurture': Zap,
   'Dead': Skull,
+  'Nurture': Zap,
+  'Follow Up': Target,
 };
 
 export const TEAM_MEMBERS = [
@@ -51,7 +52,7 @@ export const PIPELINES = [
   { name: 'Sales Pipeline', stages: ['New Lead','Qualification','Proposal','Closing','Closed'] },
   { name: 'Onboarding',     stages: ['New Client','Building','Built','Operating'] },
   { name: 'Upsell',         stages: ['Tier 1','Tier 2','Tier 3'] },
-  { name: 'Follow Up',      stages: ['Nurture','Dead'] },
+  { name: 'Follow Up',      stages: ['Dead','Nurture','Follow Up'] },
 ] as const;
 
 export const STAGE_PILL_CLASSES: Record<string, string> = {
@@ -67,8 +68,9 @@ export const STAGE_PILL_CLASSES: Record<string, string> = {
   'Tier 1':        'bg-teal-50 text-teal-700 border border-teal-200',
   'Tier 2':        'bg-blue-50 text-blue-700 border border-blue-200',
   'Tier 3':        'bg-violet-50 text-violet-700 border border-violet-200',
-  'Nurture':       'bg-zinc-100 text-zinc-500 border border-zinc-200',
   'Dead':          'bg-red-50 text-red-400 border border-red-100',
+  'Nurture':       'bg-zinc-100 text-zinc-500 border border-zinc-200',
+  'Follow Up':     'bg-amber-50 text-amber-700 border border-amber-200',
 };
 
 export const CALL_TYPE_LABELS: Record<string, string> = {
