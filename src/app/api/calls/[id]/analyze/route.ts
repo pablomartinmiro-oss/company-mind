@@ -6,6 +6,8 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+export const maxDuration = 120;
+
 export async function POST(_req: NextRequest, ctx: RouteContext) {
   try {
     const { tenantId } = await getTenantForUser();

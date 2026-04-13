@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTenantForUser } from '@/lib/get-tenant';
 import { supabaseAdmin } from '@/lib/supabase';
-import { analyzeCall } from '@/lib/ai/call-analysis';
-
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
@@ -102,10 +100,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to create call record: ' + (callError?.message ?? 'unknown') }, { status: 500 });
     }
 
-    // If we have a transcript, analyze immediately (fire and forget)
+    // If we have a transcript, trigger analysis in a separate function invocation
+    // (fire-and-forget in same function gets killed when response sends)
     if (transcriptText) {
-      analyzeCall(tenantId, call.id).catch(err => {
-        console.error('[upload] call analysis failed:', err);
+      const origin = req.headers.get('origin') || req.headers.get('host') || '';
+      const baseUrl = origin.startsWith('http') ? origin : `https://${origin}`;
+      fetch(`${baseUrl}/api/calls/${call.id}/analyze`, {
+        method: 'POST',
+        headers: { cookie: req.headers.get('cookie') ?? '' },
+      }).catch(err => {
+        console.error('[upload] analysis trigger failed:', err);
       });
     }
 
