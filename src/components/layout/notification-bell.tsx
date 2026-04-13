@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import { timeAgo } from '@/lib/format';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { CURRENT_USER } from '@/lib/tenant-context';
 
 interface Mention {
   id: string;
@@ -14,6 +16,10 @@ interface Mention {
 
 const SEEN_KEY = 'notifications_seen_at';
 
+function isMentionForMe(text: string): boolean {
+  return text.includes(`@${CURRENT_USER.name}`);
+}
+
 export function NotificationBell() {
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [open, setOpen] = useState(false);
@@ -24,21 +30,51 @@ export function NotificationBell() {
     setSeenAt(localStorage.getItem(SEEN_KEY) ?? '');
   }, []);
 
+  // Initial load from API
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch('/api/notifications');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!cancelled) setMentions(data.mentions ?? []);
-      } catch { /* ignore */ }
-    }
-    load();
-    const interval = setInterval(load, 30_000);
-    return () => { cancelled = true; clearInterval(interval); };
+    fetch('/api/notifications')
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setMentions(data.mentions ?? []); })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
+  // Realtime subscription — new activity_feed inserts push instantly
+  useEffect(() => {
+    const sb = getSupabaseBrowser();
+    if (!sb) return;
+
+    const channel = sb
+      .channel('activity_mentions')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'activity_feed' },
+        (payload) => {
+          const row = payload.new as {
+            id: string;
+            contact_id: string;
+            type: string;
+            content: { text?: string } | null;
+            author: string | null;
+            created_at: string;
+          };
+
+          // Only care about notes from other people that mention us
+          if (row.type !== 'note') return;
+          if (row.author === CURRENT_USER.name) return;
+          const text = (row.content as Record<string, unknown>)?.text;
+          if (typeof text !== 'string' || !isMentionForMe(text)) return;
+
+          setMentions(prev => [row, ...prev]);
+        },
+      )
+      .subscribe();
+
+    return () => { sb.removeChannel(channel); };
+  }, []);
+
+  // Close on outside click
   useEffect(() => {
     if (!open) return;
     function handler(e: MouseEvent) {
@@ -52,14 +88,16 @@ export function NotificationBell() {
     ? mentions.filter(m => m.created_at > seenAt).length
     : mentions.length;
 
-  function handleOpen() {
-    setOpen(!open);
-    if (!open) {
-      const now = new Date().toISOString();
-      localStorage.setItem(SEEN_KEY, now);
-      setSeenAt(now);
-    }
-  }
+  const handleOpen = useCallback(() => {
+    setOpen(prev => {
+      if (!prev) {
+        const now = new Date().toISOString();
+        localStorage.setItem(SEEN_KEY, now);
+        setSeenAt(now);
+      }
+      return !prev;
+    });
+  }, []);
 
   return (
     <div className="relative" ref={ref}>
@@ -70,7 +108,7 @@ export function NotificationBell() {
       >
         <Bell className="h-[18px] w-[18px]" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[#ff5a2d] text-white text-[9px] font-bold px-1">
+          <span className="absolute top-1 right-1 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[#ff5a2d] text-white text-[9px] font-bold px-1 animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
