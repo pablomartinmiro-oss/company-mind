@@ -55,12 +55,12 @@ interface CardUI {
 
 // ── Config ─────────────────────────────────────────────────────────────
 
-const TYPE_BADGES: Record<ActionType, { label: string; cls: string; Icon: typeof CheckSquare; pushLabel: string }> = {
-  task:        { label: 'Create Task',        cls: 'bg-violet-50 text-violet-700 border border-violet-200',   Icon: CheckSquare,    pushLabel: 'Push to GHL' },
-  appointment: { label: 'Create Appointment', cls: 'bg-blue-50 text-blue-700 border border-blue-200',         Icon: Calendar,       pushLabel: 'Push to GHL' },
-  email:       { label: 'Send Email',         cls: 'bg-amber-50 text-amber-700 border border-amber-200',      Icon: Mail,           pushLabel: 'Send Email' },
-  sms:         { label: 'Send SMS',           cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200', Icon: MessageSquare, pushLabel: 'Send SMS' },
-  note:        { label: 'Add Note',           cls: 'bg-zinc-100 text-zinc-500 border border-zinc-200',        Icon: StickyNote,     pushLabel: 'Add Note' },
+const TYPE_BADGES: Record<ActionType, { label: string; cls: string; Icon: typeof CheckSquare; pushLabel: string; cardBg: string; cardBorder: string; footerBg: string }> = {
+  task:        { label: 'Create Task',        cls: 'bg-violet-50 text-violet-700 border border-violet-200',   Icon: CheckSquare,    pushLabel: 'Push to GHL',  cardBg: 'bg-violet-50/40',  cardBorder: 'border-violet-200/60',  footerBg: 'bg-violet-50/30' },
+  appointment: { label: 'Create Appointment', cls: 'bg-blue-50 text-blue-700 border border-blue-200',         Icon: Calendar,       pushLabel: 'Push to GHL',  cardBg: 'bg-blue-50/40',    cardBorder: 'border-blue-200/60',    footerBg: 'bg-blue-50/30' },
+  email:       { label: 'Send Email',         cls: 'bg-amber-50 text-amber-700 border border-amber-200',      Icon: Mail,           pushLabel: 'Send Email',   cardBg: 'bg-amber-50/40',   cardBorder: 'border-amber-200/60',   footerBg: 'bg-amber-50/30' },
+  sms:         { label: 'Send SMS',           cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200', Icon: MessageSquare, pushLabel: 'Send SMS',     cardBg: 'bg-emerald-50/40', cardBorder: 'border-emerald-200/60', footerBg: 'bg-emerald-50/30' },
+  note:        { label: 'Add Note',           cls: 'bg-zinc-100 text-zinc-500 border border-zinc-200',        Icon: StickyNote,     pushLabel: 'Add Note',     cardBg: 'bg-zinc-50/40',    cardBorder: 'border-zinc-200/60',    footerBg: 'bg-zinc-50/30' },
 };
 
 function defaultDueDate(): string {
@@ -402,7 +402,7 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
       : ctx.contactName;
 
   return (
-    <div className={`bg-white border border-zinc-200/60 rounded-xl overflow-hidden mb-3 transition-opacity ${isPushed ? 'opacity-60' : ''}`}>
+    <div className={`${badge.cardBg} border ${badge.cardBorder} rounded-xl overflow-hidden mb-3 transition-opacity ${isPushed ? 'opacity-60' : ''}`}>
       {/* ── Header ── */}
       <div className={`px-4 pt-3 pb-2.5 ${isExpanded ? 'border-b border-zinc-100' : ''}`}>
         <div className="flex items-center gap-2">
@@ -484,7 +484,7 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
           )}
         </div>
       ) : (
-        <div className="px-4 py-2.5 bg-zinc-50/50 border-t border-zinc-100 flex items-center gap-2">
+        <div className={`px-4 py-2.5 ${badge.footerBg} border-t ${badge.cardBorder} flex items-center gap-2`}>
           {!isExpanded && (
             <button
               onClick={() => onUIChange({ expanded: true })}
