@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface StageLogEntry {
   id: string;
@@ -22,6 +23,7 @@ interface PipelineEnrollment {
 
 interface Props {
   enrollments: PipelineEnrollment[];
+  companyId?: string;
 }
 
 const SOURCE_BADGE: Record<string, string> = {
@@ -30,15 +32,67 @@ const SOURCE_BADGE: Record<string, string> = {
   manual: 'bg-green-50 text-green-700',
 };
 
-export function PipelineTracker({ enrollments }: Props) {
+export function PipelineTracker({ enrollments, companyId }: Props) {
+  const router = useRouter();
   const [openLog, setOpenLog] = useState<{ pipelineId: string; stage: string } | null>(null);
+  const [logForm, setLogForm] = useState<{ pipelineId: string; stage: string } | null>(null);
+  const [logNote, setLogNote] = useState('');
+  const [saving, setSaving] = useState(false);
 
   function toggleLog(pipelineId: string, stage: string) {
     if (openLog?.pipelineId === pipelineId && openLog?.stage === stage) {
       setOpenLog(null);
+      setLogForm(null);
     } else {
       setOpenLog({ pipelineId, stage });
+      setLogForm(null);
     }
+  }
+
+  async function handleAddLog(pipelineId: string, stage: string) {
+    if (!companyId || !logNote.trim()) return;
+    setSaving(true);
+    await fetch('/api/pipeline/move-stage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId,
+        pipelineId,
+        newStage: stage,
+        movedBy: 'manual',
+        note: logNote.trim(),
+      }),
+    });
+    setLogNote('');
+    setLogForm(null);
+    setSaving(false);
+    router.refresh();
+  }
+
+  async function handleDelete(pipelineId: string) {
+    if (!companyId) return;
+    if (!confirm('Remove this company from the pipeline?')) return;
+    await fetch('/api/pipeline/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companyId, pipelineId }),
+    });
+    router.refresh();
+  }
+
+  async function handleEditStage(pipelineId: string, newStage: string) {
+    if (!companyId) return;
+    await fetch('/api/pipeline/move-stage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId,
+        pipelineId,
+        newStage,
+        movedBy: 'manual',
+      }),
+    });
+    router.refresh();
   }
 
   return (
@@ -110,13 +164,70 @@ export function PipelineTracker({ enrollments }: Props) {
               <div className="bg-white/30 border-t border-white/30 px-4 py-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[13px] font-medium text-[#1a1a1a]">{openLog.stage}</span>
-                  <div className="flex items-center gap-1.5">
-                    <button className="bg-white/60 backdrop-blur text-zinc-700 border border-white/60 text-[11px] px-2.5 py-1 rounded-full">+ Log</button>
-                    <button className="border border-white/60 text-[11px] px-2.5 py-1 rounded-full text-zinc-500">Edit</button>
-                    <button className="border border-white/60 text-[11px] px-2.5 py-1 rounded-full text-zinc-500">Delete</button>
-                  </div>
+                  {companyId && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setLogForm(logForm ? null : { pipelineId: enrollment.pipelineId, stage: openLog.stage })}
+                        className="bg-white/60 backdrop-blur text-zinc-700 border border-white/60 text-[11px] px-2.5 py-1 rounded-full hover:bg-white/80 transition-all duration-150"
+                      >
+                        + Log
+                      </button>
+                      {/* Edit: move to a different stage */}
+                      <div className="relative group">
+                        <button className="border border-white/60 text-[11px] px-2.5 py-1 rounded-full text-zinc-500 hover:bg-white/40 transition-all duration-150">
+                          Edit
+                        </button>
+                        <div className="absolute right-0 top-full mt-1 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2)] py-1 min-w-[120px] hidden group-hover:block z-50">
+                          {enrollment.stages.filter(s => s !== enrollment.currentStage).map(s => (
+                            <button
+                              key={s}
+                              onClick={() => handleEditStage(enrollment.pipelineId, s)}
+                              className="w-full text-left px-3 py-1.5 text-[11px] text-zinc-600 hover:bg-zinc-50 transition-colors"
+                            >
+                              Move to {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDelete(enrollment.pipelineId)}
+                        className="border border-white/60 text-[11px] px-2.5 py-1 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50/50 transition-all duration-150"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {logForStage(openLog.stage).length === 0 ? (
+
+                {/* Add log form */}
+                {logForm?.pipelineId === enrollment.pipelineId && logForm?.stage === openLog.stage && (
+                  <div className="mb-3 bg-white/50 border border-white/30 rounded-lg p-2.5">
+                    <textarea
+                      value={logNote}
+                      onChange={(e) => setLogNote(e.target.value)}
+                      placeholder="Add a note about this stage..."
+                      className="w-full text-[12px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 resize-none transition-all duration-150"
+                      rows={2}
+                    />
+                    <div className="flex justify-end gap-1.5 mt-2">
+                      <button
+                        onClick={() => { setLogForm(null); setLogNote(''); }}
+                        className="text-[11px] text-zinc-400 px-2 py-1 hover:text-zinc-700 transition-all duration-150"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleAddLog(enrollment.pipelineId, openLog.stage)}
+                        disabled={!logNote.trim() || saving}
+                        className="text-[11px] px-3 py-1 bg-zinc-900 text-white rounded-lg disabled:opacity-40 hover:bg-zinc-700 transition-all duration-150"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {logForStage(openLog.stage).length === 0 && !logForm ? (
                   <p className="text-[11px] text-zinc-500">No log entries.</p>
                 ) : (
                   logForStage(openLog.stage).map((entry) => (

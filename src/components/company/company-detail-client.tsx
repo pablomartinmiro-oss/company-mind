@@ -166,7 +166,7 @@ export function CompanyDetailClient(props: Props) {
 
           {/* Pipeline tracker */}
           <div className="px-6 py-4 border-b border-white/40">
-            <PipelineTracker enrollments={trackerEnrollments} />
+            <PipelineTracker enrollments={trackerEnrollments} companyId={props.companyId} />
           </div>
 
         </div>
