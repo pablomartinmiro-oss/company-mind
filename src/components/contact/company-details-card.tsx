@@ -25,7 +25,8 @@ export function CompanyDetailsCard({ companyId, website, location, industry, lea
     setSaving(true);
     setError(null);
     const prev = { ...values };
-    setValues(v => ({ ...v, [field]: value }));
+    const next = { ...values, [field]: value };
+    setValues(next);
     try {
       const res = await fetch(`/api/companies/${companyId}`, {
         method: 'PATCH',
@@ -33,6 +34,12 @@ export function CompanyDetailsCard({ companyId, website, location, industry, lea
         body: JSON.stringify({ [dbField]: value || null }),
       });
       if (!res.ok) throw new Error('Save failed');
+
+      // If all 4 detail fields are now filled, trigger enrichment
+      if (next.website && next.location && next.industry && next.leadSource) {
+        fetch(`/api/companies/${companyId}/enrich`, { method: 'POST' })
+          .catch(err => console.error('enrichment trigger failed:', err));
+      }
     } catch {
       setError('Failed to save');
       setValues(prev);
