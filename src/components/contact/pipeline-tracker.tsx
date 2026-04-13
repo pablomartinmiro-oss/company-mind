@@ -188,7 +188,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
   }
 
   return (
-    <div className="relative glass-card rounded-3xl overflow-hidden mb-4 max-w-[50%]">
+    <div className="relative glass-card rounded-3xl mb-4 max-w-[50%]">
       <div className="glass-card-inner" />
       {enrollments.map((enrollment, idx) => {
         const currentIdx = enrollment.stages.indexOf(enrollment.currentStage);
@@ -364,7 +364,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                         <button className="flex items-center gap-1 px-3 py-1.5 border border-zinc-200/60 text-zinc-500 text-[11px] font-medium rounded-lg hover:bg-zinc-50 transition-all duration-150">
                           <Ban className="h-3 w-3" /> Not progressing
                         </button>
-                        <div className="absolute left-0 top-full mt-1 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2)] py-1 min-w-[140px] hidden group-hover:block z-50">
+                        <div className="absolute left-0 bottom-full mb-1 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2)] py-1 min-w-[140px] hidden group-hover:block z-50">
                           <button
                             onClick={() => handleMoveToFollowUp(enrollment.pipelineId, 'Follow Up')}
                             className="w-full text-left px-3 py-1.5 text-[11px] text-zinc-600 hover:bg-zinc-50 transition-colors"
