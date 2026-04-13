@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
@@ -94,6 +94,9 @@ export function CompanyDetailClient(props: Props) {
     props.contacts.find(c => c.is_primary)?.contact_id ?? props.contacts[0]?.contact_id ?? null
   );
   const [contactsState, setContactsState] = useState(props.contacts);
+
+  // Sync contacts when server data changes (e.g. after router.refresh())
+  useEffect(() => { setContactsState(props.contacts); }, [props.contacts]);
 
   const selectedContact = contactsState.find(c => c.contact_id === selectedContactId);
 

@@ -201,6 +201,7 @@ function AddContactForm({ companyId }: { companyId: string }) {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -217,6 +218,7 @@ function AddContactForm({ companyId }: { companyId: string }) {
           lastName: lastName.trim(),
           email: email.trim() || undefined,
           phone: phone.trim() || undefined,
+          role: role || undefined,
         }),
       });
       if (!res.ok) {
@@ -229,6 +231,7 @@ function AddContactForm({ companyId }: { companyId: string }) {
       setLastName('');
       setEmail('');
       setPhone('');
+      setRole('');
       setOpen(false);
       setSaving(false);
       router.refresh();
@@ -268,6 +271,11 @@ function AddContactForm({ companyId }: { companyId: string }) {
           className="w-full text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
         <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone" type="tel"
           className="w-full text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
+        <select value={role} onChange={e => setRole(e.target.value)}
+          className="w-full text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150">
+          <option value="">Role (optional)</option>
+          {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+        </select>
       </div>
       {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
       <div className="flex justify-end gap-1.5 mt-2">
