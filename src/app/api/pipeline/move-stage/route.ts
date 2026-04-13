@@ -6,8 +6,9 @@ const GATED_PIPELINES = ['Onboarding', 'Upsell'];
 
 export async function POST(req: NextRequest) {
   try {
-    const { tenantId } = await getTenantForUser();
-    const { companyId, contactId, pipelineId, newStage, movedBy, note, milestone } = await req.json();
+    const { tenantId, userName } = await getTenantForUser();
+    const { companyId, contactId, pipelineId, newStage, movedBy: movedByRaw, note, milestone } = await req.json();
+    const movedBy = movedByRaw || userName;
 
     // Resolve the entity ID — prefer companyId, fall back to contactId for legacy calls
     const entityCompanyId = companyId ?? null;
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
       contact_id: entityContactId,
       pipeline_id: pipelineId,
       stage: newStage,
-      moved_by: movedBy ?? 'system',
+      moved_by: movedBy,
       source: milestone ? 'manual' : 'manual',
       note: note ?? null,
       milestone: milestone ?? null,
@@ -174,7 +175,7 @@ export async function POST(req: NextRequest) {
           pipeline_id: nextPipeline.id,
           stage: c.targetStage,
           entered_at: now,
-          moved_by: movedBy ?? 'system',
+          moved_by: movedBy,
           source: 'api',
           entry_number: 1,
         });
