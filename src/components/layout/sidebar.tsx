@@ -7,6 +7,7 @@ import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import { CURRENT_USER } from '@/lib/tenant-context';
 import { getTeamMember } from '@/lib/pipeline-config';
 import { useConfirm } from '@/components/ui/confirm-modal';
+import { NotificationBell } from './notification-bell';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Daily HQ' },
@@ -107,6 +108,7 @@ export function Sidebar() {
 
       {/* Bottom */}
       <div className="flex flex-col items-center gap-2 mt-auto">
+        <NotificationBell />
         <UserAvatarMenu />
       </div>
     </div>
