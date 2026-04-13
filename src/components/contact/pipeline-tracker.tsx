@@ -276,24 +276,24 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
 
                       return (
                         <div key={ms}>
-                          <div
-                            onClick={() => {
-                              if (!companyId) return;
-                              if (!done) handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
-                            }}
-                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-150 ${
-                            done
-                              ? 'bg-emerald-50/60 border border-emerald-200/40'
-                              : 'bg-white/40 border border-white/30 cursor-pointer hover:bg-white/60'
-                          }`}>
-                            {/* Checkbox */}
-                            <div className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
-                              done ? 'bg-emerald-500 text-white' : 'border border-zinc-300'
-                            }`}>
-                              {done && <Check className="h-2.5 w-2.5" />}
+                          {!done ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => handleMilestone(enrollment.pipelineId, openLog.stage, ms, null)}
+                              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/40 border border-white/30 cursor-pointer hover:bg-white/60 disabled:opacity-50 transition-all duration-150 text-left"
+                            >
+                              <div className="h-4 w-4 rounded border border-zinc-300 flex-shrink-0" />
+                              <span className="text-[11px] text-zinc-600">{ms}</span>
+                              {saving && <span className="ml-auto text-[9px] text-zinc-400">saving...</span>}
+                            </button>
+                          ) : (
+                          <div className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-50/60 border border-emerald-200/40 transition-all duration-150">
+                            <div className="h-4 w-4 rounded bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
+                              <Check className="h-2.5 w-2.5" />
                             </div>
-                            <span className={`text-[11px] flex-1 ${done ? 'text-emerald-700 font-medium' : 'text-zinc-600'}`}>{ms}</span>
-                            {done && entry && !isEditingMs && (
+                            <span className="text-[11px] text-emerald-700 font-medium flex-1">{ms}</span>
+                            {entry && !isEditingMs && (
                               <span className="flex items-center gap-1 text-[9px] text-zinc-400">
                                 {new Date(entry.entered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 {entry.moved_by ? ` · ${entry.moved_by}` : ''}
@@ -304,9 +304,8 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                                 )}
                               </span>
                             )}
-                            {/* Per-milestone edit + delete */}
-                            {done && entry && !isEditingMs && companyId && (
-                              <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                            {entry && !isEditingMs && companyId && (
+                              <div className="flex items-center gap-0.5">
                                 <button onClick={() => startEdit(entry)} className="text-zinc-400 hover:text-zinc-700 p-0.5 transition-all duration-150" title="Edit">
                                   <Pencil className="h-2.5 w-2.5" />
                                 </button>
@@ -316,6 +315,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                               </div>
                             )}
                           </div>
+                          )}
 
                           {/* Inline edit form */}
                           {isEditingMs && entry && (
