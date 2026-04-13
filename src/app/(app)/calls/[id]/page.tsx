@@ -43,7 +43,26 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
   }
 
   const score = call.score as { overall: number; criteria: Array<{ name: string; score: number; weight: number; evidence: string; feedback: string }> } | null;
-  const coaching = call.coaching as { strengths: string[]; improvements: Array<{ area: string; current: string; suggested: string; example_script: string }>; summary: string } | null;
+  // coaching_data is the active column; coaching is legacy/null
+  const rawCoaching = (call.coaching_data ?? call.coaching) as {
+    strengths?: (string | { title: string; detail: string })[];
+    weaknesses?: (string | { title: string; detail: string })[];
+    red_flags?: (string | { title: string; detail: string })[];
+    improvements?: Array<{ area: string; tip?: string; current?: string; suggested?: string; example_script?: string }>;
+    score_reasoning?: string;
+    summary?: string;
+    sentiment?: string;
+  } | null;
+
+  const coaching = rawCoaching ? {
+    strengths: rawCoaching.strengths ?? [],
+    red_flags: rawCoaching.red_flags ?? [],
+    improvements: rawCoaching.improvements ?? (rawCoaching.weaknesses ?? []).map(w => ({
+      area: typeof w === 'string' ? w : w.title,
+      tip: typeof w === 'string' ? undefined : w.detail,
+    })),
+    summary: rawCoaching.summary ?? rawCoaching.score_reasoning ?? '',
+  } : null;
   const overall = score?.overall ?? 0;
   const grade = scoreGrade(overall);
 
