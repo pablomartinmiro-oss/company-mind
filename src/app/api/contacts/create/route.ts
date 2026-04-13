@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getTenantForUser } from '@/lib/get-tenant';
 import { getGHLClientForTenant } from '@/lib/tenant-context';
 import { supabaseAdmin } from '@/lib/supabase';
+import { runCompanyEnrichment } from '@/lib/ai/enrichment';
 
 export async function POST(req: Request) {
   try {
@@ -102,6 +103,11 @@ export async function POST(req: Request) {
         entry_number: 1,
       });
     }
+
+    // Fire enrichment async — do not await, do not block the response
+    runCompanyEnrichment(tenantId, company.id, 'creation').catch(err => {
+      console.error('[create] enrichment failed silently:', err);
+    });
 
     return NextResponse.json({ success: true, contactId });
   } catch (err: unknown) {
