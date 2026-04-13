@@ -85,6 +85,7 @@ export async function POST(req: Request) {
         duration_seconds: durationSeconds,
         direction: 'outbound',
         called_at: calledAt || new Date().toISOString(),
+        transcript: transcriptText,
         transcript_text: transcriptText,
         processing_status: transcriptText ? 'analyzing' : 'pending',
         rep_name: repName || userName,
