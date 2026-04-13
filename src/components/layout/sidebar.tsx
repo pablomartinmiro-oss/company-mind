@@ -25,12 +25,14 @@ function UserAvatarMenu() {
   useEffect(() => {
     const sb = getSupabaseBrowser();
     if (!sb) return;
-    sb.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
-      sb.from('users').select('name').eq('auth_id', data.user.id).single()
-        .then(({ data: appUser }) => {
-          if (appUser?.name) {
-            setCurrentUser({ name: appUser.name as string, email: data.user!.email ?? '' });
+    sb.auth.getUser().then((authRes) => {
+      const authUser = authRes.data.user;
+      if (!authUser) return;
+      sb.from('users').select('name').eq('auth_id', authUser.id).single()
+        .then((userRes) => {
+          const name = userRes.data?.name;
+          if (name) {
+            setCurrentUser({ name: String(name), email: authUser.email ?? '' });
           }
         });
     });
