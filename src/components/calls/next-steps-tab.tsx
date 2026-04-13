@@ -19,8 +19,14 @@ interface NextStep {
   status: string;
 }
 
+interface ContactInfo {
+  id: string;
+  name: string;
+}
+
 interface CallContext {
   contactName: string | null;
+  contacts: ContactInfo[];
   companyName: string | null;
   companyId: string | null;
   repName: string | null;
@@ -104,6 +110,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
       .then(r => r.json())
       .then(data => setCtx({
         contactName: data.contactName,
+        contacts: data.contacts ?? [],
         companyName: data.companyName,
         companyId: data.companyId,
         repName: data.repName,
@@ -135,11 +142,13 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
       uiInit[noteId] = { showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
     }
 
+    const defaultContactId = ctx.contacts[0]?.id ?? '';
+
     // Action cards from next_steps
     for (const step of steps) {
       if (step.status === 'skipped') continue;
       const type = normalizeType(step.action_type);
-      const fields = buildDefaultFields(type, step, ctx);
+      const fields = { ...buildDefaultFields(type, step, ctx), selectedContactGhlId: defaultContactId };
       built.push({
         id: step.id,
         type,
@@ -192,7 +201,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
           aiGenerated: true,
           status: 'pending',
           pushedAt: null,
-          fields: data.fields ?? buildDefaultFields(type, { title: data.title, description: data.description } as NextStep, ctx),
+          fields: { ...(data.fields ?? buildDefaultFields(type, { title: data.title, description: data.description } as NextStep, ctx)), selectedContactGhlId: ctx?.contacts[0]?.id ?? '' },
         };
         setCards(prev => {
           // Insert after summary note
@@ -247,7 +256,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
           stepId: card.id.startsWith('summary-note-') ? null : card.id,
           type: card.type,
           fields: card.fields,
-          contactGhlId,
+          contactGhlId: card.fields.selectedContactGhlId || contactGhlId,
         }),
       });
       const data = await res.json();
@@ -320,10 +329,9 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
       {hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(true)}
-          className="w-full text-center text-[12px] text-zinc-500 hover:text-zinc-700 py-3 flex items-center justify-center gap-1"
+          className="w-full text-center text-[11px] text-zinc-400 hover:text-zinc-600 cursor-pointer py-3 flex items-center justify-center gap-1"
         >
-          <ChevronDown className="h-3.5 w-3.5" />
-          Show all {actionCards.length} suggestions
+          Show {hiddenCount} more suggestion{hiddenCount === 1 ? '' : 's'}
         </button>
       )}
       {showAll && actionCards.length > 3 && (
@@ -399,9 +407,13 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
               <Sparkles className="h-2.5 w-2.5" /> AI
             </span>
           )}
-          {ctx.contactName && (
+          {ctx.contacts.length > 1 ? (
+            <span className="ml-auto text-[11px] text-zinc-400">
+              re: {ctx.contacts.find(c => c.id === card.fields.selectedContactGhlId)?.name ?? ctx.contacts[0]?.name}
+            </span>
+          ) : ctx.contactName ? (
             <span className="ml-auto text-[11px] text-zinc-400">re: {ctx.contactName}</span>
-          )}
+          ) : null}
         </div>
 
         <h4 className="text-[14px] font-medium text-zinc-900 mt-1.5">{card.title}</h4>
@@ -511,6 +523,32 @@ const LABEL = 'text-[10px] font-medium tracking-widest uppercase text-zinc-400 m
 const INPUT = 'w-full text-[12px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400';
 const TEXTAREA = `${INPUT} resize-none`;
 
+function ContactField({ fields, onChange, ctx }: { fields: Record<string, string>; onChange: (k: string, v: string) => void; ctx: CallContext }) {
+  if (ctx.contacts.length > 1) {
+    return (
+      <div>
+        <label className={LABEL}>Contact</label>
+        <select
+          value={fields.selectedContactGhlId ?? ctx.contacts[0]?.id ?? ''}
+          onChange={e => onChange('selectedContactGhlId', e.target.value)}
+          className={INPUT}
+        >
+          {ctx.contacts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+    );
+  }
+  if (ctx.contactName) {
+    return (
+      <div>
+        <label className={LABEL}>Contact</label>
+        <div className="text-[12px] px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-500">{ctx.contactName}</div>
+      </div>
+    );
+  }
+  return null;
+}
+
 function TaskForm({ fields, onChange, ctx }: { fields: Record<string, string>; onChange: (k: string, v: string) => void; ctx: CallContext }) {
   return (
     <div className="space-y-3">
@@ -534,12 +572,7 @@ function TaskForm({ fields, onChange, ctx }: { fields: Record<string, string>; o
           </select>
         </div>
       </div>
-      {ctx.contactName && (
-        <div>
-          <label className={LABEL}>Contact</label>
-          <div className="text-[12px] px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-500">{ctx.contactName}</div>
-        </div>
-      )}
+      <ContactField fields={fields} onChange={onChange} ctx={ctx} />
     </div>
   );
 }
@@ -581,12 +614,7 @@ function AppointmentForm({ fields, onChange, ctx }: { fields: Record<string, str
           </select>
         </div>
       </div>
-      {ctx.contactName && (
-        <div>
-          <label className={LABEL}>Contact</label>
-          <div className="text-[12px] px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-500">{ctx.contactName}</div>
-        </div>
-      )}
+      <ContactField fields={fields} onChange={onChange} ctx={ctx} />
     </div>
   );
 }
