@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import { timeAgo } from '@/lib/format';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
-import { CURRENT_USER } from '@/lib/tenant-context';
 
 interface Mention {
   id: string;
@@ -16,18 +15,24 @@ interface Mention {
 
 const SEEN_KEY = 'notifications_seen_at';
 
-function isMentionForMe(text: string): boolean {
-  return text.includes(`@${CURRENT_USER.name}`);
-}
-
 export function NotificationBell() {
   const [mentions, setMentions] = useState<Mention[]>([]);
   const [open, setOpen] = useState(false);
   const [seenAt, setSeenAt] = useState<string>('');
+  const [userName, setUserName] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Resolve real user name from auth
   useEffect(() => {
     setSeenAt(localStorage.getItem(SEEN_KEY) ?? '');
+    const sb = getSupabaseBrowser();
+    if (!sb) return;
+    (async () => {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+      const { data: row } = await sb.from('users').select('name').eq('auth_id', user.id).single();
+      if (row?.name) setUserName(String(row.name));
+    })();
   }, []);
 
   // Initial load from API
@@ -42,6 +47,7 @@ export function NotificationBell() {
 
   // Realtime subscription — new activity_feed inserts push instantly
   useEffect(() => {
+    if (!userName) return;
     const sb = getSupabaseBrowser();
     if (!sb) return;
 
@@ -60,11 +66,10 @@ export function NotificationBell() {
             created_at: string;
           };
 
-          // Only care about notes from other people that mention us
           if (row.type !== 'note') return;
-          if (row.author === CURRENT_USER.name) return;
+          if (row.author === userName) return;
           const text = (row.content as Record<string, unknown>)?.text;
-          if (typeof text !== 'string' || !isMentionForMe(text)) return;
+          if (typeof text !== 'string' || !text.includes(`@${userName}`)) return;
 
           setMentions(prev => [row, ...prev]);
         },
@@ -72,7 +77,7 @@ export function NotificationBell() {
       .subscribe();
 
     return () => { sb.removeChannel(channel); };
-  }, []);
+  }, [userName]);
 
   // Close on outside click
   useEffect(() => {
