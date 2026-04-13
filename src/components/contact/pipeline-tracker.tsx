@@ -160,19 +160,29 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
 
   async function handleMilestone(pipelineId: string, stage: string, milestone: string, contactId: string | null) {
     if (!companyId) return;
-    await fetch('/api/pipeline/move-stage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        companyId,
-        contactId,
-        pipelineId,
-        newStage: stage,
-        movedBy: 'manual',
-        note: milestone,
-        milestone,
-      }),
-    });
+    setSaving(true);
+    try {
+      const res = await fetch('/api/pipeline/move-stage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyId,
+          contactId,
+          pipelineId,
+          newStage: stage,
+          movedBy: null,
+          note: milestone,
+          milestone,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Milestone save failed:', err);
+      }
+    } catch (e) {
+      console.error('Milestone save error:', e);
+    }
+    setSaving(false);
     router.refresh();
   }
 
@@ -184,9 +194,14 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
         const logForStage = (stage: string) =>
           enrollment.stageLog.filter((l) => l.stage === stage);
 
-        const loggedStages = new Set(enrollment.stageLog.map(l => l.stage));
-        const missingLogs = new Set(
-          enrollment.stages.slice(0, currentIdx + 1).filter(s => !loggedStages.has(s))
+        // Check which stages have incomplete milestones (past or current stages only)
+        const incompleteMilestones = new Set(
+          enrollment.stages.slice(0, currentIdx + 1).filter(s => {
+            const milestones = STAGE_MILESTONES[s];
+            if (!milestones || milestones.length === 0) return false;
+            const completedMs = new Set(logForStage(s).filter(l => l.milestone).map(l => l.milestone));
+            return milestones.some(ms => !completedMs.has(ms));
+          })
         );
 
         return (
@@ -221,10 +236,10 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                         } ${isOpen ? 'border-[2px] border-zinc-700' : ''}`}>
                           {isPast ? '✓' : sIdx + 1}
                         </div>
-                        {missingLogs.has(stage) && (
+                        {incompleteMilestones.has(stage) && (
                           <div
                             className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-[#ebe7e0]"
-                            title="No stage log entry"
+                            title="Incomplete milestones"
                           />
                         )}
                       </div>
