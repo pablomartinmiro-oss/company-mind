@@ -58,7 +58,7 @@ export function MentionInput({ value, onChange, placeholder, className }: Mentio
         className={className}
       />
       {mentionQuery !== null && filtered.length > 0 && (
-        <div className="absolute left-0 bottom-full mb-1 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1">
+        <div className="absolute left-0 top-full mt-1 z-50 min-w-[200px] bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_-8px_rgba(28,25,22,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] py-1">
           {filtered.map(member => {
             const m = getTeamMember(member.name);
             return (

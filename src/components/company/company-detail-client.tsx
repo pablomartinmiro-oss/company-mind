@@ -110,7 +110,7 @@ export function CompanyDetailClient(props: Props) {
   }
 
   return (
-    <div className="p-5 animate-fade-in overflow-hidden">
+    <div className="p-5 animate-fade-in">
       {/* ══ HEADER — frosted glass ══ */}
       <div className="relative glass-card rounded-3xl overflow-hidden mb-4">
         <div className="glass-card-inner" />
