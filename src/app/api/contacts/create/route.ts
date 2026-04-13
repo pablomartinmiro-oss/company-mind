@@ -46,12 +46,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to create contact in GHL' }, { status: 400 });
     }
 
-    // 2. Create company record with detail fields
+    // 2. Create company in GHL
+    let ghlCompanyId: string | null = null;
+    try {
+      const ghlCompanyResult = await ghl.createCompany({
+        name: companyName.trim(),
+        ...(website?.trim() ? { website: website.trim() } : {}),
+        ...(location?.trim() ? { address: location.trim() } : {}),
+        ...(industry?.trim() ? { industry: industry.trim() } : {}),
+      });
+      ghlCompanyId = ghlCompanyResult?.company?.id ?? ghlCompanyResult?.id ?? null;
+    } catch (err) {
+      console.error('[create] GHL company creation failed, continuing:', err);
+    }
+
+    // 3. Create company record with detail fields
     const { data: company, error: companyError } = await supabaseAdmin
       .from('companies')
       .insert({
         tenant_id: tenantId,
         name: companyName.trim(),
+        ghl_company_id: ghlCompanyId,
         website: website?.trim() || null,
         location: location?.trim() || null,
         industry: industry?.trim() || null,
@@ -67,7 +82,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Link GHL contact to company
+    // 4. Link GHL contact to company
     await supabaseAdmin.from('company_contacts').insert({
       tenant_id: tenantId,
       company_id: company.id,
@@ -82,7 +97,7 @@ export async function POST(req: Request) {
       phone: phone?.trim() || null,
     });
 
-    // 4. Enroll in Sales Pipeline at New Lead
+    // 5. Enroll in Sales Pipeline at New Lead
     const { data: pipeline } = await supabaseAdmin
       .from('pipelines')
       .select('id')
@@ -117,7 +132,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // 5. Fire enrichment if all 4 detail fields are provided
+    // 6. Fire enrichment if all 4 detail fields are provided
     const allDetailsFilled = website?.trim() && location?.trim() && industry?.trim() && leadSource?.trim();
     if (allDetailsFilled) {
       runCompanyEnrichment(tenantId, company.id, 'creation').catch(err => {

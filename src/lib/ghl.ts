@@ -164,6 +164,18 @@ export class GHLClient {
     return this.request('POST', `/contacts/${contactId}/notes`, { body });
   }
 
+  // ── Companies ──
+  async createCompany(data: { name: string; website?: string; address?: string; industry?: string }) {
+    return this.request('POST', '/companies/', {
+      ...data,
+      locationId: this.locationId,
+    });
+  }
+
+  async getCompany(companyId: string) {
+    return this.request('GET', `/companies/${companyId}`);
+  }
+
   // ── Conversations ──
   async getConversations(limit = 20) {
     return this.request('GET', '/conversations/', undefined, {
