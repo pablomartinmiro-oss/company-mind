@@ -88,9 +88,9 @@ export default async function CompanyDetailPage({ params }: PageProps) {
       dealValue: pc.deal_value,
       stageLog: (stageLogRes.data ?? [])
         .filter((sl: { pipeline_id: string }) => sl.pipeline_id === pc.pipeline_id)
-        .map((sl: { id: string; stage: string; entered_at: string; moved_by: string | null; source: string | null; note: string | null; entry_number: number }) => ({
+        .map((sl: { id: string; stage: string; entered_at: string; moved_by: string | null; source: string | null; note: string | null; milestone: string | null; entry_number: number }) => ({
           id: sl.id, stage: sl.stage, entered_at: sl.entered_at,
-          moved_by: sl.moved_by, source: sl.source, note: sl.note, entry_number: sl.entry_number,
+          moved_by: sl.moved_by, source: sl.source, note: sl.note, milestone: sl.milestone, entry_number: sl.entry_number,
         })),
     };
   }).filter((x): x is NonNullable<typeof x> => x !== null);

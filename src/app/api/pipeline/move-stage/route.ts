@@ -7,7 +7,7 @@ const GATED_PIPELINES = ['Onboarding', 'Upsell'];
 export async function POST(req: NextRequest) {
   try {
     const { tenantId } = await getTenantForUser();
-    const { companyId, contactId, pipelineId, newStage, movedBy, note } = await req.json();
+    const { companyId, contactId, pipelineId, newStage, movedBy, note, milestone } = await req.json();
 
     // Resolve the entity ID — prefer companyId, fall back to contactId for legacy calls
     const entityCompanyId = companyId ?? null;
@@ -63,22 +63,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Perform the stage move
-    if (entityCompanyId) {
-      await supabaseAdmin
-        .from('pipeline_companies')
-        .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
-        .eq('tenant_id', tenantId)
-        .eq('company_id', entityCompanyId)
-        .eq('pipeline_id', pipelineId);
-    } else if (entityContactId) {
-      // Legacy contact-based move
-      await supabaseAdmin
-        .from('pipeline_companies')
-        .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
-        .eq('tenant_id', tenantId)
-        .eq('contact_id', entityContactId)
-        .eq('pipeline_id', pipelineId);
+    // 3. Perform the stage move (skip if this is just a milestone log for the current stage)
+    const isMilestoneOnly = !!milestone;
+    if (!isMilestoneOnly) {
+      if (entityCompanyId) {
+        await supabaseAdmin
+          .from('pipeline_companies')
+          .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
+          .eq('tenant_id', tenantId)
+          .eq('company_id', entityCompanyId)
+          .eq('pipeline_id', pipelineId);
+      } else if (entityContactId) {
+        await supabaseAdmin
+          .from('pipeline_companies')
+          .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
+          .eq('tenant_id', tenantId)
+          .eq('contact_id', entityContactId)
+          .eq('pipeline_id', pipelineId);
+      }
     }
 
     // 4. Log the stage transition
@@ -96,13 +98,14 @@ export async function POST(req: NextRequest) {
       pipeline_id: pipelineId,
       stage: newStage,
       moved_by: movedBy ?? 'system',
-      source: 'manual',
+      source: milestone ? 'manual' : 'manual',
       note: note ?? null,
+      milestone: milestone ?? null,
       entry_number: (count ?? 0) + 1,
     });
 
-    // 5. Cascade: auto-enroll in next pipeline when reaching trigger stages
-    if (entityCompanyId) {
+    // 5. Cascade: auto-enroll in next pipeline when reaching trigger stages (skip for milestone-only logs)
+    if (entityCompanyId && !isMilestoneOnly) {
       const cascades: { triggerPipeline: string; triggerStage: string; targetPipeline: string; targetStage: string }[] = [
         { triggerPipeline: 'Sales Pipeline', triggerStage: 'Closed', targetPipeline: 'Onboarding', targetStage: 'New Client' },
         { triggerPipeline: 'Onboarding', triggerStage: 'Operating', targetPipeline: 'Upsell', targetStage: 'Tier 1' },

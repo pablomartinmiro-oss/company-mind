@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pencil } from 'lucide-react';
-import { TEAM_MEMBERS } from '@/lib/pipeline-config';
+import { Pencil, Check } from 'lucide-react';
+import { TEAM_MEMBERS, STAGE_MILESTONES } from '@/lib/pipeline-config';
 
 interface StageLogEntry {
   id: string;
@@ -12,6 +12,7 @@ interface StageLogEntry {
   moved_by: string | null;
   source: string | null;
   note: string | null;
+  milestone: string | null;
   entry_number: number;
 }
 
@@ -128,6 +129,24 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
     router.refresh();
   }
 
+  async function handleMilestone(pipelineId: string, stage: string, milestone: string, contactId: string | null) {
+    if (!companyId) return;
+    await fetch('/api/pipeline/move-stage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companyId,
+        contactId,
+        pipelineId,
+        newStage: stage,
+        movedBy: 'manual',
+        note: milestone,
+        milestone,
+      }),
+    });
+    router.refresh();
+  }
+
   return (
     <div className="relative glass-card rounded-3xl overflow-hidden mb-4 max-w-[50%]">
       <div className="glass-card-inner" />
@@ -229,6 +248,50 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                     </div>
                   )}
                 </div>
+
+                {/* Milestones */}
+                {STAGE_MILESTONES[openLog.stage] && (
+                  <div className="mb-3 space-y-1">
+                    {STAGE_MILESTONES[openLog.stage].map(ms => {
+                      const done = logForStage(openLog.stage).some(e => e.milestone === ms);
+                      // Get contact_id from a sibling enrollment for logging
+                      const contactIdForLog = logForStage(openLog.stage)[0]?.note !== undefined
+                        ? enrollment.stageLog[0]?.moved_by // won't work, need contact_id
+                        : null;
+                      return (
+                        <button
+                          key={ms}
+                          disabled={done || !companyId}
+                          onClick={() => {
+                            const cId = enrollment.stageLog.find(e => e.stage === openLog.stage)?.id;
+                            handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
+                          }}
+                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left transition-all duration-150 ${
+                            done
+                              ? 'bg-emerald-50/60 border border-emerald-200/40'
+                              : 'bg-white/40 border border-white/30 hover:bg-white/60 cursor-pointer'
+                          }`}
+                        >
+                          <div className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
+                            done ? 'bg-emerald-500 text-white' : 'border border-zinc-300'
+                          }`}>
+                            {done && <Check className="h-2.5 w-2.5" />}
+                          </div>
+                          <span className={`text-[11px] ${done ? 'text-emerald-700 font-medium' : 'text-zinc-600'}`}>{ms}</span>
+                          {done && (() => {
+                            const entry = logForStage(openLog.stage).find(e => e.milestone === ms);
+                            return entry ? (
+                              <span className="ml-auto text-[9px] text-zinc-400">
+                                {new Date(entry.entered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {entry.moved_by ? ` · ${entry.moved_by}` : ''}
+                              </span>
+                            ) : null;
+                          })()}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Add log form */}
                 {logForm?.pipelineId === enrollment.pipelineId && logForm?.stage === openLog.stage && (

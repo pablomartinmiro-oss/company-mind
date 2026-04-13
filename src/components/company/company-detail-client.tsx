@@ -22,6 +22,7 @@ interface StageLogEntry {
   moved_by: string | null;
   source: string | null;
   note: string | null;
+  milestone: string | null;
   entry_number: number;
 }
 

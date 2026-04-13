@@ -6,7 +6,7 @@ import {
   User, Search, Handshake, CheckCircle,
   Sparkles, Wrench, Rocket, Target,
   ArrowUpRight, TrendingUp, Crown,
-  Zap, Skull,
+  Zap, Skull, FileText,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -14,6 +14,7 @@ export const STAGE_ICONS: Record<string, LucideIcon> = {
   // Sales Pipeline
   'New Lead': User,
   'Qualification': Search,
+  'Proposal': FileText,
   'Closing': Handshake,
   'Closed': CheckCircle,
   // Onboarding
@@ -47,7 +48,7 @@ export function getTeamMember(name: string) {
 }
 
 export const PIPELINES = [
-  { name: 'Sales Pipeline', stages: ['New Lead','Qualification','Closing','Closed'] },
+  { name: 'Sales Pipeline', stages: ['New Lead','Qualification','Proposal','Closing','Closed'] },
   { name: 'Onboarding',     stages: ['New Client','Building','Built','Operating'] },
   { name: 'Upsell',         stages: ['Tier 1','Tier 2','Tier 3'] },
   { name: 'Follow Up',      stages: ['Nurture','Dead'] },
@@ -56,6 +57,7 @@ export const PIPELINES = [
 export const STAGE_PILL_CLASSES: Record<string, string> = {
   'New Lead':      'bg-amber-50 text-amber-700 border border-amber-200',
   'Qualification': 'bg-blue-50 text-blue-700 border border-blue-200',
+  'Proposal':      'bg-indigo-50 text-indigo-700 border border-indigo-200',
   'Closing':       'bg-violet-50 text-violet-700 border border-violet-200',
   'Closed':        'bg-green-50 text-green-700 border border-green-200',
   'New Client':    'bg-amber-50 text-amber-700 border border-amber-200',
@@ -189,6 +191,16 @@ export const LEAD_SOURCES = [
   'Google Ads', 'Facebook Ads', 'Referral', 'Cold outbound',
   'Trade show', 'Inbound website', 'Other',
 ] as const;
+
+// Milestones are sub-checkpoints within a pipeline stage.
+// Each gets logged in stage_log with the milestone field when completed.
+export const STAGE_MILESTONES: Record<string, string[]> = {
+  'New Lead':       ['Lead Came In', 'Contacted Lead'],
+  'Qualification':  ['Qualification Call Scheduled', 'Qualification Call Completed'],
+  'Proposal':       ['Proposal Created', 'Proposal Delivered'],
+  'Closing':        ['Closing Call Scheduled', 'Closing Call Completed'],
+  'Closed':         ['Agreement Signed', 'Invoice Paid'],
+};
 
 export const ONBOARDING_RESEARCH_SECTIONS: Record<string, string[]> = {
   'Account Setup':    ['GHL sub-account ID','Sub-account name','Domain','Billing status','Plan tier','Contract start date'],
