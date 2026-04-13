@@ -50,7 +50,7 @@ export function NotificationBell() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'activity_feed' },
-        (payload) => {
+        (payload: { new: Record<string, unknown> }) => {
           const row = payload.new as {
             id: string;
             contact_id: string;
