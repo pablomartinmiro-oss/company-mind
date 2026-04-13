@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { TEAM_MEMBERS } from '@/lib/pipeline-config';
 import {
   CheckSquare, Calendar, Mail, MessageSquare, StickyNote,
-  Send, ChevronDown, ChevronUp, Sparkles, X, Plus, Check, Loader2,
+  Send, ChevronDown, ChevronUp, Sparkles, X, Plus, Check, Loader2, Pencil,
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -45,6 +45,7 @@ interface ActionCard {
 }
 
 interface CardUI {
+  expanded: boolean;
   showReasoning: boolean;
   aiInput: string;
   modifying: boolean;
@@ -99,7 +100,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
   const [ctx, setCtx] = useState<CallContext | null>(null);
   const [cards, setCards] = useState<ActionCard[]>([]);
   const [ui, setUI] = useState<Record<string, CardUI>>({});
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
   const [cmdInput, setCmdInput] = useState('');
   const [generating, setGenerating] = useState(false);
 
@@ -139,7 +140,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
         pushedAt: null,
         fields: { content: shortenSummary(callSummary) },
       });
-      uiInit[noteId] = { showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
+      uiInit[noteId] = { expanded: false, showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
     }
 
     const defaultContactId = ctx.contacts[0]?.id ?? '';
@@ -160,7 +161,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
         pushedAt: null,
         fields,
       });
-      uiInit[step.id] = { showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
+      uiInit[step.id] = { expanded: false, showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false };
     }
 
     setCards(built);
@@ -211,7 +212,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
           }
           return [newCard, ...prev];
         });
-        setUI(prev => ({ ...prev, [data.id]: { showReasoning: true, aiInput: '', modifying: false, pushing: false, dirty: false } }));
+        setUI(prev => ({ ...prev, [data.id]: { expanded: true, showReasoning: true, aiInput: '', modifying: false, pushing: false, dirty: false } }));
         setCmdInput('');
       }
     } catch { /* ignore */ }
@@ -316,7 +317,7 @@ export function NextStepsTab({ steps, callId, callSummary, contactGhlId }: Props
         <ActionCardView
           key={card.id}
           card={card}
-          ui={ui[card.id] ?? { showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false }}
+          ui={ui[card.id] ?? { expanded: false, showReasoning: false, aiInput: '', modifying: false, pushing: false, dirty: false }}
           ctx={ctx}
           onFieldChange={(k, v) => updateField(card.id, k, v)}
           onUIChange={(p) => updateUI(card.id, p)}
@@ -392,11 +393,18 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
 }) {
   const badge = TYPE_BADGES[card.type];
   const isPushed = card.status === 'pushed';
+  const isExpanded = cardUI.expanded;
+
+  const reLabel = card.type === 'note' && ctx.companyName
+    ? ctx.companyName
+    : ctx.contacts.length > 1
+      ? ctx.contacts.find(c => c.id === card.fields.selectedContactGhlId)?.name ?? ctx.contacts[0]?.name
+      : ctx.contactName;
 
   return (
     <div className={`bg-white border border-zinc-200/60 rounded-xl overflow-hidden mb-3 transition-opacity ${isPushed ? 'opacity-60' : ''}`}>
       {/* ── Header ── */}
-      <div className="px-4 pt-4 pb-3 border-b border-zinc-100">
+      <div className={`px-4 pt-3 pb-2.5 ${isExpanded ? 'border-b border-zinc-100' : ''}`}>
         <div className="flex items-center gap-2">
           <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${badge.cls}`}>
             <badge.Icon className="h-3 w-3" />
@@ -407,20 +415,14 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
               <Sparkles className="h-2.5 w-2.5" /> AI
             </span>
           )}
-          {card.type === 'note' && ctx.companyName ? (
-            <span className="ml-auto text-[11px] text-zinc-400">re: {ctx.companyName}</span>
-          ) : ctx.contacts.length > 1 ? (
-            <span className="ml-auto text-[11px] text-zinc-400">
-              re: {ctx.contacts.find(c => c.id === card.fields.selectedContactGhlId)?.name ?? ctx.contacts[0]?.name}
-            </span>
-          ) : ctx.contactName ? (
-            <span className="ml-auto text-[11px] text-zinc-400">re: {ctx.contactName}</span>
-          ) : null}
+          {reLabel && (
+            <span className="ml-auto text-[11px] text-zinc-400">re: {reLabel}</span>
+          )}
         </div>
 
         <h4 className="text-[14px] font-medium text-zinc-900 mt-1.5">{card.title}</h4>
 
-        {card.reasoning && (
+        {isExpanded && card.reasoning && (
           <div className="mt-1.5">
             <button
               onClick={() => onUIChange({ showReasoning: !cardUI.showReasoning })}
@@ -438,14 +440,13 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
         )}
       </div>
 
-      {/* ── Form (only for pending) ── */}
-      {!isPushed && (
+      {/* ── Expanded: Form + AI Change Bar ── */}
+      {isExpanded && !isPushed && (
         <>
           <div className="px-4 py-4">
             <CardForm card={card} onFieldChange={onFieldChange} ctx={ctx} />
           </div>
 
-          {/* ── AI Change Bar ── */}
           <div className="px-4 pb-3">
             <div className="text-[10px] font-medium text-blue-500 tracking-widest mb-1.5 flex items-center gap-1">
               <Sparkles className="h-2.5 w-2.5" /> TELL AI WHAT TO CHANGE
@@ -483,16 +484,31 @@ function ActionCardView({ card, ui: cardUI, ctx, onFieldChange, onUIChange, onPu
           )}
         </div>
       ) : (
-        <div className="px-4 py-3 bg-zinc-50/50 border-t border-zinc-100 flex items-center gap-2">
+        <div className="px-4 py-2.5 bg-zinc-50/50 border-t border-zinc-100 flex items-center gap-2">
+          {!isExpanded && (
+            <button
+              onClick={() => onUIChange({ expanded: true })}
+              className="text-[12px] text-zinc-600 font-medium px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 flex items-center gap-1.5"
+            >
+              <Pencil className="h-3 w-3" /> Edit
+            </button>
+          )}
           <button
             onClick={onPush}
             disabled={cardUI.pushing}
-            className="bg-zinc-900 text-white text-[12px] font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 hover:bg-zinc-700 disabled:opacity-40"
+            className="bg-zinc-900 text-white text-[12px] font-medium px-4 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-zinc-700 disabled:opacity-40"
           >
             {cardUI.pushing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             {badge.pushLabel}
           </button>
-
+          {isExpanded && (
+            <button
+              onClick={() => onUIChange({ expanded: false })}
+              className="text-[12px] text-zinc-400 hover:text-zinc-600 cursor-pointer"
+            >
+              Collapse
+            </button>
+          )}
           <button
             onClick={onSkip}
             className="ml-auto text-[12px] text-zinc-400 hover:text-zinc-600 cursor-pointer"
