@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Star, Plus, ChevronDown, Mail, Phone } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Star, Plus, ChevronDown, Mail, Phone, X } from 'lucide-react';
 import { formatPhone } from '@/lib/format-phone';
 
 interface ContactInfo {
@@ -187,8 +188,93 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
           })}
         </div>
 
-        <button className="w-full px-4 py-3 text-[11px] font-medium text-[#ff6a3d] hover:bg-white/30 transition-colors border-t border-white/40 flex items-center justify-center gap-1.5">
-          <Plus className="w-3 h-3" /> Add contact
+        <AddContactForm companyId={companyId} />
+      </div>
+    </div>
+  );
+}
+
+function AddContactForm({ companyId }: { companyId: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSave() {
+    if (!firstName.trim() || !lastName.trim()) return;
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/companies/${companyId}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim() || undefined,
+          phone: phone.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Failed to add contact');
+        setSaving(false);
+        return;
+      }
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPhone('');
+      setOpen(false);
+      setSaving(false);
+      router.refresh();
+    } catch {
+      setError('Network error');
+      setSaving(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full px-4 py-3 text-[11px] font-medium text-[#ff6a3d] hover:bg-white/30 transition-colors border-t border-white/40 flex items-center justify-center gap-1.5"
+      >
+        <Plus className="w-3 h-3" /> Add contact
+      </button>
+    );
+  }
+
+  return (
+    <div className="border-t border-white/40 px-4 py-3">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-medium tracking-widest uppercase text-zinc-400">New Contact</span>
+        <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-zinc-700 transition-all duration-150">
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
+          <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name *"
+            className="text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
+          <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name *"
+            className="text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
+        </div>
+        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" type="email"
+          className="w-full text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
+        <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone" type="tel"
+          className="w-full text-[11px] px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150" />
+      </div>
+      {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
+      <div className="flex justify-end gap-1.5 mt-2">
+        <button onClick={() => setOpen(false)} className="text-[11px] text-zinc-400 px-2 py-1 hover:text-zinc-700 transition-all duration-150">Cancel</button>
+        <button onClick={handleSave} disabled={!firstName.trim() || !lastName.trim() || saving}
+          className="text-[11px] px-3 py-1 bg-zinc-900 text-white rounded-lg disabled:opacity-40 hover:bg-zinc-700 transition-all duration-150">
+          {saving ? 'Adding...' : 'Add'}
         </button>
       </div>
     </div>
