@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { approveAction, rejectAction } from '@/app/actions';
 import { NEXT_STEP_TYPE_LABELS, NEXT_STEP_TYPE_PILL } from '@/lib/pipeline-config';
-import { Pencil, X, RefreshCw } from 'lucide-react';
-import { scoreColor } from '@/lib/format';
+import { ChevronDown, Pencil, X, Check } from 'lucide-react';
+import { scoreColor, scoreGrade } from '@/lib/format';
 import { NextStepsTab } from '@/components/calls/next-steps-tab';
 import { DataPointsView } from '@/components/calls/data-points-view';
 
@@ -67,8 +67,13 @@ interface Props {
 const TABS = ['Overview', 'Next Steps', 'Data Points'] as const;
 type Tab = typeof TABS[number];
 
-function itemText(item: string | { title: string; detail?: string }): string {
-  return typeof item === 'string' ? item : item.detail ?? item.title;
+function txt(item: unknown): string {
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object' && item !== null) {
+    const o = item as Record<string, unknown>;
+    return String(o.detail ?? o.tip ?? o.area ?? o.title ?? o.text ?? '');
+  }
+  return String(item);
 }
 
 export function CallDetailTabs({ score, coaching, callSummary, actions, nextSteps, pendingDataPoints, callId }: Props) {
@@ -76,16 +81,13 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Tab bar */}
       <div className="flex border-b border-zinc-200/60 shrink-0 px-6">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`text-[14px] font-medium border-b-2 pb-3 -mb-px px-4 transition-all ${
-              activeTab === tab
-                ? 'text-[#1a1a1a] border-zinc-900'
-                : 'text-zinc-400 border-transparent hover:text-zinc-600'
+              activeTab === tab ? 'text-[#1a1a1a] border-zinc-900' : 'text-zinc-400 border-transparent hover:text-zinc-600'
             }`}
           >
             {tab}
@@ -103,11 +105,8 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
         ))}
       </div>
 
-      {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        {activeTab === 'Overview' && (
-          <OverviewTab score={score} coaching={coaching} callSummary={callSummary} />
-        )}
+        {activeTab === 'Overview' && <OverviewTab score={score} coaching={coaching} callSummary={callSummary} />}
         {activeTab === 'Next Steps' && (
           nextSteps && nextSteps.length > 0
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
@@ -119,52 +118,87 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
   );
 }
 
-/* ── Overview Tab ── */
+/* ══════════════════════════════════════
+   OVERVIEW TAB
+   ══════════════════════════════════════ */
 
 function OverviewTab({ score, coaching, callSummary }: { score: ScoreData | null; coaching: CoachingData | null; callSummary: string }) {
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [strengthsExpanded, setStrengthsExpanded] = useState(false);
+  const [watchoutsExpanded, setWatchoutsExpanded] = useState(false);
+  const [checkedPrep, setCheckedPrep] = useState<Set<number>>(new Set());
+
+  const strengths = coaching?.strengths ?? [];
+  const watchouts = [...(coaching?.red_flags ?? []), ...coaching?.improvements ?? []];
+  const sentiment = deriveSentiment(coaching);
+  const badges = deriveBadges(score, coaching);
+  const headline = coaching?.summary ? coaching.summary.split(/[.!]/)[0] + '.' : null;
+
+  // Derive prep items from improvements/weaknesses
+  const prepItems = watchouts.slice(0, 4).map(w => 'Address: ' + txt(w).split('—')[0].split('–')[0].trim().slice(0, 80));
+
+  const hasAnyContent = callSummary || score || (strengths.length > 0) || (watchouts.length > 0);
+
+  if (!hasAnyContent) {
+    return <p className="py-8 text-center text-[13px] text-zinc-400 italic">Analysis not available yet.</p>;
+  }
+
   return (
     <div>
-      {/* Section 1: AI Summary */}
+      {/* ── Section 1: AI Summary (collapsible) ── */}
       {callSummary && (
         <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">
-          <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={() => setSummaryExpanded(!summaryExpanded)}
+            className="w-full flex items-center justify-between cursor-pointer"
+          >
             <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-400">AI SUMMARY</span>
-          </div>
-          <p className="text-[13px] text-zinc-600 leading-relaxed">{callSummary}</p>
-          <p className="text-[10px] text-zinc-400 mt-2">Scout · AI Generated</p>
+            <span className="flex items-center gap-2">
+              <span className="text-[10px] text-zinc-400">Scout · AI Generated</span>
+              <ChevronDown className={`h-3 w-3 text-zinc-400 transition-transform duration-200 ${summaryExpanded ? 'rotate-180' : ''}`} />
+            </span>
+          </button>
+          <p className={`text-[13px] text-zinc-600 leading-relaxed mt-2 transition-all duration-200 ${summaryExpanded ? '' : 'line-clamp-2'}`}>
+            {callSummary}
+          </p>
         </div>
       )}
 
-      {/* Section 2: Coaching Scores */}
+      {/* ── Section 2: Score + Headline + Badges ── */}
       {score && (
         <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`h-[52px] w-[52px] rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+          <div className="flex items-start gap-4">
+            <div className={`h-[56px] w-[56px] rounded-full border-2 flex flex-col items-center justify-center shrink-0 ${
               score.overall >= 70 ? 'border-emerald-400' : score.overall >= 40 ? 'border-amber-400' : 'border-red-400'
             }`}>
-              <span className={`text-[18px] font-medium font-mono ${scoreColor(score.overall)}`}>{score.overall}</span>
+              <span className={`text-[20px] font-medium font-mono ${scoreColor(score.overall)}`}>{score.overall}</span>
+              <span className={`text-[11px] -mt-0.5 ${scoreColor(score.overall)}`}>{scoreGrade(score.overall).letter}</span>
             </div>
-            <div className="flex-1">
-              <p className="text-[14px] font-medium text-zinc-900">
-                {coaching?.summary ? coaching.summary.split('.')[0] + '.' : 'Call scored'}
-              </p>
+            <div className="flex-1 min-w-0">
+              {headline && <p className="text-[14px] font-medium text-zinc-900 leading-snug mb-3">{headline}</p>}
+              {badges.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {badges.map((b, i) => (
+                    <span key={i} className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${b.classes}`}>{b.label}</span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Criteria bars if available */}
           {score.criteria && score.criteria.length > 0 && (
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+            <div className="mt-4 pt-4 border-t border-zinc-100">
               {score.criteria.map(c => {
                 const pct = (c.score / 10) * 100;
                 return (
-                  <div key={c.name} className="flex items-center gap-2">
-                    <span className="text-[11px] text-zinc-500 w-[120px] shrink-0 truncate">{c.name}</span>
-                    <div className="flex-1 h-1.5 rounded-full bg-zinc-100">
-                      <div
-                        className={`h-full rounded-full ${pct > 70 ? 'bg-emerald-400' : pct >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
-                        style={{ width: `${Math.min(pct, 100)}%` }}
-                      />
+                  <div key={c.name} className="flex items-center gap-3 mb-3 last:mb-0">
+                    <span className="text-[11px] text-zinc-500 w-[110px] shrink-0 truncate">{c.name}</span>
+                    <div className="flex-1 h-2 rounded-full bg-zinc-100">
+                      <div className={`h-2 rounded-full transition-all duration-500 ${pct > 70 ? 'bg-emerald-400' : pct >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
+                        style={{ width: `${Math.min(pct, 100)}%` }} />
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-400 w-[32px] text-right">{c.score}/10</span>
+                    <span className="text-[10px] font-mono text-zinc-400 w-[36px] text-right shrink-0">{c.score}/10</span>
                   </div>
                 );
               })}
@@ -173,68 +207,160 @@ function OverviewTab({ score, coaching, callSummary }: { score: ScoreData | null
         </div>
       )}
 
-      {/* Section 3: What Went Well + Watch Out For */}
-      {coaching && (coaching.strengths.length > 0 || coaching.improvements.length > 0 || (coaching.red_flags ?? []).length > 0) && (
+      {/* ── Section 3: Deal Snapshot + Sentiment ── */}
+      {(sentiment > 0) && (
+        <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">
+          <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-400 mb-3 block">DEAL SNAPSHOT</span>
+
+          {/* Sentiment meter */}
+          <div className="mb-1">
+            <span className="text-[10px] text-zinc-400 block mb-1.5">PROSPECT SENTIMENT</span>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <div key={n} className={`w-3 h-3 rounded-full ${
+                    n <= sentiment
+                      ? sentiment <= 2 ? 'bg-red-400' : sentiment <= 3 ? 'bg-amber-400' : 'bg-emerald-400'
+                      : 'bg-zinc-100'
+                  }`} />
+                ))}
+              </div>
+              <span className="text-[10px] text-zinc-400">
+                {sentiment <= 2 ? 'Cold' : sentiment <= 3 ? 'Warm' : 'Hot'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Section 4: What Went Well + Watch Out For ── */}
+      {(strengths.length > 0 || watchouts.length > 0) && (
         <div className="grid grid-cols-2 gap-4 mb-4">
           {/* What Went Well */}
           <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-            <span className="text-[10px] font-semibold tracking-widest uppercase text-emerald-700 mb-3 block">
-              WHAT WENT WELL
-            </span>
-            {coaching.strengths.length > 0 ? coaching.strengths.map((s, i) => (
-              <div key={i} className="flex items-start gap-2 mb-2.5 last:mb-0">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                <span className="text-[12px] text-emerald-900 leading-relaxed">{itemText(s)}</span>
-              </div>
-            )) : (
-              <p className="text-[12px] text-emerald-700/60">No strengths noted.</p>
-            )}
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-emerald-700 mb-3 block">WHAT WENT WELL</span>
+            {strengths.length > 0 ? (
+              <>
+                {(strengthsExpanded ? strengths : strengths.slice(0, 3)).map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 mb-2.5 last:mb-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                    <span className="text-[12px] text-emerald-900 leading-relaxed">{txt(s)}</span>
+                  </div>
+                ))}
+                {strengths.length > 3 && !strengthsExpanded && (
+                  <button onClick={() => setStrengthsExpanded(true)} className="text-[11px] text-emerald-600 cursor-pointer hover:text-emerald-800 mt-1">
+                    + {strengths.length - 3} more
+                  </button>
+                )}
+              </>
+            ) : <p className="text-[12px] text-emerald-700/60 italic">None noted.</p>}
           </div>
 
           {/* Watch Out For */}
           <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-            <span className="text-[10px] font-semibold tracking-widest uppercase text-amber-700 mb-3 block">
-              WATCH OUT FOR
-            </span>
-            {[...(coaching.red_flags ?? []), ...coaching.improvements].length > 0 ? (
-              [...(coaching.red_flags ?? []), ...coaching.improvements].map((item, i) => {
-                const text = typeof item === 'string' ? item
-                  : 'detail' in item ? item.detail ?? (item as { title: string }).title
-                  : 'area' in item ? ((item as { area: string; tip?: string }).tip ?? (item as { area: string }).area)
-                  : String(item);
-                return (
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-amber-700 mb-3 block">WATCH OUT FOR</span>
+            {watchouts.length > 0 ? (
+              <>
+                {(watchoutsExpanded ? watchouts : watchouts.slice(0, 3)).map((w, i) => (
                   <div key={i} className="flex items-start gap-2 mb-2.5 last:mb-0">
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                    <span className="text-[12px] text-amber-900 leading-relaxed">{text}</span>
+                    <span className="text-[12px] text-amber-900 leading-relaxed">{txt(w)}</span>
                   </div>
-                );
-              })
-            ) : (
-              <p className="text-[12px] text-amber-700/60">Nothing flagged.</p>
-            )}
+                ))}
+                {watchouts.length > 3 && !watchoutsExpanded && (
+                  <button onClick={() => setWatchoutsExpanded(true)} className="text-[11px] text-amber-600 cursor-pointer hover:text-amber-800 mt-1">
+                    + {watchouts.length - 3} more
+                  </button>
+                )}
+              </>
+            ) : <p className="text-[12px] text-amber-700/60 italic">Nothing flagged.</p>}
           </div>
         </div>
       )}
 
-      {/* Section 4: For Next Call */}
-      {coaching?.summary && (
-        <div className="border-l-4 border-blue-400 bg-blue-50 rounded-r-xl px-4 py-3">
-          <span className="text-[10px] font-semibold tracking-widest uppercase text-blue-700 mb-2 block">
-            FOR NEXT CALL
-          </span>
-          <p className="text-[12px] text-blue-900 leading-relaxed">{coaching.summary}</p>
+      {/* ── Section 5: Before Next Call ── */}
+      {prepItems.length > 0 && (
+        <div className="border-l-4 border-blue-400 bg-blue-50 rounded-r-xl px-4 py-4">
+          <span className="text-[10px] font-semibold tracking-widest uppercase text-blue-700 mb-3 block">BEFORE NEXT CALL</span>
+          {prepItems.map((item, i) => {
+            const checked = checkedPrep.has(i);
+            return (
+              <div
+                key={i}
+                onClick={() => setCheckedPrep(prev => {
+                  const next = new Set(prev);
+                  if (next.has(i)) next.delete(i); else next.add(i);
+                  return next;
+                })}
+                className="flex items-start gap-2.5 mb-2.5 last:mb-0 cursor-pointer"
+              >
+                <div className={`h-4 w-4 rounded border-2 shrink-0 mt-0.5 flex items-center justify-center ${
+                  checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-blue-300'
+                }`}>
+                  {checked && <Check className="h-2.5 w-2.5" />}
+                </div>
+                <span className={`text-[12px] text-blue-900 leading-relaxed ${checked ? 'line-through opacity-50' : ''}`}>
+                  {item}
+                </span>
+              </div>
+            );
+          })}
         </div>
-      )}
-
-      {/* Empty state */}
-      {!callSummary && !score && !coaching && (
-        <p className="py-8 text-center text-[13px] text-zinc-400">No analysis data available yet.</p>
       )}
     </div>
   );
 }
 
-/* ── Next Steps (legacy actions fallback) ── */
+/* ── Helpers ── */
+
+function deriveSentiment(coaching: CoachingData | null): number {
+  if (!coaching) return 0;
+  // Map sentiment string to 1-5 scale
+  const summaryLower = coaching.summary?.toLowerCase() ?? '';
+  const hasPositive = summaryLower.includes('positive') || summaryLower.includes('strong') || summaryLower.includes('excited');
+  const hasNegative = summaryLower.includes('negative') || summaryLower.includes('cold') || summaryLower.includes('disengaged');
+
+  if (hasNegative) return 2;
+  if (hasPositive && coaching.strengths.length >= 5) return 5;
+  if (hasPositive) return 4;
+  if (coaching.strengths.length > coaching.improvements.length) return 4;
+  return 3;
+}
+
+function deriveBadges(score: ScoreData | null, coaching: CoachingData | null): { label: string; classes: string }[] {
+  if (!coaching) return [];
+  const badges: { label: string; classes: string }[] = [];
+  const summary = coaching.summary?.toLowerCase() ?? '';
+  const strengths = coaching.strengths.map(s => txt(s).toLowerCase()).join(' ');
+  const watchouts = [...(coaching.red_flags ?? []), ...coaching.improvements].map(w => txt(w).toLowerCase()).join(' ');
+
+  // Intent signal
+  if (strengths.includes('commitment') || strengths.includes('ready') || strengths.includes('agreed') || strengths.includes('like it')) {
+    badges.push({ label: 'Strong Intent', classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200' });
+  } else if (strengths.includes('engaged') || strengths.includes('interest')) {
+    badges.push({ label: 'Soft Commitment', classes: 'bg-amber-50 text-amber-700 border border-amber-200' });
+  }
+
+  // Next step signal
+  if (strengths.includes('next step') || strengths.includes('follow-up') || strengths.includes('tuesday') || strengths.includes('monday')) {
+    badges.push({ label: 'Next Step Set', classes: 'bg-blue-50 text-blue-700 border border-blue-200' });
+  } else if (watchouts.includes('no next step') || watchouts.includes('not confirmed')) {
+    badges.push({ label: 'Follow-up Soft', classes: 'bg-amber-50 text-amber-700 border border-amber-200' });
+  }
+
+  // Risk signal
+  if (watchouts.includes('budget') || watchouts.includes('pricing')) {
+    badges.push({ label: 'Budget Unclear', classes: 'bg-amber-50 text-amber-700 border border-amber-200' });
+  } else if (score && score.overall >= 70) {
+    badges.push({ label: 'Low Risk', classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200' });
+  }
+
+  return badges.slice(0, 3);
+}
+
+/* ══════════════════════════════════════
+   NEXT STEPS (legacy actions fallback)
+   ══════════════════════════════════════ */
 
 function NextStepsView({ actions, callId }: { actions: Action[]; callId: string }) {
   const pending = actions.filter((a) => a.status === 'suggested');
