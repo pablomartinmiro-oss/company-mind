@@ -9,6 +9,7 @@ import { ArrowLeft, User, Clock, MapPin, Star } from 'lucide-react';
 import { CallDetailTabs } from './call-detail-tabs';
 import { ProcessingStatusBanner } from '@/components/calls/processing-status';
 import { getTenantForUser } from '@/lib/get-tenant';
+import { CallHeaderInfo } from '@/components/calls/call-header-info';
 
 export default async function CallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { tenantId } = await getTenantForUser();
@@ -96,7 +97,7 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
 
           <div className="flex items-start justify-between gap-4 mt-2">
             <div className="flex-1 min-w-0">
-              <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900 leading-tight">{call.contact_name}</h1>
+              <CallHeaderInfo contactName={call.contact_name ?? ''} contactGhlId={call.contact_ghl_id ?? ''} />
               <div className="flex items-center gap-2 mt-2 text-[11px] text-zinc-500 flex-wrap">
                 <span className="inline-flex items-center gap-1"><User className="w-3 h-3" /> {call.rep_name ?? 'Pablo Martin'}</span>
                 <span>·</span>
