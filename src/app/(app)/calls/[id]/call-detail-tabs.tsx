@@ -109,9 +109,7 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
       <div className="flex-1 overflow-y-auto px-6 py-5">
         {activeTab === 'Overview' && <OverviewTab score={score} coaching={coaching} callSummary={callSummary} contactGhlId={contactGhlId} />}
         {activeTab === 'Next Steps' && (
-          nextSteps && nextSteps.length > 0
-            ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
-            : <NextStepsView actions={actions} callId={callId ?? ''} />
+          <NextStepsTab steps={nextSteps ?? []} callId={callId ?? ''} callSummary={callSummary} contactGhlId={contactGhlId} />
         )}
         {activeTab === 'Data Points' && <DataPointsView callId={callId ?? ''} />}
       </div>
