@@ -235,7 +235,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                             ? 'border-zinc-400 bg-zinc-100 text-zinc-600 text-[10px]'
                             : 'border-zinc-300 bg-white/30 text-zinc-400 text-[10px] font-mono'
                         } ${isOpen ? 'border-[2px] border-zinc-700' : ''}`}>
-                          {isPast ? '✓' : sIdx + 1}
+                          {isPast || (isActive && stage === 'Closed') ? '✓' : sIdx + 1}
                         </div>
                         {incompleteMilestones.has(stage) && (
                           <div

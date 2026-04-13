@@ -117,15 +117,33 @@ export async function POST(req: NextRequest) {
       entry_number: (count ?? 0) + 1,
     });
 
-    // 5. Cascade: auto-enroll in next pipeline when reaching trigger stages (skip for milestone-only logs)
-    if (entityCompanyId && !isMilestoneOnly) {
-      const cascades: { triggerPipeline: string; triggerStage: string; targetPipeline: string; targetStage: string }[] = [
-        { triggerPipeline: 'Sales Pipeline', triggerStage: 'Closed', targetPipeline: 'Onboarding', targetStage: 'New Client' },
-        { triggerPipeline: 'Onboarding', triggerStage: 'Operating', targetPipeline: 'Upsell', targetStage: 'Tier 1' },
+    // 5. Cascade: auto-enroll in next pipeline when ALL milestones for a trigger stage are complete
+    //    - Sales Pipeline "Closed" (Agreement Signed + Invoice Paid) → Onboarding "New Client"
+    //    - Onboarding "Operating" → Upsell "Tier 1"
+    if (entityCompanyId) {
+      const cascades: { triggerPipeline: string; triggerStage: string; requiredMilestones: string[]; targetPipeline: string; targetStage: string }[] = [
+        { triggerPipeline: 'Sales Pipeline', triggerStage: 'Closed', requiredMilestones: ['Agreement Signed', 'Invoice Paid'], targetPipeline: 'Onboarding', targetStage: 'New Client' },
+        { triggerPipeline: 'Onboarding', triggerStage: 'Operating', requiredMilestones: [], targetPipeline: 'Upsell', targetStage: 'Tier 1' },
       ];
 
       for (const c of cascades) {
         if (targetPipeline.name !== c.triggerPipeline || newStage !== c.triggerStage) continue;
+
+        // Check required milestones are all completed
+        if (c.requiredMilestones.length > 0) {
+          const { data: milestoneEntries } = await supabaseAdmin
+            .from('stage_log')
+            .select('milestone')
+            .eq('tenant_id', tenantId)
+            .eq('company_id', entityCompanyId)
+            .eq('pipeline_id', pipelineId)
+            .eq('stage', c.triggerStage)
+            .not('milestone', 'is', null);
+
+          const completedMilestones = new Set((milestoneEntries ?? []).map(e => e.milestone));
+          const allDone = c.requiredMilestones.every(ms => completedMilestones.has(ms));
+          if (!allDone) continue;
+        }
 
         // Look up the target pipeline
         const { data: nextPipeline } = await supabaseAdmin
