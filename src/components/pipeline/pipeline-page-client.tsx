@@ -59,7 +59,7 @@ export function PipelinePageClient({ pipelines, contacts, totalValue, activeDeal
           className="px-3 py-1.5 bg-zinc-900 text-white text-[12px] font-medium rounded-lg flex items-center gap-1.5 hover:bg-zinc-700 transition-all duration-150"
         >
           <Plus size={14} />
-          New Contact
+          New Company
         </button>
       </div>
 

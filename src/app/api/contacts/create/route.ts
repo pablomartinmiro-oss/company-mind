@@ -7,14 +7,24 @@ import { runCompanyEnrichment } from '@/lib/ai/enrichment';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { firstName, lastName, companyName, email, phone } = body as {
+    const {
+      companyName, website, location, industry, leadSource,
+      firstName, lastName, email, phone,
+    } = body as {
+      companyName?: string;
+      website?: string;
+      location?: string;
+      industry?: string;
+      leadSource?: string;
       firstName?: string;
       lastName?: string;
-      companyName?: string;
       email?: string;
       phone?: string;
     };
 
+    if (!companyName?.trim()) {
+      return NextResponse.json({ error: 'Company name is required' }, { status: 400 });
+    }
     if (!firstName?.trim() || !lastName?.trim()) {
       return NextResponse.json({ error: 'First and last name are required' }, { status: 400 });
     }
@@ -26,7 +36,7 @@ export async function POST(req: Request) {
     const ghlResult = await ghl.createContact({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      ...(companyName ? { companyName: companyName.trim() } : {}),
+      companyName: companyName.trim(),
       ...(email ? { email: email.trim() } : {}),
       ...(phone ? { phone: phone.trim() } : {}),
     });
@@ -36,21 +46,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to create contact in GHL' }, { status: 400 });
     }
 
-    // 2. Create company record in Supabase
-    const displayName = companyName?.trim() || `${firstName.trim()} ${lastName.trim()}`;
+    // 2. Create company record with detail fields
     const { data: company, error: companyError } = await supabaseAdmin
       .from('companies')
       .insert({
         tenant_id: tenantId,
-        name: displayName,
-        industry: null,
-        lead_source: null,
+        name: companyName.trim(),
+        website: website?.trim() || null,
+        location: location?.trim() || null,
+        industry: industry?.trim() || null,
+        lead_source: leadSource?.trim() || null,
       })
       .select('id')
       .single();
 
     if (companyError || !company) {
-      // GHL contact was created — don't roll back (GHL is source of truth)
       return NextResponse.json(
         { error: 'Contact created in GHL but failed to save company record' },
         { status: 400 },
@@ -66,9 +76,13 @@ export async function POST(req: Request) {
       contact_name: `${firstName.trim()} ${lastName.trim()}`,
       contact_email: email?.trim() || null,
       contact_phone: phone?.trim() || null,
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      email: email?.trim() || null,
+      phone: phone?.trim() || null,
     });
 
-    // 4. Look up Sales Pipeline
+    // 4. Enroll in Sales Pipeline at New Lead
     const { data: pipeline } = await supabaseAdmin
       .from('pipelines')
       .select('id')
@@ -80,7 +94,6 @@ export async function POST(req: Request) {
     if (pipeline) {
       const now = new Date().toISOString();
 
-      // 5. Enroll company in pipeline at New Lead
       await supabaseAdmin.from('pipeline_companies').insert({
         tenant_id: tenantId,
         company_id: company.id,
@@ -90,7 +103,6 @@ export async function POST(req: Request) {
         stage_entered_at: now,
       });
 
-      // 6. Auto-log the New Lead stage entry
       await supabaseAdmin.from('stage_log').insert({
         tenant_id: tenantId,
         company_id: company.id,
@@ -100,16 +112,20 @@ export async function POST(req: Request) {
         entered_at: now,
         moved_by: userName,
         source: 'api',
+        milestone: 'Lead Came In',
         entry_number: 1,
       });
     }
 
-    // Fire enrichment async — do not await, do not block the response
-    runCompanyEnrichment(tenantId, company.id, 'creation').catch(err => {
-      console.error('[create] enrichment failed silently:', err);
-    });
+    // 5. Fire enrichment if all 4 detail fields are provided
+    const allDetailsFilled = website?.trim() && location?.trim() && industry?.trim() && leadSource?.trim();
+    if (allDetailsFilled) {
+      runCompanyEnrichment(tenantId, company.id, 'creation').catch(err => {
+        console.error('[create] enrichment failed silently:', err);
+      });
+    }
 
-    return NextResponse.json({ success: true, contactId });
+    return NextResponse.json({ success: true, companyId: company.id, contactId });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 400 });
