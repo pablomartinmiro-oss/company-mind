@@ -253,41 +253,76 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                 {STAGE_MILESTONES[openLog.stage] && (
                   <div className="mb-3 space-y-1">
                     {STAGE_MILESTONES[openLog.stage].map(ms => {
-                      const done = logForStage(openLog.stage).some(e => e.milestone === ms);
-                      // Get contact_id from a sibling enrollment for logging
-                      const contactIdForLog = logForStage(openLog.stage)[0]?.note !== undefined
-                        ? enrollment.stageLog[0]?.moved_by // won't work, need contact_id
-                        : null;
+                      const entry = logForStage(openLog.stage).find(e => e.milestone === ms);
+                      const done = !!entry;
+                      const isEditingMs = editingId === entry?.id;
+
                       return (
-                        <button
-                          key={ms}
-                          disabled={done || !companyId}
-                          onClick={() => {
-                            const cId = enrollment.stageLog.find(e => e.stage === openLog.stage)?.id;
-                            handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
-                          }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left transition-all duration-150 ${
-                            done
-                              ? 'bg-emerald-50/60 border border-emerald-200/40'
-                              : 'bg-white/40 border border-white/30 hover:bg-white/60 cursor-pointer'
-                          }`}
-                        >
-                          <div className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
-                            done ? 'bg-emerald-500 text-white' : 'border border-zinc-300'
-                          }`}>
-                            {done && <Check className="h-2.5 w-2.5" />}
-                          </div>
-                          <span className={`text-[11px] ${done ? 'text-emerald-700 font-medium' : 'text-zinc-600'}`}>{ms}</span>
-                          {done && (() => {
-                            const entry = logForStage(openLog.stage).find(e => e.milestone === ms);
-                            return entry ? (
-                              <span className="ml-auto text-[9px] text-zinc-400">
+                        <div key={ms}>
+                          <div
+                            onClick={() => {
+                              if (!companyId) return;
+                              if (!done) {
+                                handleMilestone(enrollment.pipelineId, openLog.stage, ms, null);
+                              } else if (entry) {
+                                startEdit(entry);
+                              }
+                            }}
+                            className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left transition-all duration-150 cursor-pointer ${
+                              done
+                                ? 'bg-emerald-50/60 border border-emerald-200/40 hover:bg-emerald-50'
+                                : 'bg-white/40 border border-white/30 hover:bg-white/60'
+                            }`}
+                          >
+                            <div className={`h-4 w-4 rounded flex items-center justify-center flex-shrink-0 ${
+                              done ? 'bg-emerald-500 text-white' : 'border border-zinc-300'
+                            }`}>
+                              {done && <Check className="h-2.5 w-2.5" />}
+                            </div>
+                            <span className={`text-[11px] ${done ? 'text-emerald-700 font-medium' : 'text-zinc-600'}`}>{ms}</span>
+                            {done && entry && !isEditingMs && (
+                              <span className="ml-auto flex items-center gap-1.5 text-[9px] text-zinc-400">
                                 {new Date(entry.entered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 {entry.moved_by ? ` · ${entry.moved_by}` : ''}
+                                <Pencil className="h-2.5 w-2.5" />
                               </span>
-                            ) : null;
-                          })()}
-                        </button>
+                            )}
+                          </div>
+
+                          {/* Inline date/user edit for completed milestone */}
+                          {isEditingMs && entry && (
+                            <div className="ml-6 mt-1 mb-1 bg-white/50 border border-white/30 rounded-lg p-2 space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <label className="text-[10px] text-zinc-400 w-[32px]">Date</label>
+                                <input
+                                  type="date"
+                                  value={editDate}
+                                  onChange={(e) => setEditDate(e.target.value)}
+                                  className="text-[11px] px-2 py-1 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <label className="text-[10px] text-zinc-400 w-[32px]">By</label>
+                                <select
+                                  value={editMovedBy}
+                                  onChange={(e) => setEditMovedBy(e.target.value)}
+                                  className="text-[11px] px-2 py-1 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
+                                >
+                                  <option value="">Select...</option>
+                                  {TEAM_MEMBERS.map(m => (
+                                    <option key={m.name} value={m.name}>{m.name}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="flex justify-end gap-1.5 pt-1">
+                                <button onClick={() => setEditingId(null)} className="text-[11px] text-zinc-400 px-2 py-1 hover:text-zinc-700 transition-all duration-150">Cancel</button>
+                                <button onClick={saveEdit} disabled={saving} className="text-[11px] px-3 py-1 bg-zinc-900 text-white rounded-lg disabled:opacity-40 hover:bg-zinc-700 transition-all duration-150">
+                                  {saving ? 'Saving...' : 'Save'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
