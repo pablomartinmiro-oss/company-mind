@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { Star, Plus, ChevronDown, Mail, Phone } from 'lucide-react';
 import { formatPhone } from '@/lib/format-phone';
 
@@ -106,9 +107,9 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
             const isEditing = editingContactId === contact.contact_id;
             return (
               <div key={contact.contact_id} className="relative">
-                <button
+                <div
                   onClick={() => onSelectContact(contact.contact_id)}
-                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/30 transition-colors ${
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/30 transition-colors cursor-pointer ${
                     selectedContactId === contact.contact_id ? 'bg-white/50' : ''
                   }`}
                 >
@@ -117,7 +118,11 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-medium text-[#1a1a1a] truncate">{contact.contact_name}</span>
+                      <Link
+                        href={`/contacts/${contact.contact_id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[13px] font-medium text-[#1a1a1a] truncate hover:text-zinc-600 underline-offset-2 hover:underline transition-all duration-150"
+                      >{contact.contact_name}</Link>
                       {contact.is_primary && <Star className="w-3 h-3 text-[#ff6a3d] fill-[#ff6a3d] flex-shrink-0" />}
                     </div>
                     {/* Editable role pill */}
@@ -144,7 +149,7 @@ export function ContactsPanel({ companyId, contacts, selectedContactId, onSelect
                       )}
                     </div>
                   </div>
-                </button>
+                </div>
 
                 {/* Role dropdown — rendered via portal to avoid overflow clipping */}
                 {isEditing && mounted && dropdownPos && createPortal(

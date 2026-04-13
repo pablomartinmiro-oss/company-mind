@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { PipelineFunnel } from './pipeline-funnel';
 import { CompanyList } from './company-list';
+import { CreateContactModal } from './create-contact-modal';
 
 interface StageLogEntry {
   id: string;
@@ -47,9 +49,22 @@ interface Props {
 
 export function PipelinePageClient({ pipelines, contacts, totalValue, activeDeals, avgDaysInStage, closingSoon }: Props) {
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="p-5 animate-fade-in">
+      <div className="flex items-center justify-end mb-3">
+        <button
+          onClick={() => setModalOpen(true)}
+          className="px-3 py-1.5 bg-zinc-900 text-white text-[12px] font-medium rounded-lg flex items-center gap-1.5 hover:bg-zinc-700 transition-all duration-150"
+        >
+          <Plus size={14} />
+          New Contact
+        </button>
+      </div>
+
+      <CreateContactModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
       <div className="grid grid-cols-4 gap-2.5">
         <StatCard label="Total MRR" value={totalValue} />
         <StatCard label="Active Deals" value={activeDeals} />

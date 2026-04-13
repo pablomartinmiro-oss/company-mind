@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Building2, User } from 'lucide-react';
 import { COMPANY_SECTIONS, CONTACT_SECTIONS } from '@/lib/research/catalog';
 import type { FieldSource } from '@/lib/research/catalog';
 import { ResearchSection } from '@/components/research/research-section';
@@ -26,10 +25,11 @@ interface Props {
 }
 
 export function CompanyResearchTab({ companyId, contacts, selectedContactId, companyResearch, contactResearchMap }: Props) {
-  const [activeContactId, setActiveContactId] = useState(selectedContactId ?? contacts[0]?.contactId ?? null);
+  const [activeTab, setActiveTab] = useState<string>('company');
   const [companyData, setCompanyData] = useState(companyResearch);
   const [contactDataMap, setContactDataMap] = useState(contactResearchMap);
 
+  const activeContactId = activeTab === 'company' ? null : activeTab;
   const activeContact = contacts.find(c => c.contactId === activeContactId);
   const contactData = activeContactId ? (contactDataMap[activeContactId] ?? {}) : {};
 
@@ -56,52 +56,51 @@ export function CompanyResearchTab({ companyId, contacts, selectedContactId, com
   };
 
   return (
-    <div className="space-y-6">
-      {/* Company sections */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Building2 className="w-4 h-4 text-zinc-500" />
-          <h2 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-500">About the company</h2>
-        </div>
-        {COMPANY_SECTIONS.map(section => (
-          <ResearchSection
-            key={section.key}
-            section={section}
-            data={companyData}
-            onSave={saveCompanyField}
-          />
+    <div>
+      {/* Switcher bar */}
+      <div className="flex gap-1 mb-4 border-b border-zinc-100 pb-3">
+        <button
+          onClick={() => setActiveTab('company')}
+          className={`text-[12px] font-medium px-3 py-1.5 rounded-lg transition-all duration-150 ${
+            activeTab === 'company'
+              ? 'bg-zinc-900 text-white'
+              : 'text-zinc-400 hover:bg-zinc-100'
+          }`}
+        >
+          Company
+        </button>
+        {contacts.map(c => (
+          <button
+            key={c.contactId}
+            onClick={() => setActiveTab(c.contactId)}
+            className={`text-[12px] font-medium px-3 py-1.5 rounded-lg transition-all duration-150 ${
+              activeTab === c.contactId
+                ? 'bg-zinc-900 text-white'
+                : 'text-zinc-400 hover:bg-zinc-100'
+            }`}
+          >
+            {c.contactName}
+          </button>
         ))}
       </div>
 
-      {/* Contact tabs + sections */}
-      {contacts.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <User className="w-4 h-4 text-zinc-500" />
-            <h2 className="text-[11px] font-semibold tracking-widest uppercase text-zinc-500">
-              About {activeContact?.contactName ?? 'contact'}
-            </h2>
-          </div>
+      {/* Company research */}
+      {activeTab === 'company' && (
+        <div className="space-y-4">
+          {COMPANY_SECTIONS.map(section => (
+            <ResearchSection
+              key={section.key}
+              section={section}
+              data={companyData}
+              onSave={saveCompanyField}
+            />
+          ))}
+        </div>
+      )}
 
-          {/* Contact switcher tabs */}
-          {contacts.length > 1 && (
-            <div className="flex gap-1 mb-4">
-              {contacts.map(c => (
-                <button
-                  key={c.contactId}
-                  onClick={() => setActiveContactId(c.contactId)}
-                  className={`px-3 py-1.5 text-[12px] font-medium rounded-full transition-all ${
-                    activeContactId === c.contactId
-                      ? 'bg-white/70 text-[#1a1a1a] shadow-sm border border-white/60'
-                      : 'text-zinc-500 hover:text-zinc-700 hover:bg-white/40'
-                  }`}
-                >
-                  {c.contactName}
-                </button>
-              ))}
-            </div>
-          )}
-
+      {/* Contact research */}
+      {activeContactId && (
+        <div className="space-y-4">
           {CONTACT_SECTIONS.map(section => (
             <ResearchSection
               key={`${activeContactId}-${section.key}`}
