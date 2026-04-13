@@ -11,7 +11,19 @@ export async function POST(req: NextRequest) {
 
     // Resolve the entity ID — prefer companyId, fall back to contactId for legacy calls
     const entityCompanyId = companyId ?? null;
-    const entityContactId = contactId ?? null;
+    let entityContactId = contactId ?? null;
+
+    // If contactId not provided but companyId is, look it up from the enrollment
+    if (!entityContactId && entityCompanyId && pipelineId) {
+      const { data: enrollment } = await supabaseAdmin
+        .from('pipeline_companies')
+        .select('contact_id')
+        .eq('tenant_id', tenantId)
+        .eq('company_id', entityCompanyId)
+        .eq('pipeline_id', pipelineId)
+        .maybeSingle();
+      entityContactId = enrollment?.contact_id ?? null;
+    }
 
     // 1. Look up the target pipeline
     const { data: targetPipeline } = await supabaseAdmin
