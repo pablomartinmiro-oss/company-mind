@@ -14,9 +14,13 @@ export async function POST(req: Request) {
     const companyId = formData.get('companyId') as string;
     const contactId = formData.get('contactId') as string;
     const contactName = formData.get('contactName') as string;
+    const contactIdsRaw = formData.get('contactIds') as string;
     const repName = formData.get('repName') as string;
     const callType = formData.get('callType') as string;
     const calledAt = formData.get('calledAt') as string;
+
+    let allContactIds: string[] = [];
+    try { allContactIds = JSON.parse(contactIdsRaw || '[]'); } catch { allContactIds = [contactId]; }
 
     if (!file) {
       return NextResponse.json({ error: 'File is required' }, { status: 400 });
@@ -89,7 +93,7 @@ export async function POST(req: Request) {
         transcript_text: transcriptText,
         processing_status: transcriptText ? 'analyzing' : 'pending',
         rep_name: repName || userName,
-        metadata: { uploaded_by: userName, company_id: companyId },
+        metadata: { uploaded_by: userName, company_id: companyId, contact_ids: allContactIds },
       })
       .select('id')
       .single();

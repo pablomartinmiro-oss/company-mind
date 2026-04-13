@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Upload, FileText, FileVideo } from 'lucide-react';
+import { X, Upload, FileText, FileVideo, Check } from 'lucide-react';
 import { TEAM_MEMBERS, CALL_TYPE_LABELS } from '@/lib/pipeline-config';
 
 interface CompanyOption {
@@ -23,7 +23,7 @@ export function UploadCallModal({ isOpen, onClose, companies }: Props) {
 
   const [file, setFile] = useState<File | null>(null);
   const [companyId, setCompanyId] = useState('');
-  const [contactId, setContactId] = useState('');
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [repName, setRepName] = useState<string>(TEAM_MEMBERS[0]?.name ?? '');
   const [callType, setCallType] = useState('proposal');
   const [calledAt, setCalledAt] = useState(new Date().toISOString().slice(0, 16));
@@ -34,21 +34,32 @@ export function UploadCallModal({ isOpen, onClose, companies }: Props) {
 
   const selectedCompany = companies.find(c => c.id === companyId);
   const contacts = selectedCompany?.contacts ?? [];
-  const canSubmit = file && companyId && contactId && repName && !loading;
+  const canSubmit = file && companyId && selectedContacts.length > 0 && repName && !loading;
 
   const isVideo = file?.type?.startsWith('video/') || file?.name?.endsWith('.mp4');
   const isText = file?.type === 'text/plain' || file?.name?.endsWith('.txt');
 
+  function toggleContact(id: string) {
+    setSelectedContacts(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  }
+
   async function handleSubmit() {
-    if (!file || !companyId || !contactId) return;
+    if (!file || !companyId || selectedContacts.length === 0) return;
     setErrorMessage('');
     setLoading(true);
     try {
+      const primaryContact = selectedContacts[0];
+      const primaryName = contacts.find(c => c.contact_id === primaryContact)?.contact_name ?? '';
+      const allNames = selectedContacts.map(id => contacts.find(c => c.contact_id === id)?.contact_name ?? '').filter(Boolean);
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('companyId', companyId);
-      formData.append('contactId', contactId);
-      formData.append('contactName', contacts.find(c => c.contact_id === contactId)?.contact_name ?? '');
+      formData.append('contactId', primaryContact);
+      formData.append('contactName', allNames.join(', '));
+      formData.append('contactIds', JSON.stringify(selectedContacts));
       formData.append('repName', repName);
       formData.append('callType', callType);
       formData.append('calledAt', new Date(calledAt).toISOString());
@@ -119,7 +130,7 @@ export function UploadCallModal({ isOpen, onClose, companies }: Props) {
           <div className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">COMPANY *</div>
           <select
             value={companyId}
-            onChange={e => { setCompanyId(e.target.value); setContactId(''); }}
+            onChange={e => { setCompanyId(e.target.value); setSelectedContacts([]); }}
             className="w-full text-[13px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 transition-all duration-150"
           >
             <option value="">Select company...</option>
@@ -127,18 +138,39 @@ export function UploadCallModal({ isOpen, onClose, companies }: Props) {
           </select>
         </div>
 
-        {/* Contact */}
+        {/* Contacts (multi-select) */}
         <div className="mb-3">
-          <div className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">CONTACT *</div>
-          <select
-            value={contactId}
-            onChange={e => setContactId(e.target.value)}
-            disabled={!companyId}
-            className="w-full text-[13px] px-3 py-2 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-zinc-400 disabled:opacity-50 transition-all duration-150"
-          >
-            <option value="">Select contact...</option>
-            {contacts.map(c => <option key={c.contact_id} value={c.contact_id}>{c.contact_name}</option>)}
-          </select>
+          <div className="text-[10px] font-medium tracking-widest uppercase text-zinc-400 mb-1">
+            CONTACTS ON CALL * <span className="normal-case tracking-normal text-zinc-300">(select all that apply)</span>
+          </div>
+          {!companyId ? (
+            <p className="text-[12px] text-zinc-400 py-2">Select a company first</p>
+          ) : contacts.length === 0 ? (
+            <p className="text-[12px] text-zinc-400 py-2">No contacts for this company</p>
+          ) : (
+            <div className="border border-zinc-200 rounded-lg overflow-hidden">
+              {contacts.map(c => {
+                const checked = selectedContacts.includes(c.contact_id);
+                return (
+                  <button
+                    key={c.contact_id}
+                    type="button"
+                    onClick={() => toggleContact(c.contact_id)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-left border-b border-zinc-100 last:border-0 transition-all duration-150 ${
+                      checked ? 'bg-zinc-50' : 'hover:bg-zinc-50/50'
+                    }`}
+                  >
+                    <div className={`h-3.5 w-3.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                      checked ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-300'
+                    }`}>
+                      {checked && <Check className="h-2 w-2" />}
+                    </div>
+                    <span className="text-[13px] text-zinc-700">{c.contact_name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Team member */}
