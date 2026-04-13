@@ -7,6 +7,7 @@ import { ChevronDown, Pencil, X, Check } from 'lucide-react';
 import { scoreColor, scoreGrade } from '@/lib/format';
 import { NextStepsTab } from '@/components/calls/next-steps-tab';
 import { DataPointsView } from '@/components/calls/data-points-view';
+import { CallCompanyLink } from '@/components/calls/call-company-link';
 
 interface ScoreData {
   overall: number;
@@ -76,7 +77,7 @@ function txt(item: unknown): string {
   return String(item);
 }
 
-export function CallDetailTabs({ score, coaching, callSummary, actions, nextSteps, pendingDataPoints, callId }: Props) {
+export function CallDetailTabs({ score, coaching, callSummary, actions, nextSteps, pendingDataPoints, callId, contactGhlId }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
 
   return (
@@ -106,7 +107,7 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        {activeTab === 'Overview' && <OverviewTab score={score} coaching={coaching} callSummary={callSummary} />}
+        {activeTab === 'Overview' && <OverviewTab score={score} coaching={coaching} callSummary={callSummary} contactGhlId={contactGhlId} />}
         {activeTab === 'Next Steps' && (
           nextSteps && nextSteps.length > 0
             ? <NextStepsTab steps={nextSteps} callId={callId ?? ''} />
@@ -122,7 +123,7 @@ export function CallDetailTabs({ score, coaching, callSummary, actions, nextStep
    OVERVIEW TAB
    ══════════════════════════════════════ */
 
-function OverviewTab({ score, coaching, callSummary }: { score: ScoreData | null; coaching: CoachingData | null; callSummary: string }) {
+function OverviewTab({ score, coaching, callSummary, contactGhlId }: { score: ScoreData | null; coaching: CoachingData | null; callSummary: string; contactGhlId?: string }) {
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [strengthsExpanded, setStrengthsExpanded] = useState(false);
   const [watchoutsExpanded, setWatchoutsExpanded] = useState(false);
@@ -145,6 +146,7 @@ function OverviewTab({ score, coaching, callSummary }: { score: ScoreData | null
 
   return (
     <div>
+      {contactGhlId && <CallCompanyLink contactGhlId={contactGhlId} />}
       {/* ── Section 1: AI Summary (collapsible) ── */}
       {callSummary && (
         <div className="bg-white rounded-xl border border-zinc-200/60 p-4 mb-4">

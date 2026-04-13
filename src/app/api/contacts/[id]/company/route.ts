@@ -10,5 +10,8 @@ export async function GET(
   const { id } = await params;
 
   const info = await getContactInfo(tenantId, id);
-  return NextResponse.json({ company_name: info?.company_name ?? null });
+  return NextResponse.json({
+    company_name: info?.company_name ?? null,
+    company_id: info?.company_id ?? null,
+  });
 }
