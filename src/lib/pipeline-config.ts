@@ -76,6 +76,7 @@ export const STAGE_PILL_CLASSES: Record<string, string> = {
 export const CALL_TYPE_LABELS: Record<string, string> = {
   cold_call:     'Cold Call',
   qualification: 'Qualification Call',
+  proposal:      'Proposal Call',
   closing:       'Closing Call',
   follow_up:     'Follow Up',
   onboarding:    'Onboarding Call',
@@ -85,6 +86,7 @@ export const CALL_TYPE_LABELS: Record<string, string> = {
 export const CALL_TYPE_PILL: Record<string, string> = {
   cold_call:     'bg-zinc-100 text-zinc-500',
   qualification: 'bg-blue-50 text-blue-700 border border-blue-200',
+  proposal:      'bg-indigo-50 text-indigo-700 border border-indigo-200',
   closing:       'bg-violet-50 text-violet-700 border border-violet-200',
   follow_up:     'bg-amber-50 text-amber-700 border border-amber-200',
   onboarding:    'bg-teal-50 text-teal-700 border border-teal-200',

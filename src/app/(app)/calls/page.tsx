@@ -7,6 +7,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { CallFilters } from '@/components/calls/call-filters';
 import { getTenantForUser } from '@/lib/get-tenant';
 import { getContactInfoBatch } from '@/lib/lookups';
+import { UploadCallButton } from '@/components/calls/upload-call-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,7 +110,19 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
   };
 
   const contactIds = [...new Set((calls ?? []).map((c: CallRow) => c.contact_ghl_id).filter(Boolean))];
-  const contactInfoMap = await getContactInfoBatch(tenantId, contactIds);
+  const [contactInfoMap, companiesForUpload] = await Promise.all([
+    getContactInfoBatch(tenantId, contactIds),
+    supabaseAdmin
+      .from('companies')
+      .select('id, name, company_contacts(contact_id, contact_name)')
+      .eq('tenant_id', tenantId)
+      .order('name')
+      .then(r => (r.data ?? []).map((c: { id: string; name: string; company_contacts: { contact_id: string; contact_name: string }[] }) => ({
+        id: c.id,
+        name: c.name,
+        contacts: (c.company_contacts ?? []).map(cc => ({ contact_id: cc.contact_id, contact_name: cc.contact_name ?? cc.contact_id })),
+      }))),
+  ]);
 
   const dpMap: Record<string, { company?: string; address?: string }> = {};
   for (const [id, info] of contactInfoMap) {
@@ -129,6 +142,10 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="p-5 animate-fade-in">
+      <div className="flex items-center justify-end mb-3">
+        <UploadCallButton companies={companiesForUpload} />
+      </div>
+
       <div className="grid grid-cols-4 gap-2.5">
         <StatCard label="Today" value={callsToday} />
         <StatCard label="This Week" value={callsThisWeek} />
