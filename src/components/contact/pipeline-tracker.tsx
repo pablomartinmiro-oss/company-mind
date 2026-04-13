@@ -41,6 +41,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
   const [logForm, setLogForm] = useState<{ pipelineId: string; stage: string } | null>(null);
   const [logNote, setLogNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingMilestone, setSavingMilestone] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDate, setEditDate] = useState('');
   const [editMovedBy, setEditMovedBy] = useState('');
@@ -160,7 +161,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
 
   async function handleMilestone(pipelineId: string, stage: string, milestone: string, contactId: string | null) {
     if (!companyId) return;
-    setSaving(true);
+    setSavingMilestone(milestone);
     try {
       const res = await fetch('/api/pipeline/move-stage', {
         method: 'POST',
@@ -182,7 +183,7 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
     } catch (e) {
       console.error('Milestone save error:', e);
     }
-    setSaving(false);
+    setSavingMilestone(null);
     router.refresh();
   }
 
@@ -279,13 +280,13 @@ export function PipelineTracker({ enrollments, companyId }: Props) {
                           {!done ? (
                             <button
                               type="button"
-                              disabled={saving}
+                              disabled={savingMilestone === ms}
                               onClick={() => handleMilestone(enrollment.pipelineId, openLog.stage, ms, null)}
                               className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/40 border border-white/30 cursor-pointer hover:bg-white/60 disabled:opacity-50 transition-all duration-150 text-left"
                             >
-                              <div className="h-4 w-4 rounded border border-zinc-300 flex-shrink-0" />
+                              <div className={`h-4 w-4 rounded flex-shrink-0 ${savingMilestone === ms ? 'bg-zinc-200 animate-pulse' : 'border border-zinc-300'}`} />
                               <span className="text-[11px] text-zinc-600">{ms}</span>
-                              {saving && <span className="ml-auto text-[9px] text-zinc-400">saving...</span>}
+                              {savingMilestone === ms && <span className="ml-auto text-[9px] text-zinc-400">saving...</span>}
                             </button>
                           ) : (
                           <div className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-50/60 border border-emerald-200/40 transition-all duration-150">
