@@ -101,6 +101,71 @@ export async function POST(req: NextRequest) {
       entry_number: (count ?? 0) + 1,
     });
 
+    // 5. Cascade: auto-enroll in next pipeline when reaching trigger stages
+    if (entityCompanyId) {
+      const cascades: { triggerPipeline: string; triggerStage: string; targetPipeline: string; targetStage: string }[] = [
+        { triggerPipeline: 'Sales Pipeline', triggerStage: 'Closed', targetPipeline: 'Onboarding', targetStage: 'New Client' },
+        { triggerPipeline: 'Onboarding', triggerStage: 'Operating', targetPipeline: 'Upsell', targetStage: 'Tier 1' },
+      ];
+
+      for (const c of cascades) {
+        if (targetPipeline.name !== c.triggerPipeline || newStage !== c.triggerStage) continue;
+
+        // Look up the target pipeline
+        const { data: nextPipeline } = await supabaseAdmin
+          .from('pipelines')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .eq('name', c.targetPipeline)
+          .single();
+        if (!nextPipeline) continue;
+
+        // Check if already enrolled
+        const { data: existing } = await supabaseAdmin
+          .from('pipeline_companies')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .eq('company_id', entityCompanyId)
+          .eq('pipeline_id', nextPipeline.id)
+          .maybeSingle();
+        if (existing) continue;
+
+        const now = new Date().toISOString();
+
+        // Get contact_id from current enrollment
+        const { data: currentEnrollment } = await supabaseAdmin
+          .from('pipeline_companies')
+          .select('contact_id')
+          .eq('tenant_id', tenantId)
+          .eq('company_id', entityCompanyId)
+          .eq('pipeline_id', pipelineId)
+          .maybeSingle();
+
+        // Enroll in target pipeline
+        await supabaseAdmin.from('pipeline_companies').insert({
+          tenant_id: tenantId,
+          company_id: entityCompanyId,
+          contact_id: currentEnrollment?.contact_id ?? entityContactId,
+          pipeline_id: nextPipeline.id,
+          stage: c.targetStage,
+          stage_entered_at: now,
+        });
+
+        // Auto-log with api source
+        await supabaseAdmin.from('stage_log').insert({
+          tenant_id: tenantId,
+          company_id: entityCompanyId,
+          contact_id: currentEnrollment?.contact_id ?? entityContactId,
+          pipeline_id: nextPipeline.id,
+          stage: c.targetStage,
+          entered_at: now,
+          moved_by: movedBy ?? 'system',
+          source: 'api',
+          entry_number: 1,
+        });
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err instanceof Error && err.message === 'Not authenticated') {
