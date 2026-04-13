@@ -46,8 +46,15 @@ export function ResearchSection({ section, data, onSave }: ResearchSectionProps)
           <span className="text-[10px] font-mono text-zinc-400">{filledCount}/{section.fields.length}</span>
           <div className="w-12 h-1 rounded-full bg-zinc-200/60 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#ff7a4d] to-[#ff5a2d] transition-all duration-300"
-              style={{ width: `${completionPct}%` }}
+              className="h-full transition-all duration-300"
+              style={{
+                width: `${completionPct}%`,
+                backgroundColor: completionPct >= 80
+                  ? '#22c55e'
+                  : completionPct >= 50
+                  ? '#eab308'
+                  : '#ff5a2d',
+              }}
             />
           </div>
         </div>

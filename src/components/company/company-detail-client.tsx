@@ -136,9 +136,16 @@ export function CompanyDetailClient(props: Props) {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <ReEnrichButton companyId={props.companyId} />
-                <button className="text-[12px] font-medium px-4 py-2 rounded-full bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/80 flex items-center gap-1.5">
-                  GHL <ExternalLink className="h-3 w-3" />
-                </button>
+                {contactsState[0]?.contact_id && (
+                  <a
+                    href={`https://app.gohighlevel.com/v2/location/Z5CGu3oIIWrMPWEz9kPT/contacts/detail/${contactsState.find(c => c.is_primary)?.contact_id ?? contactsState[0].contact_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[12px] font-medium px-4 py-2 rounded-full bg-white/60 backdrop-blur border border-white/60 text-zinc-700 hover:bg-white/80 flex items-center gap-1.5"
+                  >
+                    GHL <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             </div>
 
