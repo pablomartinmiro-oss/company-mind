@@ -69,8 +69,8 @@ export default async function CallDetailPage({ params }: { params: Promise<{ id:
   // Format full date
   const calledDate = call.called_at ? new Date(call.called_at) : null;
   const fullDate = calledDate
-    ? calledDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
-      + ' at ' + calledDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    ? calledDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Chicago' })
+      + ' at ' + calledDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) + ' CT'
     : '';
 
   return (
