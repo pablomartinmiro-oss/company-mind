@@ -244,6 +244,10 @@ function CriteriaView({ score }: { score: ScoreData | null }) {
     return 'bg-red-500';
   }
 
+  if (!score.criteria?.length) {
+    return <p className="py-8 text-center text-[13px] text-zinc-400">No detailed criteria available for this call.</p>;
+  }
+
   return (
     <div className="grid grid-cols-2 gap-4">
       {score.criteria.map((c) => {
@@ -283,15 +287,32 @@ function TranscriptView({ text, duration, recordingUrl }: { text: string; durati
       if (m) repName = m[1];
     }
 
-    for (const line of parts) {
-      const trimmed = line.trim();
-      // Timestamped format: [00:01:23] Speaker Name: text
+    for (let i = 0; i < parts.length; i++) {
+      const trimmed = parts[i].trim();
+      // Format 1: [00:01:23] Speaker Name: text
       const tsMatch = trimmed.match(/^\[(\d{2}:\d{2}(?::\d{2})?)\]\s*(.+?):\s*(.+)/);
       if (tsMatch) {
         const [, timestamp, speakerName, lineText] = tsMatch;
         const isRep = speakerName === repName;
         lines.push({ speaker: isRep ? 'rep' : 'contact', speakerName, text: lineText, timestamp });
-      } else if (trimmed.startsWith('Rep:')) {
+        continue;
+      }
+      // Format 2: "0:14 - Speaker Name" on one line, text on next lines (Fireflies/uploaded)
+      const headerMatch = trimmed.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)/);
+      if (headerMatch) {
+        const [, timestamp, speakerName] = headerMatch;
+        // Collect following lines until next header
+        let bodyText = '';
+        while (i + 1 < parts.length && !parts[i + 1].trim().match(/^\d{1,2}:\d{2}(?::\d{2})?\s*[-–]/)) {
+          i++;
+          bodyText += (bodyText ? ' ' : '') + parts[i].trim();
+        }
+        const isRep = speakerName === repName || speakerName.toLowerCase().includes('participant 1');
+        lines.push({ speaker: isRep ? 'rep' : 'contact', speakerName, text: bodyText, timestamp });
+        continue;
+      }
+      // Format 3: "Rep: text" / "Prospect: text"
+      if (trimmed.startsWith('Rep:')) {
         lines.push({ speaker: 'rep', speakerName: 'Rep', text: trimmed.replace(/^Rep:\s*/, '') });
       } else if (trimmed.startsWith('Prospect:') || trimmed.startsWith('Contact:')) {
         lines.push({ speaker: 'contact', speakerName: 'Contact', text: trimmed.replace(/^(Prospect|Contact):\s*/, '') });
