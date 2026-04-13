@@ -31,7 +31,7 @@ export const STAGE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const TEAM_MEMBERS = [
-  { name: 'Pablo Martin',   initials: 'PM', pillClass: 'bg-violet-100/60 text-violet-700 border border-violet-200/40', avatarClass: 'bg-gradient-to-br from-violet-400 to-violet-600' },
+  { name: 'Pablo Martin Miro', initials: 'PM', pillClass: 'bg-violet-100/60 text-violet-700 border border-violet-200/40', avatarClass: 'bg-gradient-to-br from-violet-400 to-violet-600' },
   { name: 'Corey Lavinder', initials: 'CL', pillClass: 'bg-emerald-100/60 text-emerald-700 border border-emerald-200/40', avatarClass: 'bg-gradient-to-br from-emerald-400 to-emerald-600' },
 ] as const;
 
